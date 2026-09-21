@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.vercel/
+.DS_Store
+*.log
+.env*.local
+public/icons/
+public/qr/

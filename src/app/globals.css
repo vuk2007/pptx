@@ -1,0 +1,53 @@
+/*
+  Faza 0: minimalni tokeni samo da kostur bude čitljiv.
+  Pravi dizajn sistem (paleta, tipografska skala, PCB motivi) dolazi u Fazi 1.
+*/
+
+:root {
+  --maska: #0a2b1f;
+  --maska-tamna: #061a13;
+  --bakar: #c98b3a;
+  --silkscreen: #eef4ef;
+  --osjeti: #3fb6e8;
+  --odluci: #f0b429;
+  --djeluj: #e2574c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--maska-tamna);
+  color: var(--silkscreen);
+  font-family: var(--font-tekst), system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100svh;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--bakar);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
