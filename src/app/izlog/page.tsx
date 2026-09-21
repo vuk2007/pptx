@@ -1,18 +1,9 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Izlog } from '@/components/izlog/Izlog';
+import { SVI_SLAJDOVI } from '@/sadrzaj/slajdovi';
+
+export const metadata: Metadata = { title: 'Izlog — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="IZLOG / SVE"
-      naslov="Izlog"
-      opis="Automatska prezentacija svih blokova, u petlji."
-      faza="1"
-      veze={[
-        { putanja: '/', naziv: 'Početna' },
-        { putanja: '/izlog/perjanik', naziv: 'Samo Perjanik' },
-        { putanja: '/izlog/xgo', naziv: 'Samo psi' },
-        { putanja: '/izlog/jarvis', naziv: 'Samo Jarvis' },
-      ]}
-    />
-  );
+  return <Izlog slajdovi={SVI_SLAJDOVI} putanja="Izlog" />;
 }

@@ -1,16 +1,9 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Izlog } from '@/components/izlog/Izlog';
+import { izlogEksponata } from '@/sadrzaj/slajdovi';
+
+export const metadata: Metadata = { title: 'Izlog: Perjanik — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="IZLOG / PERJANIK"
-      naslov="Izlog: Perjanik"
-      opis="Petlja slajdova samo za rover."
-      faza="1"
-      veze={[
-        { putanja: '/izlog', naziv: 'Cio izlog' },
-        { putanja: '/perjanik', naziv: 'Blok Perjanik' },
-      ]}
-    />
-  );
+  return <Izlog slajdovi={izlogEksponata('perjanik')} putanja="Izlog · Perjanik" />;
 }

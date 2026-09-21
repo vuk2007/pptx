@@ -14,6 +14,8 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run build` | Lint, statički izvoz u `out/`, ikone, service worker |
 | `npm start` | Servira `out/` na http://localhost:4173 |
 | `npm run provjeri-offline` | Digne server, pusti Chrome, isključi mrežu i provjeri da sve i dalje radi |
+| `npm run provjeri-qr` | Kodira pa dekodira QR nazad, uključujući Reed-Solomon sindrome |
+| `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
 
 `npm run build` pada ako postoji ijedno lint upozorenje. To je namjerno.
@@ -40,10 +42,31 @@ svaki novi build donosi nov keš i briše stari.
 protokola (bez ijedne biblioteke — Node 24 ima ugrađen WebSocket), učita sajt,
 isključi mrežu, osvježi i prošeta kroz duboke rute.
 
+## QR kod
+
+`scripts/qr.mjs` je sopstveni QR enkoder (bajt režim, nivo ispravke M, verzije
+1–10), pa ni build nema zavisnosti. QR koji se ne skenira gori je nego nikakav,
+zato `scripts/provjeri-qr.mjs` svaki kod pročita nazad istim putem kojim ga čita
+telefon — format, maska, redosljed modula, raspletanje blokova i Reed-Solomon
+sindromi — i pada ako round-trip ne vrati polazni tekst. Build ga pokreće.
+
+Kod se pravi samo kad `QR_URL` nije prazan. Dok jeste, `/pocni` ide bez koda.
+
+## Dizajn
+
+Paleta, tipografska skala i pokret žive u [`src/app/globals.css`](src/app/globals.css).
+Tri boje petlje (`--osjeti`, `--odluci`, `--djeluj`) su razmaknute po nijansi i od
+zelene ploče i od bakra, i nigdje ne nose značenje same — uz njih uvijek stoji
+riječ, pa daltonizam ništa ne odnosi.
+
+PCB primitivi (vod sa strujom, pad, via, LED, obris komponente, silkscreen tekst)
+su u [`src/components/ploca/primitivi.tsx`](src/components/ploca/primitivi.tsx),
+a ilustracije slajdova u [`src/components/ilustracije/`](src/components/ilustracije/).
+
 ## Faze
 
 0. ✅ Kostur: rute, statički izvoz, service worker, manifest, offline dokazan
-1. Dizajn sistem, početna strana, izlog sa slajdovima i bilješkama
+1. ✅ Dizajn sistem, početna strana, izlog sa 21 slajdom i bilješkama, `/pocni`, QR enkoder
 2. H-most i PWM
 3. Radio paket, suspenzija, dvostruki servo
 4. XGO demonstracije

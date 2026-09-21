@@ -1,0 +1,218 @@
+/*
+  Strana eksponata: slajdovi kojima se upravlja ručno (bez auto-prelaza)
+  i meni demonstracija zalemljen na dno ploče.
+*/
+
+.ploca {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 1.6vh;
+  padding: 2.6vh 3vw 2.4vh;
+  background: var(--maska);
+  border: 3px solid var(--ivica);
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.rupa {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--maska-duboka);
+  border: 4px solid var(--bakar);
+  opacity: 0.8;
+}
+.rupaGL { top: 18px; left: 18px; }
+.rupaGD { top: 18px; right: 18px; }
+
+.zaglavlje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+  flex-wrap: wrap;
+}
+
+.naslovnaGrupa {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2vw;
+}
+
+.naslov {
+  font-size: 6.4vh;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.uloga {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-oznaka);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--boja);
+}
+
+.akcije {
+  display: flex;
+  gap: 1vw;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dugme {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: var(--meta-dodir);
+  padding: 0 1.4em;
+  font-size: 2.4vh;
+  font-weight: 600;
+  color: var(--bakar-struja);
+  border: 3px solid var(--bakar);
+  border-radius: var(--radijus);
+  background: var(--maska-svijetla);
+  white-space: nowrap;
+}
+
+.dugme:hover,
+.dugme:focus-visible {
+  background: var(--bakar-struja);
+  color: var(--maska-duboka);
+}
+
+/* --- slajd sa strelicama sa obje strane --- */
+
+.pojas {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1vw;
+  min-height: 0;
+}
+
+.strelica {
+  display: grid;
+  place-items: center;
+  width: var(--meta-dodir);
+  height: var(--meta-dodir);
+  font-size: 3.4vh;
+  color: var(--bakar-struja);
+  border: 3px solid var(--bakar);
+  border-radius: 50%;
+  background: var(--maska-svijetla);
+}
+
+.strelica:hover,
+.strelica:focus-visible {
+  background: var(--bakar-struja);
+  color: var(--maska-duboka);
+}
+
+.scena {
+  min-height: 0;
+  height: 100%;
+}
+
+/* --- podnožje: brojač slajdova i meni demonstracija --- */
+
+.podnozje {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4vh;
+}
+
+.brojac {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+}
+
+.tacke {
+  display: flex;
+  gap: 0.6vw;
+}
+
+.tackaDugme {
+  display: grid;
+  place-items: center;
+  width: 3vh;
+  height: 3vh;
+}
+
+.tacka {
+  width: 1.3vh;
+  height: 1.3vh;
+  border-radius: 50%;
+  background: var(--maska-svijetla);
+  border: 2px solid var(--bakar);
+}
+
+.tackaAktivna {
+  background: var(--bakar-struja);
+  border-color: var(--bakar-struja);
+  transform: scale(1.35);
+}
+
+.meni {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1vw;
+}
+
+/* Demonstracija nije kartica, nego komponenta na ploči. */
+.demo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4vh;
+  padding: 1.6vh 1.2vw 1.8vh;
+  min-height: var(--meta-dodir);
+  background: var(--maska-svijetla);
+  border: 3px solid var(--bakar);
+  border-radius: var(--radijus);
+  transition: background 150ms linear, color 150ms linear;
+}
+
+.demo:hover,
+.demo:focus-visible {
+  background: color-mix(in srgb, var(--bakar-struja) 18%, var(--maska-svijetla));
+}
+
+.demo::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bakar);
+}
+
+.demoAktivan {
+  border-color: var(--bakar-struja);
+}
+
+.nazivDemo {
+  font-size: 2.8vh;
+  font-weight: 600;
+  line-height: 1.04;
+}
+
+.opisDemo {
+  font-size: 1.9vh;
+  line-height: 1.2;
+  color: var(--silkscreen-tih);
+}
+
+@media (max-aspect-ratio: 5/4) {
+  .naslov { font-size: 4.6vh; }
+  .pojas { grid-template-columns: 1fr; }
+  .strelica { display: none; }
+}

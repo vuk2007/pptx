@@ -1,4 +1,5 @@
 import { readFileSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { qrUSvg } from './qr.mjs';
 
 /*
   QR kod se pravi pri buildu i završava kao statički SVG u public/qr/.
@@ -18,7 +19,6 @@ if (!url) {
   process.exit(0);
 }
 
-// TODO: enkodiranje QR koda kad QR_URL bude poznat.
-writeFileSync('public/qr/.gitkeep', '');
-console.error(`QR: QR_URL je postavljen na "${url}", ali enkoder još nije napisan.`);
-process.exit(1);
+const svg = qrUSvg(url);
+writeFileSync('public/qr/pocni.svg', svg, 'utf8');
+console.log(`QR: pocni.svg za ${url} (${svg.length} bajtova)`);

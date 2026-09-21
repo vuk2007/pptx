@@ -1,16 +1,41 @@
 /*
-  Faza 0: minimalni tokeni samo da kostur bude čitljiv.
-  Pravi dizajn sistem (paleta, tipografska skala, PCB motivi) dolazi u Fazi 1.
+  Dizajn sistem: štampana ploča.
+  Tamnozelena lemna maska, prigušen bakar koji se pali kad kroz njega teče struja,
+  bijeli silkscreen, i tri LED boje za petlju osjeti-odluči-djeluj.
 */
 
 :root {
+  /* --- ploča --- */
   --maska: #0a2b1f;
-  --maska-tamna: #061a13;
-  --bakar: #c98b3a;
+  --maska-duboka: #061a13;
+  --maska-svijetla: #11402e;
+  --ivica: #14402e;
+
+  /* --- bakar --- */
+  --bakar: #a9702e;
+  --bakar-struja: #f2c57c;
+
+  /* --- silkscreen --- */
   --silkscreen: #eef4ef;
-  --osjeti: #3fb6e8;
-  --odluci: #f0b429;
-  --djeluj: #e2574c;
+  --silkscreen-tih: #8fae9f;
+
+  /* --- tri LED-a petlje --- */
+  --osjeti: #38c6f4;
+  --odluci: #b98cf7;
+  --djeluj: #ff6a4d;
+
+  /* --- upozorenje (kratak spoj, pregrijavanje, odbačen paket) --- */
+  --alarm: #ff3b30;
+
+  /* --- tipografska skala, vezana za visinu ekrana --- */
+  --tekst-recenica: 8vh;
+  --tekst-naslov: 11vh;
+  --tekst-telo: 3.6vh;
+  --tekst-oznaka: 1.9vh;
+  --tekst-mikro: 1.7vh;
+
+  --meta-dodir: 64px;
+  --radijus: 6px;
 }
 
 *,
@@ -19,29 +44,99 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--maska-tamna);
+  background: var(--maska-duboka);
   color: var(--silkscreen);
   font-family: var(--font-tekst), system-ui, sans-serif;
-  -webkit-text-size-adjust: 100%;
+  font-weight: 400;
 }
 
 body {
   min-height: 100svh;
+  overscroll-behavior: none;
+}
+
+h1,
+h2,
+h3,
+p,
+figure {
+  margin: 0;
 }
 
 a {
   color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 :focus-visible {
-  outline: 3px solid var(--bakar);
-  outline-offset: 3px;
+  outline: 3px solid var(--bakar-struja);
+  outline-offset: 4px;
 }
 
+/* --- silkscreen oznake: verzal, razmaknuto, mono --- */
+.oznaka {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-oznaka);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--silkscreen-tih);
+}
+
+.mikro {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.06em;
+  color: var(--silkscreen-tih);
+}
+
+/* Naslov koji postoji za čitače ekrana, ali ne troši prostor na slajdu. */
+.samo-za-citace {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- boje petlje, dosljedno gdje god se pomene senzor, mozak ili aktuator --- */
+.osjeti { color: var(--osjeti); }
+.odluci { color: var(--odluci); }
+.djeluj { color: var(--djeluj); }
+
+/* --- struja koja teče vodom --- */
+@keyframes struja-naprijed {
+  to { stroke-dashoffset: -32; }
+}
+@keyframes struja-nazad {
+  to { stroke-dashoffset: 32; }
+}
+
+/*
+  Dekorativan pokret staje. Struja u vodovima ne staje u demonstracijama,
+  jer tamo pokret nosi objašnjenje — ali usporava.
+*/
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -49,5 +144,11 @@ a {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .struja-tece {
+    animation: none !important;
+    stroke-dasharray: 6 8 !important;
+    opacity: 0.75;
   }
 }

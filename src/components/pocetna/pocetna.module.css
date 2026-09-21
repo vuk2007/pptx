@@ -1,0 +1,228 @@
+/*
+  Početna je jedna ploča: petlja gore, tri eksponata dolje,
+  spojeni bakarnim vodovima. Svaki eksponat visi sa one stanice
+  petlje koju naglašava.
+*/
+
+.ploca {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 1.2vh;
+  padding: 3vh 3vw 2.6vh;
+  background: var(--maska);
+  border: 3px solid var(--ivica);
+  overflow: hidden;
+}
+
+.rupa {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--maska-duboka);
+  border: 4px solid var(--bakar);
+  opacity: 0.8;
+}
+.rupaGL { top: 18px; left: 18px; }
+.rupaGD { top: 18px; right: 18px; }
+.rupaDL { bottom: 18px; left: 18px; }
+.rupaDD { bottom: 18px; right: 18px; }
+
+.zaglavlje {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3vw;
+}
+
+.naslov {
+  font-size: 7.4vh;
+  font-weight: 600;
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+}
+
+.podnaslov {
+  margin-top: 0.4vh;
+  font-size: var(--tekst-telo);
+  color: var(--silkscreen-tih);
+}
+
+.dugmeIzlog {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: var(--meta-dodir);
+  padding: 0 1.8em;
+  font-size: 2.8vh;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--maska-duboka);
+  background: var(--bakar-struja);
+  border: 3px solid var(--bakar-struja);
+  border-radius: var(--radijus);
+  transition: filter 140ms linear;
+}
+
+.dugmeIzlog:hover,
+.dugmeIzlog:focus-visible {
+  filter: brightness(1.12);
+}
+
+.recenica {
+  font-size: 5.2vh;
+  font-weight: 600;
+  line-height: 1.04;
+  max-width: 26ch;
+}
+
+.petlja {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+  Bakarna sabirnica preko cijele ploče, i sa nje kratak vod do svakog eksponata.
+  Sabirnica je vezana za same blokove, pa se poravnanje ne raspada ni na jednom
+  odnosu stranica ekrana.
+*/
+.eksponati {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2vw;
+  margin-top: 5vh;
+}
+
+.eksponati::before {
+  content: '';
+  position: absolute;
+  top: -5vh;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--bakar);
+}
+
+/* Eksponat nije kartica, nego komponenta zalemljena na ploču. */
+.eksponat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8vh;
+  padding: 2.2vh 1.8vw 2.4vh;
+  min-height: var(--meta-dodir);
+  background: var(--maska-svijetla);
+  border: 3px solid var(--boja);
+  border-radius: var(--radijus);
+  transition: background 150ms linear;
+}
+
+.eksponat:hover,
+.eksponat:focus-visible {
+  background: color-mix(in srgb, var(--boja) 16%, var(--maska-svijetla));
+}
+
+/* Kratak vod koji eksponat spaja na sabirnicu iznad. */
+.eksponat::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 5px;
+  height: 5vh;
+  transform: translateX(-50%);
+  background: var(--bakar);
+}
+
+/* Tačka prvog pina, kao na čipu. */
+.eksponat::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--boja);
+  opacity: 0.85;
+}
+
+.zaglavljeEksponata {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.nazivEksponata {
+  font-size: 4.4vh;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ulogaEksponata {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-oznaka);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--boja);
+}
+
+.opisEksponata {
+  font-size: 2.5vh;
+  line-height: 1.22;
+  color: var(--silkscreen-tih);
+}
+
+.brojDemo {
+  margin-top: auto;
+  padding-top: 1vh;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.08em;
+  color: var(--bakar-struja);
+  text-transform: uppercase;
+}
+
+.podnozje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+  flex-wrap: wrap;
+}
+
+.veza {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 0.5em;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--silkscreen-tih);
+  border-bottom: 2px solid transparent;
+}
+
+.veza:hover,
+.veza:focus-visible {
+  color: var(--bakar-struja);
+  border-bottom-color: var(--bakar-struja);
+}
+
+@media (max-aspect-ratio: 5/4) {
+  .zaglavlje { flex-direction: column; }
+  .naslov { font-size: 5.6vh; }
+  .recenica { font-size: 3.8vh; }
+  .eksponati { grid-template-columns: 1fr; margin-top: 2vh; }
+  .eksponati::before { display: none; }
+  .eksponat::after { display: none; }
+}

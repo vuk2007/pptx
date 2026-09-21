@@ -1,16 +1,9 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Izlog } from '@/components/izlog/Izlog';
+import { izlogEksponata } from '@/sadrzaj/slajdovi';
+
+export const metadata: Metadata = { title: 'Izlog: Jarvis — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="IZLOG / JARVIS"
-      naslov="Izlog: Jarvis"
-      opis="Petlja slajdova samo za glasovnog asistenta."
-      faza="1"
-      veze={[
-        { putanja: '/izlog', naziv: 'Cio izlog' },
-        { putanja: '/jarvis', naziv: 'Blok Jarvis' },
-      ]}
-    />
-  );
+  return <Izlog slajdovi={izlogEksponata('jarvis')} putanja="Izlog · Jarvis" />;
 }
