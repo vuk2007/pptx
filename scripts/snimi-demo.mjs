@@ -78,6 +78,49 @@ try {
   await postaviKlizac('Duty', 95);
   await cekaj(450);
   await snimi('pwm-4-sa-rampom');
+
+  // --- Radio paket ---
+  await otvori('/perjanik/radio/');
+  await cekaj(600);
+  await snimi('radio-1-u-letu');
+
+  await udriMunjom('ne slaže');
+  await snimi('radio-2-odbacen');
+
+  await klikniTekst('Dvije munje na istom bitu');
+  await udriMunjom('XOR ovo ne vidi');
+  await snimi('radio-3-prosao-pokvaren');
+
+  await klikniTekst('Resetuj');
+  await cekaj(400);
+  await klikniTekst('Prekini signal');
+  await cekaj(260);
+  await snimi('radio-4-tajmer');
+  await cekaj(900);
+  await snimi('radio-5-rover-stao');
+
+  // --- Suspenzija ---
+  await otvori('/perjanik/suspenzija/');
+  await cekaj(500);
+  await snimi('suspenzija-1-kamen');
+  await postaviKlizacTastaturom('Položaj kamena', 'ArrowLeft', 13);
+  await cekaj(500);
+  await snimi('suspenzija-2-zadnji-tocak');
+  await klikniTekst('Bez suspenzije');
+  await cekaj(600);
+  await snimi('suspenzija-3-kruto');
+
+  // --- Dvostruki servo ---
+  await otvori('/perjanik/servo/');
+  await cekaj(500);
+  await postaviKlizac('Ugao A', 150);
+  await cekaj(900);
+  await snimi('servo-1-ispravno');
+  await klikniTekst('Greška: B = A');
+  await cekaj(700);
+  await snimi('servo-2-borba');
+  await cekaj(4200);
+  await snimi('servo-3-dim');
 } finally {
   kartica.zatvori();
   chrome.zatvori();
@@ -149,6 +192,31 @@ async function postaviKlizac(ariaLabel, vrijednost) {
        return true;
      })()`,
   );
+}
+
+/** Udara munjom dok paket stvarno ne bude pogođen — let traje samo tren. */
+async function udriMunjom(ocekivanDio) {
+  for (let pokusaj = 0; pokusaj < 14; pokusaj++) {
+    await klikniTekst('Munja');
+    await cekaj(240);
+    const poruka = await uStranici(kartica, `document.querySelector('[role="status"]')?.textContent ?? ''`);
+    if (poruka.includes(ocekivanDio)) return;
+  }
+  throw new Error(`Munja nikad nije pogodila paket (tražio sam „${ocekivanDio}")`);
+}
+
+/** Pomjera element sa role="slider" strelicama, onako kako bi ga pomjerila tastatura. */
+async function postaviKlizacTastaturom(ariaLabel, taster, koraka) {
+  await uStranici(
+    kartica,
+    `document.querySelector('[aria-label="${ariaLabel}"]').focus()`,
+  );
+  const kod = taster === 'ArrowLeft' ? 37 : 39;
+  for (let i = 0; i < koraka; i++) {
+    await kartica.posalji('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: taster, windowsVirtualKeyCode: kod });
+    await kartica.posalji('Input.dispatchKeyEvent', { type: 'keyUp', key: taster, windowsVirtualKeyCode: kod });
+    await cekaj(60);
+  }
 }
 
 async function snimi(ime) {

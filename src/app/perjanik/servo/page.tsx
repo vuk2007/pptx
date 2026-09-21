@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Servo } from '@/components/demo/Servo';
+
+export const metadata: Metadata = { title: 'Dvostruki servo — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="PERJANIK / DEMONSTRACIJA"
-      naslov="Dvostruki servo"
-      opis="Dva servoa na istoj osovini, ispravno i pogrešno."
-      faza="3"
-      veze={[
-        { putanja: '/perjanik', naziv: 'Nazad na Perjanik' },
-      ]}
-    />
-  );
+  return <Servo />;
 }

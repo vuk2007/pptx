@@ -16,6 +16,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-offline` | Digne server, pusti Chrome, isključi mrežu i provjeri da sve i dalje radi |
 | `npm run provjeri-qr` | Kodira pa dekodira QR nazad, uključujući Reed-Solomon sindrome |
 | `npm run provjeri-h-most` | Iscrpno provjerava tabelu istinitosti H-mosta |
+| `npm run provjeri-paket` | Provjerava šta XOR hvata, a šta mu promakne |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -62,6 +63,12 @@ za sebe. [`src/lib/h-most.ts`](src/lib/h-most.ts) zna samo za četiri prekidača
 prekidača i svih 8 ulaza L298N** i potvrdi da nijedan ulaz čipa ne može da
 napravi kratak spoj. Build pada ako neki od tih 24 slučaja promijeni ponašanje.
 
+[`src/lib/paket.ts`](src/lib/paket.ts) nosi drugu tvrdnju koja mora biti tačna:
+jedna pokvarena bit-pozicija uvijek obori XOR provjeru, a ista bit-pozicija
+pokvarena u dva bajta uvijek prođe. Druga je cijela poenta demonstracije
+(„zato postoje jače provjere, kao CRC"), pa se ne vjeruje na riječ —
+`npm run provjeri-paket` prođe kroz 43 512 slučajeva.
+
 Animacije idu kroz [`src/lib/animacija.ts`](src/lib/animacija.ts) i pišu direktno
 u DOM atribute, a ne u React state — SVG se ne prerenderuje šezdeset puta u
 sekundi zbog jednog ugla.
@@ -82,7 +89,7 @@ a ilustracije slajdova u [`src/components/ilustracije/`](src/components/ilustrac
 0. ✅ Kostur: rute, statički izvoz, service worker, manifest, offline dokazan
 1. ✅ Dizajn sistem, početna strana, izlog sa 21 slajdom i bilješkama, `/pocni`, QR enkoder
 2. ✅ H-most i PWM
-3. Radio paket, suspenzija, dvostruki servo
+3. ✅ Radio paket, suspenzija, dvostruki servo
 4. XGO demonstracije
 5. Jarvis demonstracije i tri radija
 6. Završna provjera na TV-u i iPadu

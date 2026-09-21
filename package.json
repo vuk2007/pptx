@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
+    "build": "node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-paket.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
     "start": "node scripts/serve.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -12,7 +12,8 @@
     "provjeri-qr": "node scripts/provjeri-qr.mjs",
     "snimi": "node scripts/snimi-strane.mjs",
     "provjeri-h-most": "node scripts/provjeri-h-most.mjs",
-    "snimi-demo": "node scripts/snimi-demo.mjs"
+    "snimi-demo": "node scripts/snimi-demo.mjs",
+    "provjeri-paket": "node scripts/provjeri-paket.mjs"
   },
   "dependencies": {
     "next": "^16.3.5",

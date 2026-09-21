@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Suspenzija } from '@/components/demo/Suspenzija';
+
+export const metadata: Metadata = { title: 'Suspenzija — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="PERJANIK / DEMONSTRACIJA"
-      naslov="Rocker sa diferencijalom"
-      opis="Poluge koje drže sva četiri točka na zemlji."
-      faza="3"
-      veze={[
-        { putanja: '/perjanik', naziv: 'Nazad na Perjanik' },
-      ]}
-    />
-  );
+  return <Suspenzija />;
 }

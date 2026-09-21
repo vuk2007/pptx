@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Radio } from '@/components/demo/Radio';
+
+export const metadata: Metadata = { title: 'Radio paket — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="PERJANIK / DEMONSTRACIJA"
-      naslov="Radio paket i failsafe"
-      opis="Kako rover provjerava komandu i šta radi kad signal nestane."
-      faza="3"
-      veze={[
-        { putanja: '/perjanik', naziv: 'Nazad na Perjanik' },
-      ]}
-    />
-  );
+  return <Radio />;
 }
