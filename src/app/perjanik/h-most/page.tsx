@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { HMost } from '@/components/demo/HMost';
+
+export const metadata: Metadata = { title: 'H-most — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="PERJANIK / DEMONSTRACIJA"
-      naslov="H-most"
-      opis="Četiri prekidača koja okreću motor na obje strane."
-      faza="2"
-      veze={[
-        { putanja: '/perjanik', naziv: 'Nazad na Perjanik' },
-      ]}
-    />
-  );
+  return <HMost />;
 }

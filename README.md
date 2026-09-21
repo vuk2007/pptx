@@ -15,6 +15,8 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm start` | Servira `out/` na http://localhost:4173 |
 | `npm run provjeri-offline` | Digne server, pusti Chrome, isključi mrežu i provjeri da sve i dalje radi |
 | `npm run provjeri-qr` | Kodira pa dekodira QR nazad, uključujući Reed-Solomon sindrome |
+| `npm run provjeri-h-most` | Iscrpno provjerava tabelu istinitosti H-mosta |
+| `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
 
@@ -52,6 +54,18 @@ sindromi — i pada ako round-trip ne vrati polazni tekst. Build ga pokreće.
 
 Kod se pravi samo kad `QR_URL` nije prazan. Dok jeste, `/pocni` ide bez koda.
 
+## Demonstracije
+
+Logika koja nosi objašnjenje stoji odvojeno od crteža, da se može provjeriti sama
+za sebe. [`src/lib/h-most.ts`](src/lib/h-most.ts) zna samo za četiri prekidača i
+šest režima, a `npm run provjeri-h-most` prođe kroz **svih 16 kombinacija
+prekidača i svih 8 ulaza L298N** i potvrdi da nijedan ulaz čipa ne može da
+napravi kratak spoj. Build pada ako neki od tih 24 slučaja promijeni ponašanje.
+
+Animacije idu kroz [`src/lib/animacija.ts`](src/lib/animacija.ts) i pišu direktno
+u DOM atribute, a ne u React state — SVG se ne prerenderuje šezdeset puta u
+sekundi zbog jednog ugla.
+
 ## Dizajn
 
 Paleta, tipografska skala i pokret žive u [`src/app/globals.css`](src/app/globals.css).
@@ -67,7 +81,7 @@ a ilustracije slajdova u [`src/components/ilustracije/`](src/components/ilustrac
 
 0. ✅ Kostur: rute, statički izvoz, service worker, manifest, offline dokazan
 1. ✅ Dizajn sistem, početna strana, izlog sa 21 slajdom i bilješkama, `/pocni`, QR enkoder
-2. H-most i PWM
+2. ✅ H-most i PWM
 3. Radio paket, suspenzija, dvostruki servo
 4. XGO demonstracije
 5. Jarvis demonstracije i tri radija

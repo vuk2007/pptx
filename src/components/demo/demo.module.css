@@ -1,0 +1,289 @@
+/*
+  Okvir svake demonstracije: veliki crtež u sredini, malo kontrola gore desno,
+  jedna rečenica dolje koja se mijenja sa stanjem. „Resetuj" je uvijek vidljiv.
+*/
+
+.ploca {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 1.4vh;
+  padding: 2.4vh 2.6vw 2.2vh;
+  background: var(--maska);
+  border: 3px solid var(--ivica);
+  overflow: hidden;
+  /* Na dodir: crtež se dira, stranica se ne klizi i ne zumira. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rupa {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--maska-duboka);
+  border: 4px solid var(--bakar);
+  opacity: 0.8;
+}
+.rupaGL { top: 18px; left: 18px; }
+.rupaGD { top: 18px; right: 18px; }
+
+/* --- gornja letva --- */
+
+.zaglavlje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+  flex-wrap: wrap;
+}
+
+.naslovnaGrupa {
+  display: flex;
+  align-items: baseline;
+  gap: 1vw;
+  min-width: 0;
+}
+
+.naslov {
+  font-size: 5.2vh;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.kontrole {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  flex-wrap: wrap;
+}
+
+.dugme {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: var(--meta-dodir);
+  padding: 0 1.4em;
+  font-size: 2.2vh;
+  font-weight: 600;
+  color: var(--bakar-struja);
+  border: 3px solid var(--bakar);
+  border-radius: var(--radijus);
+  background: var(--maska-svijetla);
+  white-space: nowrap;
+}
+
+.dugme:hover,
+.dugme:focus-visible {
+  background: var(--bakar-struja);
+  color: var(--maska-duboka);
+}
+
+/* Prekidač režima: vidi se da li je uključen, ne samo kad se pređe mišem. */
+.prekidac {
+  position: relative;
+  padding-left: 3.6em;
+}
+
+.prekidac::before {
+  content: '';
+  position: absolute;
+  left: 1em;
+  width: 2em;
+  height: 1.1em;
+  border-radius: 1em;
+  border: 2px solid var(--bakar);
+  background: var(--maska-duboka);
+}
+
+.prekidac::after {
+  content: '';
+  position: absolute;
+  left: 1.3em;
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--bakar);
+  transition: transform 140ms ease-out, background 140ms linear;
+}
+
+.prekidacUkljucen {
+  border-color: var(--bakar-struja);
+  color: var(--maska-duboka);
+  background: var(--bakar-struja);
+}
+
+.prekidacUkljucen::before {
+  border-color: var(--maska-duboka);
+  background: var(--maska-duboka);
+}
+
+.prekidacUkljucen::after {
+  transform: translateX(0.85em);
+  background: var(--bakar-struja);
+}
+
+/* --- crtež --- */
+
+.scena {
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scena svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* --- donja letva: rečenica koja se mijenja sa stanjem --- */
+
+.podnozje {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2vw;
+}
+
+.poruka {
+  font-size: 3.2vh;
+  line-height: 1.16;
+  font-weight: 600;
+  max-width: 46ch;
+  text-wrap: balance;
+}
+
+.porukaAlarm {
+  color: var(--alarm);
+}
+
+.napomena {
+  margin-top: 0.6vh;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.06em;
+  color: var(--silkscreen-tih);
+}
+
+.nazad {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 0.5em;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--silkscreen-tih);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.nazad:hover,
+.nazad:focus-visible {
+  color: var(--bakar-struja);
+  border-bottom-color: var(--bakar-struja);
+}
+
+/* --- sklopke i ulazi unutar SVG-a --- */
+
+.prekidacSvg {
+  cursor: pointer;
+}
+
+.prekidacSvg:focus {
+  outline: none;
+}
+
+/* Okvir fokusa je u SVG-u, jer outline ne prati oblik grupe. */
+.okvirFokusa {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prekidacSvg:focus-visible .okvirFokusa {
+  opacity: 1;
+}
+
+/* --- klizač, koristi ga PWM i ostale demonstracije --- */
+
+.klizacGrupa {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+}
+
+.klizacNatpis {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-oznaka);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--silkscreen-tih);
+  white-space: nowrap;
+}
+
+.klizacVrijednost {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 2.6vh;
+  font-weight: 700;
+  color: var(--bakar-struja);
+  min-width: 4.5ch;
+  text-align: right;
+}
+
+.klizac {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22vw;
+  height: var(--meta-dodir);
+  background: transparent;
+  cursor: pointer;
+}
+
+.klizac::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--maska-duboka);
+  border: 2px solid var(--bakar);
+}
+
+.klizac::-moz-range-track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--maska-duboka);
+  border: 2px solid var(--bakar);
+}
+
+/* Velika glava klizača — meta za prst u gužvi, ne za precizan miš. */
+.klizac::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 38px;
+  height: 38px;
+  margin-top: -16px;
+  border-radius: 50%;
+  background: var(--bakar-struja);
+  border: 3px solid var(--maska-duboka);
+}
+
+.klizac::-moz-range-thumb {
+  width: 38px;
+  height: 38px;
+  border: 3px solid var(--maska-duboka);
+  border-radius: 50%;
+  background: var(--bakar-struja);
+}
+
+@media (max-aspect-ratio: 5/4) {
+  .naslov { font-size: 3.8vh; }
+  .poruka { font-size: 2.6vh; }
+  .klizac { width: 40vw; }
+}

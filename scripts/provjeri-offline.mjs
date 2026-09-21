@@ -86,19 +86,34 @@ try {
   await snimi(kartica, `${SNIMCI}/02-offline-pocetna.png`);
 
   // ---- 4. Duboke rute bez mreže ----
+  /* Dijakritika se skuplja kroz sve rute — nijedna strana sama ne nosi sva slova. */
+  const nadjenaSlova = new Set();
   for (const ruta of RUTE) {
     await kartica.posalji('Page.navigate', { url: OSNOVA + ruta });
     await cekaj(900);
     const naslov = await uStranici(kartica, `document.querySelector('h1')?.textContent ?? ''`);
     const tekst = await uStranici(kartica, `document.body.innerText.length`);
     provjeri(naslov.length > 0 && tekst > 40, `Offline ruta ${ruta} → h1 "${naslov}"`);
+
+    const slova = await uStranici(
+      kartica,
+      `[...'čćđšž'].filter((slovo) => document.documentElement.textContent.includes(slovo)).join('')`,
+    );
+    for (const slovo of slova) nadjenaSlova.add(slovo);
   }
 
-  // ---- 5. Dijakritika i navigacija klikom, i dalje bez mreže ----
+  const sva = [...'čćđšž'];
+  const fale = sva.filter((slovo) => !nadjenaSlova.has(slovo));
+  provjeri(
+    fale.length === 0,
+    fale.length === 0
+      ? `Sva slova čćđšž renderuju offline kroz ${RUTE.length} ruta`
+      : `Nedostaju slova: ${fale.join('')}`,
+  );
+
+  // ---- 5. Duboka ruta sa demonstracijom, i dalje bez mreže ----
   await kartica.posalji('Page.navigate', { url: OSNOVA + '/perjanik/h-most/' });
   await cekaj(900);
-  const dijakritika = await uStranici(kartica, `document.body.innerText.includes('čćđšž')`);
-  provjeri(dijakritika === true, 'Dijakritika čćđšž je u izvezenom HTML-u');
   await snimi(kartica, `${SNIMCI}/03-offline-duboka-ruta.png`);
 
   provjeri(spoljniZahtjevi.length === 0, `Zahtjeva ka spolja: ${spoljniZahtjevi.length}${spoljniZahtjevi.length ? ' → ' + spoljniZahtjevi.slice(0, 3).join(', ') : ''}`);

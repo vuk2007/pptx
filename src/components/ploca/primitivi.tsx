@@ -34,6 +34,8 @@ type VodProps = {
   /** Sekundi po ciklusu; manje = brže. */
   brzina?: number;
   boja?: string;
+  /** Boja svjetla koje putuje vodom. Kratak spoj je crven, ne bakarni. */
+  bojaStruje?: string;
   zatvoren?: boolean;
 };
 
@@ -44,6 +46,7 @@ export function Vod({
   struja = false,
   brzina = 1.4,
   boja,
+  bojaStruje,
   zatvoren = false,
 }: VodProps) {
   const Oblik = zatvoren ? 'polygon' : 'polyline';
@@ -62,7 +65,7 @@ export function Vod({
           className="struja-tece"
           points={tacke}
           fill="none"
-          stroke="var(--bakar-struja)"
+          stroke={bojaStruje ?? 'var(--bakar-struja)'}
           strokeWidth={debljina}
           strokeLinecap="round"
           strokeLinejoin="round"
