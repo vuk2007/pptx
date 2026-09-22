@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Glas } from '@/components/demo/Glas';
+
+export const metadata: Metadata = { title: 'Tvoj glas uživo — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="JARVIS / DEMONSTRACIJA"
-      naslov="Tvoj glas uživo"
-      opis="Talas i spektrogram tvog glasa."
-      faza="5"
-      veze={[
-        { putanja: '/jarvis', naziv: 'Nazad na Jarvis' },
-      ]}
-    />
-  );
+  return <Glas />;
 }

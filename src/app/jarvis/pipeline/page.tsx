@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Pipeline } from '@/components/demo/Pipeline';
+
+export const metadata: Metadata = { title: 'Pipeline i brzina — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="JARVIS / DEMONSTRACIJA"
-      naslov="Pipeline i brzina"
-      opis="Zašto odgovara za dvije sekunde, a ne za deset."
-      faza="5"
-      veze={[
-        { putanja: '/jarvis', naziv: 'Nazad na Jarvis' },
-      ]}
-    />
-  );
+  return <Pipeline />;
 }

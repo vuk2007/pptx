@@ -162,6 +162,29 @@ try {
   await snimi('komanda-2-serijski');
   await cekaj(2400);
   await snimi('komanda-3-kraj');
+
+  // --- Jarvis: pipeline ---
+  await otvori('/jarvis/pipeline/');
+  await cekaj(400);
+  await snimi('pipeline-1-prije');
+  await klikniTekst('Pokreni');
+  await cekaj(2600);
+  await snimi('pipeline-2-streaming-govori');
+  await cekaj(2600);
+  await snimi('pipeline-3-kraj');
+
+  // --- Jarvis: frekvencije ---
+  await otvori('/jarvis/frekvencije/');
+  await cekaj(600);
+  await snimi('frekvencije-1-u-razmjeri');
+  await klikniTekst('Zid');
+  await cekaj(900);
+  await snimi('frekvencije-2-zid');
+
+  // --- Jarvis: glas ---
+  await otvori('/jarvis/glas/');
+  await cekaj(1400);
+  await snimi('glas-1-ilustracija');
 } finally {
   kartica.zatvori();
   chrome.zatvori();

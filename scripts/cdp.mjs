@@ -23,7 +23,7 @@ export function nadjiChrome() {
 
 const cekaj = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function pokreniChrome({ port = 9222, sirina = 1920, visina = 1080 } = {}) {
+export async function pokreniChrome({ port = 9222, sirina = 1920, visina = 1080, dodatno = [] } = {}) {
   const profil = mkdtempSync(join(tmpdir(), 'praktikum-chrome-'));
   const proces = spawn(
     nadjiChrome(),
@@ -36,6 +36,7 @@ export async function pokreniChrome({ port = 9222, sirina = 1920, visina = 1080 
       '--no-default-browser-check',
       '--disable-extensions',
       '--hide-scrollbars',
+      ...dodatno,
       'about:blank',
     ],
     { stdio: 'ignore' },

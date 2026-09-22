@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Frekvencije } from '@/components/demo/Frekvencije';
+
+export const metadata: Metadata = { title: 'Tri radija na štandu — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="JARVIS / DEMONSTRACIJA"
-      naslov="Tri radija na štandu"
-      opis="Duži talas prolazi, kraći nosi više."
-      faza="5"
-      veze={[
-        { putanja: '/jarvis', naziv: 'Nazad na Jarvis' },
-      ]}
-    />
-  );
+  return <Frekvencije />;
 }

@@ -18,6 +18,9 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-h-most` | Iscrpno provjerava tabelu istinitosti H-mosta |
 | `npm run provjeri-paket` | Provjerava šta XOR hvata, a šta mu promakne |
 | `npm run provjeri-xgo` | Povratni test kinematike noge i serijskog paketa za psa |
+| `npm run provjeri-pipeline` | Provjerava raspored faza i tvrdnju o uštedi koju streaming donosi |
+| `npm run provjeri-talasi` | Mjeri brjegove nacrtanih talasa i poredi ih sa λ = c / f |
+| `npm run provjeri-glas` | Paleta spektrograma i ilustrativni govor kroz 30 000 kadrova |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -75,6 +78,25 @@ tačku, izračunaj uglove, pa iz tih uglova vrati stopalo i vidi je li stiglo
 odakle si krenuo. `npm run provjeri-xgo` to radi na mreži tačaka, zajedno sa
 serijskim paketom za psa, gdje je checksum invertovan najniži bajt zbira.
 
+[`src/lib/pipeline.ts`](src/lib/pipeline.ts) pravi raspored Jarvisovih faza, a
+`npm run provjeri-pipeline` ga prolazi kroz mrežu mogućih vremena i drži jednu
+invarijantu: ušteda koju streaming donosi jednaka je tačno onome što mozgu treba
+od prve rečenice do kraja odgovora. Ako neko promijeni broj u `cinjenice.ts`,
+crtež i rečenica ispod njega ostaju u skladu — ili build pada.
+
+Kod [`src/lib/talasi.ts`](src/lib/talasi.ts) jedina fizika je λ = c / f, ali
+crtež tvrdi da su tri talasa u razmjeri. To se ne provjerava gledanjem:
+`npm run provjeri-talasi` iz nacrtanih tačaka izmjeri razmak između brjegova i
+uporedi ga sa traženom talasnom dužinom. Faktor 2π na pogrešnom mjestu oku bi
+i dalje izgledao uredno.
+
+Spektrogram u [`src/components/demo/Glas.tsx`](src/components/demo/Glas.tsx) je
+jedina slika na sajtu koja se crta na `<canvas>`, a ne u SVG-u — drži nekoliko
+stotina kolona istorije, što bi u SVG-u bilo na desetine hiljada pravougaonika
+po kadru. Mikrofon se čita preko `AnalyserNode`-a i nigdje se ne spaja na
+zvučnik, pa nema zavijanja u sali; nema ni `MediaRecorder`-a ni ijednog mrežnog
+poziva, tako da tvrdnja „ništa se ne snima" stoji u kodu, ne samo na ekranu.
+
 Animacije idu kroz [`src/lib/animacija.ts`](src/lib/animacija.ts) i pišu direktno
 u DOM atribute, a ne u React state — SVG se ne prerenderuje šezdeset puta u
 sekundi zbog jednog ugla.
@@ -97,5 +119,5 @@ a ilustracije slajdova u [`src/components/ilustracije/`](src/components/ilustrac
 2. ✅ H-most i PWM
 3. ✅ Radio paket, suspenzija, dvostruki servo
 4. ✅ XGO demonstracije
-5. Jarvis demonstracije i tri radija
+5. ✅ Jarvis demonstracije i tri radija
 6. Završna provjera na TV-u i iPadu

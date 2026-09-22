@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
+    "build": "node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
     "start": "node scripts/serve.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -17,7 +17,10 @@
     "provjeri-h-most": "node scripts/provjeri-h-most.mjs",
     "snimi-demo": "node scripts/snimi-demo.mjs",
     "provjeri-paket": "node scripts/provjeri-paket.mjs",
-    "provjeri-xgo": "node scripts/provjeri-xgo.mjs"
+    "provjeri-xgo": "node scripts/provjeri-xgo.mjs",
+    "provjeri-pipeline": "node scripts/provjeri-pipeline.mjs",
+    "provjeri-talasi": "node scripts/provjeri-talasi.mjs",
+    "provjeri-glas": "node scripts/provjeri-glas.mjs"
   },
   "dependencies": {
     "next": "^16.3.5",

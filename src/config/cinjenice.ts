@@ -85,3 +85,14 @@ export const PAKET_ILUSTRATIVNI: PaketPolje[] = [
 
 export const PAKET_JE_ILUSTRATIVAN = PAKET_FORMAT === null;
 export const PAKET = PAKET_FORMAT ?? PAKET_ILUSTRATIVNI;
+
+/**
+ * Gdje se koja faza Jarvisovog pipeline-a izvršava.
+ * null znači da to nije provjereno — tada se na crtežu ne piše ništa.
+ */
+export const PIPELINE_GDJE: Record<'budjenje' | 'glasUTekst' | 'mozak' | 'tekstUGlas', 'lokalno' | 'oblak' | null> = {
+  budjenje: 'lokalno',
+  glasUTekst: 'lokalno', // scenario kaže: „drugi program, koji radi ovdje na laptopu"
+  mozak: null, // TODO: radi li jezički model na laptopu ili u oblaku
+  tekstUGlas: null, // TODO: radi li sinteza glasa na laptopu ili u oblaku
+};
