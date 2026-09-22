@@ -2,6 +2,9 @@
   "name": "praktikum-elektronike",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
@@ -25,7 +28,7 @@
     "@types/node": "22.15.3",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "eslint": "9.27.0",
+    "eslint": "9.39.5",
     "eslint-config-next": "^16.3.5",
     "typescript": "5.8.3"
   }
