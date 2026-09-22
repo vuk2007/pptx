@@ -22,6 +22,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-talasi` | Mjeri brjegove nacrtanih talasa i poredi ih sa λ = c / f |
 | `npm run provjeri-glas` | Paleta spektrograma i ilustrativni govor kroz 30 000 kadrova |
 | `npm run provjeri-raspored` | Otvara svaku rutu u četiri veličine i mjeri viri li išta van ekrana |
+| `npm run provjeri-vercel` | Provjerava da `vercel.json` ima samo ključeve koje Vercel priznaje |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -97,6 +98,20 @@ stotina kolona istorije, što bi u SVG-u bilo na desetine hiljada pravougaonika
 po kadru. Mikrofon se čita preko `AnalyserNode`-a i nigdje se ne spaja na
 zvučnik, pa nema zavijanja u sali; nema ni `MediaRecorder`-a ni ijednog mrežnog
 poziva, tako da tvrdnja „ništa se ne snima" stoji u kodu, ne samo na ekranu.
+
+## Objavljivanje
+
+Sajt je čist statički izvoz, pa na Vercelu namjerno **nema** Next.js preseta:
+`"framework": null` u [`vercel.json`](vercel.json). Sa Next.js presetom Vercel
+traži `routes-manifest.json` u izlaznom folderu, a taj fajl živi u `.next/`,
+dok mi objavljujemo `out/` — deploy tada pada prije nego što išta počne.
+`trailingSlash` mora da se slaže sa `next.config.mjs`, inače svaka unutrašnja
+veza ide kroz preusmjeravanje.
+
+Ovo objašnjenje stoji ovdje jer JSON nema komentare, a ključ `"//"` Vercel
+odbija: njegova šema ne prima nijedan nepoznat ključ i obara deploy prije
+build-a. `npm run provjeri-vercel` to hvata lokalno i ide prvi u build lancu,
+prije svega skupog.
 
 Raspored se provjerava mjerenjem, ne gledanjem. `npm run provjeri-raspored`
 otvori svaku rutu na 1080p, 4K i u dvije veličine iPada, pa izmjeri svaki
