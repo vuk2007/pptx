@@ -121,6 +121,47 @@ try {
   await snimi('servo-2-borba');
   await cekaj(4200);
   await snimi('servo-3-dim');
+
+  // --- XGO: povratna sprega ---
+  await otvori('/xgo/ravnoteza/');
+  await postaviKlizac('Nagib', 18);
+  await cekaj(1600);
+  await snimi('ravnoteza-1-drzi-se');
+
+  await postaviKlizac('Pojačanje', 28);
+  await postaviKlizac('Nagib', -18);
+  await cekaj(900);
+  await snimi('ravnoteza-2-oscilira');
+
+  await klikniTekst('Resetuj');
+  await cekaj(400);
+  await klikniTekst('Povratna sprega');
+  await postaviKlizac('Nagib', 24);
+  await cekaj(1200);
+  await snimi('ravnoteza-3-pao');
+
+  // --- XGO: noga ---
+  await otvori('/xgo/noga/');
+  await cekaj(400);
+  await snimi('noga-1-inverzno');
+  await postaviKlizacTastaturom('Položaj stopala', 'ArrowRight', 16);
+  await cekaj(400);
+  await snimi('noga-2-van-dometa');
+  await klikniTekst('Direktno');
+  await cekaj(300);
+  await postaviKlizac('Koljeno', 70);
+  await cekaj(400);
+  await snimi('noga-3-direktno');
+
+  // --- XGO: put komande ---
+  await otvori('/xgo/komanda/');
+  await cekaj(400);
+  await snimi('komanda-1-mirno');
+  await klikniTekst('Pošalji');
+  await cekaj(2600);
+  await snimi('komanda-2-serijski');
+  await cekaj(2400);
+  await snimi('komanda-3-kraj');
 } finally {
   kartica.zatvori();
   chrome.zatvori();

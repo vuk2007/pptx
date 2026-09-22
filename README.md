@@ -17,6 +17,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-qr` | Kodira pa dekodira QR nazad, uključujući Reed-Solomon sindrome |
 | `npm run provjeri-h-most` | Iscrpno provjerava tabelu istinitosti H-mosta |
 | `npm run provjeri-paket` | Provjerava šta XOR hvata, a šta mu promakne |
+| `npm run provjeri-xgo` | Povratni test kinematike noge i serijskog paketa za psa |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -69,6 +70,11 @@ pokvarena u dva bajta uvijek prođe. Druga je cijela poenta demonstracije
 („zato postoje jače provjere, kao CRC"), pa se ne vjeruje na riječ —
 `npm run provjeri-paket` prođe kroz 43 512 slučajeva.
 
+Kod [`src/lib/noga.ts`](src/lib/noga.ts) jedini pošten test je povratni: uzmi
+tačku, izračunaj uglove, pa iz tih uglova vrati stopalo i vidi je li stiglo
+odakle si krenuo. `npm run provjeri-xgo` to radi na mreži tačaka, zajedno sa
+serijskim paketom za psa, gdje je checksum invertovan najniži bajt zbira.
+
 Animacije idu kroz [`src/lib/animacija.ts`](src/lib/animacija.ts) i pišu direktno
 u DOM atribute, a ne u React state — SVG se ne prerenderuje šezdeset puta u
 sekundi zbog jednog ugla.
@@ -90,6 +96,6 @@ a ilustracije slajdova u [`src/components/ilustracije/`](src/components/ilustrac
 1. ✅ Dizajn sistem, početna strana, izlog sa 21 slajdom i bilješkama, `/pocni`, QR enkoder
 2. ✅ H-most i PWM
 3. ✅ Radio paket, suspenzija, dvostruki servo
-4. XGO demonstracije
+4. ✅ XGO demonstracije
 5. Jarvis demonstracije i tri radija
 6. Završna provjera na TV-u i iPadu

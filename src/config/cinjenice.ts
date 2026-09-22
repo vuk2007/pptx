@@ -40,6 +40,21 @@ export const PIPELINE_VREMENA = {
   tekstUGlas: 0.5,
 } as const;
 
+/** Bajtovi komande „sjedi" za XGO psa. Format i račun checksuma su poznati, same vrijednosti nisu. */
+export const XGO_BAJTOVI_SJEDI: { komanda: number; adresa: number; podaci: number[] } | null = null; // TODO: očitati iz micro:bit koda
+
+/** Koristi se dok XGO_BAJTOVI_SJEDI nije popunjen. Označeno na ekranu kao ilustrativno. */
+export const XGO_BAJTOVI_SJEDI_ILUSTRATIVNI = { komanda: 0x3e, adresa: 0x01, podaci: [0x02] };
+
+/** micro:bit radio veza sa psima. */
+export const XGO_RADIO = { grupa: 42, mhz: 2483 } as const;
+
+/** Sigurnosni slojevi na putu komande, u milisekundama. */
+export const XGO_SIGURNOST = {
+  pasStajeBezKomande: 500,
+  mostSaljeStopAkoLaptopCuti: 2000,
+} as const;
+
 /** Ilustrativni naponi za H-most demonstraciju. */
 export const NAPON = {
   ulaz: 11.1,

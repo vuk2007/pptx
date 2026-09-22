@@ -7,3 +7,4 @@ out/
 .env*.local
 public/icons/
 public/qr/
+*.tsbuildinfo

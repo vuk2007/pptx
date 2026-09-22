@@ -1,15 +1,8 @@
-import { KosturStrane } from '@/components/KosturStrane';
+import type { Metadata } from 'next';
+import { Ravnoteza } from '@/components/demo/Ravnoteza';
+
+export const metadata: Metadata = { title: 'Povratna sprega — Praktikum elektronike' };
 
 export default function Strana() {
-  return (
-    <KosturStrane
-      oznaka="XGO / DEMONSTRACIJA"
-      naslov="Povratna sprega"
-      opis="Mjeri, ispravi, pa opet mjeri."
-      faza="4"
-      veze={[
-        { putanja: '/xgo', naziv: 'Nazad na XGO psi' },
-      ]}
-    />
-  );
+  return <Ravnoteza />;
 }
