@@ -196,16 +196,23 @@ export function Izlog({ slajdovi, putanja }: { slajdovi: SlajdUIzlogu[]; putanja
 
         <div className={stil.savjeti}>
           {(pauzirano || biljeskeOtvorene) && <span className={`${stil.savjet} ${stil.pauza}`}>auto pauziran</span>}
-          <span className={stil.savjet}>
+
+          {/*
+            Na iPadu nema tastature, pa spisak tastera tamo samo zbunjuje.
+            Umjesto njega stoji ono što na dodir zaista radi.
+          */}
+          <span className={`${stil.savjet} ${stil.samoDodir}`}>prevuci za sljedeći slajd</span>
+
+          <span className={`${stil.savjet} ${stil.samoTaster}`}>
             <span className={stil.taster}>←</span>
             <span className={stil.taster}>→</span>
             slajd
           </span>
-          <span className={stil.savjet}>
+          <span className={`${stil.savjet} ${stil.samoTaster}`}>
             <span className={stil.taster}>N</span>
             bilješke
           </span>
-          <span className={stil.savjet}>
+          <span className={`${stil.savjet} ${stil.samoTaster}`}>
             <span className={stil.taster}>ESC</span>
             početna
           </span>

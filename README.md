@@ -21,6 +21,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-pipeline` | Provjerava raspored faza i tvrdnju o uštedi koju streaming donosi |
 | `npm run provjeri-talasi` | Mjeri brjegove nacrtanih talasa i poredi ih sa λ = c / f |
 | `npm run provjeri-glas` | Paleta spektrograma i ilustrativni govor kroz 30 000 kadrova |
+| `npm run provjeri-raspored` | Otvara svaku rutu u četiri veličine i mjeri viri li išta van ekrana |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -97,6 +98,12 @@ po kadru. Mikrofon se čita preko `AnalyserNode`-a i nigdje se ne spaja na
 zvučnik, pa nema zavijanja u sali; nema ni `MediaRecorder`-a ni ijednog mrežnog
 poziva, tako da tvrdnja „ništa se ne snima" stoji u kodu, ne samo na ekranu.
 
+Raspored se provjerava mjerenjem, ne gledanjem. `npm run provjeri-raspored`
+otvori svaku rutu na 1080p, 4K i u dvije veličine iPada, pa izmjeri svaki
+natpis: mora cio da stoji na ekranu, i mora da stane u viewBox svog SVG-a.
+Ono što je nacrtano izvan viewBox-a preživi na širokom ekranu, a na uskom ga
+ivica ploče odsiječe — zato se to na 16:9 ne primijeti.
+
 Animacije idu kroz [`src/lib/animacija.ts`](src/lib/animacija.ts) i pišu direktno
 u DOM atribute, a ne u React state — SVG se ne prerenderuje šezdeset puta u
 sekundi zbog jednog ugla.
@@ -120,4 +127,20 @@ a ilustracije slajdova u [`src/components/ilustracije/`](src/components/ilustrac
 3. ✅ Radio paket, suspenzija, dvostruki servo
 4. ✅ XGO demonstracije
 5. ✅ Jarvis demonstracije i tri radija
-6. Završna provjera na TV-u i iPadu
+6. ✅ Završna provjera na TV-u; ostaje probati na iPadu (spisak ispod)
+
+## Šta treba probati na iPadu
+
+Safari se ne može voziti iz komandne linije, a dvije stvari traže HTTPS i
+pravi uređaj. Ovo je spisak za provjeru na sajmu, preko Vercel adrese:
+
+- `/jarvis/glas` — „Uključi mikrofon", pa provjeriti da se talas miče i da
+  se iz zvučnika **ništa** ne čuje (mikrofon namjerno nije spojen na izlaz).
+- `/xgo/ravnoteza` — mora se pojaviti dugme „Koristi nagib iPada"; poslije
+  dozvole nagni uređaj. Ako se senzor ne javi za sekundu i po, demonstracija
+  to kaže i vrati se na klizač.
+- Izlog: prevlačenje prstom mijenja slajd i pauzira auto-prelaz; savjet dolje
+  desno mora pisati „prevuci za sljedeći slajd", a ne spisak tastera.
+- Bilo koja demonstracija: dupli dodir ne smije da zumira stranu, i strana ne
+  smije da se gumeno vuče gore-dolje.
+- Avionski režim poslije prve posjete: sve rute i dalje rade.

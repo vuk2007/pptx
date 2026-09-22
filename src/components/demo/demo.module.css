@@ -9,7 +9,7 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 1.4vh;
-  padding: 2.4vh 2.6vw 2.2vh;
+  padding: 2.4vh max(52px, 2.6vw) 2.2vh;
   background: var(--maska);
   border: 3px solid var(--ivica);
   overflow: hidden;
@@ -58,8 +58,13 @@
 .kontrole {
   display: flex;
   align-items: center;
-  gap: 1vw;
+  /* Razmak ne smije da padne toliko da se vrijednost klizača slije sa
+     natpisom sljedećeg — na iPadu 1vw je svega dvanaest piksela. */
+  gap: clamp(22px, 1.2vw, 34px);
   flex-wrap: wrap;
+  /* Na užem ekranu letva se prelomi — kontrole i tada ostaju desno. */
+  margin-left: auto;
+  justify-content: flex-end;
 }
 
 .dugme {

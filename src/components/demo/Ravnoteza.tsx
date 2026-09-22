@@ -287,7 +287,7 @@ export function Ravnoteza() {
         {/* željeni nagib je nula — sve iznad i ispod je greška */}
         <line x1={GRAFIK_X} y1={GRAFIK_Y} x2={GRAFIK_X + GRAFIK_S} y2={GRAFIK_Y}
           stroke="var(--odluci)" strokeWidth={3} strokeDasharray="12 8" />
-        <SilkTekst x={GRAFIK_X + GRAFIK_S + 14} y={GRAFIK_Y + 6} velicina={17} boja="var(--odluci)">
+        <SilkTekst x={GRAFIK_X + GRAFIK_S} y={GRAFIK_Y - 12} desno velicina={17} boja="var(--odluci)">
           željeno 0°
         </SilkTekst>
 

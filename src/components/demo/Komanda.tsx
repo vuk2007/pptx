@@ -192,7 +192,12 @@ export function Komanda() {
           boja={korak === 7 ? 'var(--djeluj)' : 'var(--silkscreen-tih)'} />
 
         {/* iskra koja putuje */}
-        <g ref={iskraRef} opacity={ide ? 1 : 0}>
+        {/* Početni položaj je prva karika — bez njega iskra jedan kadar stoji u uglu. */}
+        <g
+          ref={iskraRef}
+          opacity={ide ? 1 : 0}
+          transform={`translate(${KARIKE[0].x + SIRINA / 2} ${KARIKE[0].y + VISINA / 2})`}
+        >
           <circle r={13} fill="var(--bakar-struja)" />
           <circle r={26} fill="var(--bakar-struja)" opacity={0.25} />
         </g>

@@ -54,7 +54,7 @@ export default function Pocetna() {
             </div>
             <p className={stil.opisEksponata}>{e.podnaslov}</p>
             <span className={stil.brojDemo}>
-              {e.demonstracije.length} demonstracije koje možeš dirati
+              {e.demonstracije.length} {rijecDemonstracija(e.demonstracije.length)} koje možeš dirati
             </span>
           </Link>
         ))}
@@ -79,4 +79,18 @@ export default function Pocetna() {
       </footer>
     </main>
   );
+}
+
+/*
+  Broj eksponatovih demonstracija se mijenja kako sajt raste, pa oblik
+  riječi ne smije biti zakucan: dvije, tri i četiri traže „demonstracije",
+  pet i više „demonstracija".
+*/
+function rijecDemonstracija(broj: number): string {
+  const desetice = broj % 100;
+  if (desetice >= 11 && desetice <= 14) return 'demonstracija';
+  const jedinica = broj % 10;
+  if (jedinica === 1) return 'demonstracija';
+  if (jedinica >= 2 && jedinica <= 4) return 'demonstracije';
+  return 'demonstracija';
 }

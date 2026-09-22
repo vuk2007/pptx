@@ -22,7 +22,7 @@ const X1 = 1450;
 const SIRINA_CM = 118;
 const PX_PO_CM = (X1 - X0) / SIRINA_CM;
 
-const REDOVI = [150, 310, 470];
+const REDOVI = [140, 310, 480];
 const AMPLITUDA = 42;
 
 const ZID_CM = 62;
@@ -197,11 +197,11 @@ function Red({
 
       {/* Mjera jednog talasa, istim lenjirom kao i ostali redovi. */}
       <g>
-        <line x1={X0} y1={y + 66} x2={krajTalasa} y2={y + 66} stroke={boja} strokeWidth={2.5} opacity={0.8} />
-        <line x1={X0} y1={y + 58} x2={X0} y2={y + 74} stroke={boja} strokeWidth={2.5} opacity={0.8} />
-        <line x1={krajTalasa} y1={y + 58} x2={krajTalasa} y2={y + 74} stroke={boja} strokeWidth={2.5} opacity={0.8} />
+        <line x1={X0} y1={y + 54} x2={krajTalasa} y2={y + 54} stroke={boja} strokeWidth={2.5} opacity={0.8} />
+        <line x1={X0} y1={y + 46} x2={X0} y2={y + 62} stroke={boja} strokeWidth={2.5} opacity={0.8} />
+        <line x1={krajTalasa} y1={y + 46} x2={krajTalasa} y2={y + 62} stroke={boja} strokeWidth={2.5} opacity={0.8} />
         {prvi && (
-          <SilkTekst x={krajTalasa + 14} y={y + 73} velicina={18} boja={boja} debljina={400}>
+          <SilkTekst x={krajTalasa + 14} y={y + 61} velicina={18} boja={boja} debljina={400}>
             jedan talas
           </SilkTekst>
         )}

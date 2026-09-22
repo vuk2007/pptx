@@ -10,7 +10,7 @@
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 1.2vh;
-  padding: 3vh 3vw 2.6vh;
+  padding: 3vh max(52px, 3vw) 2.6vh;
   background: var(--maska);
   border: 3px solid var(--ivica);
   overflow: hidden;

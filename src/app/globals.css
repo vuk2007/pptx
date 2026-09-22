@@ -59,8 +59,20 @@ body {
 }
 
 body {
-  min-height: 100svh;
+  /*
+    Nijedna strana se ne skroluje — svaka sama zauzima tačno jedan ekran.
+    Bez ovoga iPad gumeno vuče cijelu stranu usred demonstracije.
+  */
+  height: 100svh;
+  overflow: hidden;
   overscroll-behavior: none;
+
+  /*
+    „manipulation" gasi zumiranje na dupli dodir, a prste za zumiranje
+    ostavlja — dupli dodir se u gužvi dešava sam od sebe, pinch ne.
+  */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1,
@@ -83,6 +95,13 @@ button {
   border: none;
   padding: 0;
   cursor: pointer;
+}
+
+/* Dugo držanje prsta na dugmetu ne smije da otvori meni za kopiranje. */
+button,
+a {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 :focus-visible {

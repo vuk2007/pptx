@@ -20,7 +20,8 @@
     "provjeri-xgo": "node scripts/provjeri-xgo.mjs",
     "provjeri-pipeline": "node scripts/provjeri-pipeline.mjs",
     "provjeri-talasi": "node scripts/provjeri-talasi.mjs",
-    "provjeri-glas": "node scripts/provjeri-glas.mjs"
+    "provjeri-glas": "node scripts/provjeri-glas.mjs",
+    "provjeri-raspored": "node scripts/provjeri-raspored.mjs"
   },
   "dependencies": {
     "next": "^16.3.5",

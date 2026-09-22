@@ -9,7 +9,7 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 1.6vh;
-  padding: 2.6vh 3vw 2.4vh;
+  padding: 2.6vh max(52px, 3vw) 2.4vh;
   background: var(--maska);
   border: 3px solid var(--ivica);
   overflow: hidden;
@@ -141,8 +141,9 @@
 .tackaDugme {
   display: grid;
   place-items: center;
-  width: 3vh;
-  height: 3vh;
+  /* Na iPadu 3vh padne ispod 25 px, a prst traži bar 44. */
+  width: max(44px, 3vh);
+  height: max(44px, 3vh);
 }
 
 .tacka {

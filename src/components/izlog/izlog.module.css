@@ -6,7 +6,7 @@
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 1.4vh;
-  padding: 2.4vh 2.6vw;
+  padding: 2.4vh max(52px, 2.6vw);
   background: var(--maska);
   border: 3px solid var(--ivica);
   overflow: hidden;
@@ -308,5 +308,23 @@
 
   .recenica {
     font-size: 5.4vh !important;
+  }
+}
+
+/*
+  Štand ima TV sa daljinskim i iPad bez tastature. Savjet mora da odgovara
+  onome što gledalac zaista ima u ruci.
+*/
+.samoDodir {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .samoTaster {
+    display: none;
+  }
+
+  .samoDodir {
+    display: inline-flex;
   }
 }
