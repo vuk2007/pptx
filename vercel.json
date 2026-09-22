@@ -4,6 +4,7 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "out",
+  "trailingSlash": true,
   "headers": [
     {
       "source": "/sw.js",
