@@ -31,13 +31,31 @@ type AtributiModela = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement
   reveal?: string;
 };
 
-/** Metode koje zovemo na elementu. */
+/** Pravac i razdaljina kamere u odnosu na tačku u koju gleda. */
+export type SfernoMjesto = { theta: number; phi: number; radius: number };
+export type Tacka3D = { x: number; y: number; z: number };
+
+/** Svojstva i metode koje zovemo na elementu. */
 export type ElementModela = HTMLElement & {
   resetTurntableRotation?: (ugao?: number) => void;
   availableAnimations?: string[];
   play?: (opcije?: { repetitions?: number }) => void;
   pause?: () => void;
   animationName?: string;
+
+  /*
+    Kamera se čita i piše preko svojstava, ne preko atributa: posjetilac
+    mijenja unutrašnji cilj komponente, a atribut pri tome ostaje onakav
+    kakav je zapisan u JSX-u.
+  */
+  cameraOrbit?: string;
+  cameraTarget?: string;
+  fieldOfView?: string;
+  getCameraOrbit?: () => SfernoMjesto;
+  getCameraTarget?: () => Tacka3D;
+  getFieldOfView?: () => number;
+  /** Prekida prigušenje i odmah stavlja kameru na zadati cilj. */
+  jumpCameraToGoal?: () => void;
 };
 
 declare module 'react' {

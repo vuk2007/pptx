@@ -72,7 +72,15 @@ export function OkvirDemonstracije({
   );
 }
 
-/** Prekidač režima. Stanje se vidi i bez prelaska mišem. */
+/**
+  Prekidač režima. Stanje se vidi i bez prelaska mišem.
+
+  Kružić i natpis su dva flex djeteta sa razmakom, a ne apsolutno
+  pozicionirani pseudo-elementi. Flex djeca se po definiciji ne mogu
+  preklopiti; pseudo-elementi izvan toka nisu ni sa čim vezani, pa su se
+  u landscape-u, gdje se em računa iz niske visine ekrana, naslanjali na
+  tekst.
+*/
 export function PrekidacRezima({
   ukljucen,
   onPromjena,
@@ -89,7 +97,10 @@ export function PrekidacRezima({
       aria-checked={ukljucen}
       onClick={() => onPromjena(!ukljucen)}
     >
-      {children}
+      <span className={stil.staza} aria-hidden="true">
+        <span className={stil.glava} />
+      </span>
+      <span className={stil.natpisPrekidaca}>{children}</span>
     </button>
   );
 }

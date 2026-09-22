@@ -8,3 +8,8 @@ out/
 public/icons/
 public/qr/
 *.tsbuildinfo
+
+# Gusta verzija Prona kontrolera (36 MB). Isti model kao public/modeli/prona-kontroler.glb,
+# samo neredukovan: 780 000 naspram 100 000 tjemena. Ostaje lokalno kao izvor,
+# na sajt ide lakša verzija.
+prona_controler.glb

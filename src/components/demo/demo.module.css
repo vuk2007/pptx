@@ -73,7 +73,8 @@
   gap: 0.5em;
   min-height: var(--meta-dodir);
   padding: 0 1.4em;
-  font-size: 2.2vh;
+  /* Donja granica u pikselima: u landscape-u je 2.2vh svega devet piksela. */
+  font-size: max(15px, 2.2vh);
   font-weight: 600;
   color: var(--bakar-struja);
   border: 3px solid var(--bakar);
@@ -88,32 +89,41 @@
   color: var(--maska-duboka);
 }
 
-/* Prekidač režima: vidi se da li je uključen, ne samo kad se pređe mišem. */
+/*
+  Prekidač režima. Kružić i natpis su dva flex djeteta sa razmakom, pa se
+  ne mogu preklopiti — ranije su to bili apsolutno pozicionirani pseudo-
+  elementi, vezani za tekst samo preko padding-a u em jedinicama. U
+  landscape-u se em računa iz niske visine ekrana, pa je rezervisani
+  prostor presušio i kružić je ulazio u natpis.
+
+  Mjere su u pikselima baš zato: ne smiju da se skupljaju sa visinom ekrana.
+*/
 .prekidac {
-  position: relative;
-  padding-left: 3.6em;
+  gap: 0.75em;
 }
 
-.prekidac::before {
-  content: '';
-  position: absolute;
-  left: 1em;
-  width: 2em;
-  height: 1.1em;
-  border-radius: 1em;
+.staza {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  width: 46px;
+  height: 26px;
+  padding: 0 3px;
+  border-radius: 999px;
   border: 2px solid var(--bakar);
   background: var(--maska-duboka);
 }
 
-.prekidac::after {
-  content: '';
-  position: absolute;
-  left: 1.3em;
-  width: 0.7em;
-  height: 0.7em;
+.glava {
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--bakar);
   transition: transform 140ms ease-out, background 140ms linear;
+}
+
+.natpisPrekidaca {
+  white-space: nowrap;
 }
 
 .prekidacUkljucen {
@@ -122,13 +132,13 @@
   background: var(--bakar-struja);
 }
 
-.prekidacUkljucen::before {
+.prekidacUkljucen .staza {
   border-color: var(--maska-duboka);
   background: var(--maska-duboka);
 }
 
-.prekidacUkljucen::after {
-  transform: translateX(0.85em);
+.prekidacUkljucen .glava {
+  transform: translateX(20px);
   background: var(--bakar-struja);
 }
 

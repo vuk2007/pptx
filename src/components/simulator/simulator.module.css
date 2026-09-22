@@ -62,3 +62,21 @@
   letter-spacing: 0.12em;
   color: var(--bakar-struja);
 }
+
+/* Izbor modela: dugmad u jednom redu, prelome se kad nema mjesta. */
+.izbor {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  flex-wrap: wrap;
+}
+
+.izborDugme {
+  font-weight: 600;
+}
+
+.izborAktivan {
+  color: var(--maska-duboka);
+  background: var(--bakar-struja);
+  border-color: var(--bakar-struja);
+}

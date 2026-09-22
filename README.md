@@ -24,6 +24,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-raspored` | Otvara svaku rutu u četiri veličine i mjeri viri li išta van ekrana |
 | `npm run provjeri-vercel` | Provjerava da `vercel.json` ima samo ključeve koje Vercel priznaje |
 | `npm run provjeri-analitiku` | Provjerava da se analitika javlja samo na pravoj adresi |
+| `npm run provjeri-modele` | Provjerava da 3D modeli stvarno uđu u keš i rade bez mreže |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -109,12 +110,24 @@ Tu stoji Googleov `<model-viewer>`, instaliran preko npm-a i serviran iz našeg
 izvoza, bez CDN-a. Uvozi se tek u browseru, jer se pri uvozu registruje kao
 web komponenta.
 
-Model je krupan (8,2 MB), pa je service worker podijeljen u dva koraka.
-`cache.addAll` je sve-ili-ništa: da je model u istom spisku, jedan prekid na
-lošem sajamskom wifiju ostavio bi sajt bez **ijednog** keširanog fajla — dakle
-bez elektronike, zbog helikoptera. Zato sve ispod 1,5 MB ide atomično i odmah
-(3,3 MB), a krupno se dovlači poslije, jedan po jedan, i svaki fajl smije da
-padne za sebe.
+Modeli su krupni (16 MB u tri fajla), pa je service worker podijeljen u dva
+koraka. `cache.addAll` je sve-ili-ništa: da su modeli u istom spisku, jedan
+prekid na lošem sajamskom wifiju ostavio bi sajt bez **ijednog** keširanog
+fajla — dakle bez elektronike, zbog helikoptera. Zato sve ispod 1,5 MB ide
+atomično i odmah (3,3 MB), a krupno se dovlači poslije, jedan po jedan, i
+svaki fajl smije da padne za sebe.
+
+Krupno se dovlači **na poruku sa strane**, a ne u `activate` događaju. Dok
+`waitUntil` u `activate` ne završi, worker stoji u stanju „activating", a
+tada offline navigacija nema ko da posluži — browser pokaže svoju stranu o
+grešci umjesto sajta. Sa šesnaest megabajta taj prozor traje koliko i
+preuzimanje.
+
+Poruka ide na `registracija.active`, ne na `navigator.serviceWorker.controller`:
+pri prvoj posjeti strana je učitana bez kontrolera, pa se `controller` popuni
+tek poslije `clients.claim()`. Sa kontrolerom upit tiho promaši i modeli nikad
+ne uđu u keš, a nijedna druga provjera to ne vidi — offline provjera gleda
+strane, ne modele. Zato postoji `npm run provjeri-modele`.
 
 Logo na ulaznoj strani je [`public/prona.svg`](public/prona.svg). Trenutno je
 **privremen** — zamijeni fajl pravim logotipom, kod se ne dira. Strana ga

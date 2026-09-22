@@ -88,8 +88,23 @@ self.addEventListener('activate', (e) => {
     caches.keys()
       .then((imena) => Promise.all(imena.filter((i) => i !== KES).map((i) => caches.delete(i))))
       .then(() => self.clients.claim())
-      .then(dovuciKrupno)
   );
+});
+
+/*
+  Krupno se NAMJERNO ne dovlači unutar activate.
+
+  Dok waitUntil u activate ne završi, worker stoji u stanju „activating", a
+  tada nijedna navigacija nije ni na kom: bez mreže browser pokaže svoju
+  stranu o grešci umjesto sajta. Sa šesnaest megabajta modela taj prozor
+  traje koliko i preuzimanje — na sajmu i po nekoliko minuta.
+
+  Zato aktivacija ostaje trenutna, a strana porukom traži krupne fajlove
+  kad se već učita. waitUntil ovdje samo drži workera u životu dok traje
+  preuzimanje.
+*/
+self.addEventListener('message', (e) => {
+  if (e.data === 'dovuci-krupno') e.waitUntil(dovuciKrupno());
 });
 
 self.addEventListener('fetch', (e) => {

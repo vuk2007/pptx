@@ -23,7 +23,8 @@
     "provjeri-glas": "node scripts/provjeri-glas.mjs",
     "provjeri-raspored": "node scripts/provjeri-raspored.mjs",
     "provjeri-vercel": "node scripts/provjeri-vercel.mjs",
-    "provjeri-analitiku": "node scripts/provjeri-analitiku.mjs"
+    "provjeri-analitiku": "node scripts/provjeri-analitiku.mjs",
+    "provjeri-modele": "node scripts/provjeri-modele.mjs"
   },
   "dependencies": {
     "@google/model-viewer": "^4.3.1",
