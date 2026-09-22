@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
+  "//": "Sajt je čist statički izvoz (next.config.mjs: output: 'export'). Ne treba mu Next.js runtime na Vercelu, pa preset namjerno stoji na null: sa Next.js presetom Vercel traži routes-manifest.json, koji živi u .next/, a mi objavljujemo out/. Ovdje su sva podešavanja u repozitorijumu, da deploy ne zavisi od toga šta neko klikne u dashboardu.",
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "out",
   "headers": [
     {
       "source": "/sw.js",
