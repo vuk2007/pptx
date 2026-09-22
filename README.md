@@ -23,6 +23,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-glas` | Paleta spektrograma i ilustrativni govor kroz 30 000 kadrova |
 | `npm run provjeri-raspored` | Otvara svaku rutu u četiri veličine i mjeri viri li išta van ekrana |
 | `npm run provjeri-vercel` | Provjerava da `vercel.json` ima samo ključeve koje Vercel priznaje |
+| `npm run provjeri-analitiku` | Provjerava da se analitika javlja samo na pravoj adresi |
 | `npm run snimi-demo <folder>` | Vozi demonstracije kroz stvarna stanja i snima svako |
 | `npm run snimi <folder> [š] [v]` | Snima strane u zadatoj rezoluciji, onako kako ih vidi TV |
 | `npm run typecheck` | TypeScript bez emitovanja |
@@ -107,6 +108,24 @@ traži `routes-manifest.json` u izlaznom folderu, a taj fajl živi u `.next/`,
 dok mi objavljujemo `out/` — deploy tada pada prije nego što išta počne.
 `trailingSlash` mora da se slaže sa `next.config.mjs`, inače svaka unutrašnja
 veza ide kroz preusmjeravanje.
+
+### Analitika i pravilo o mreži
+
+Sajt inače ne pravi nijedan mrežni poziv u runtime-u — sve ide iz keša
+service workera. Vercel Analytics je **jedini izuzetak** i uveden je svjesno:
+dovlači `/_vercel/insights/script.js` i za svaku posjetu šalje jedan signal.
+
+Zato je ograničen na pravu adresu ([`src/components/Analitika.tsx`](src/components/Analitika.tsx)).
+Lokalno te putanje nema, pa bi se svaka strana javljala greškom u konzoli i
+oborila provjeru koja traži nula grešaka — a ta provjera je jedino što čuva
+pravilo da sajt ništa ne vuče sa mreže. `npm run provjeri-analitiku` drži oba
+slučaja: lokalno mora da ćuti, na pravom domenu mora da se ubaci.
+
+Service worker namjerno ne dira `/_vercel/` putanje: nema ih u izvozu, nema
+šta da se kešira, a bez mreže poziv padne i sajt to ne osjeti — samo se ta
+posjeta ne izbroji. Na sajmu, gdje mreža i jeste nepouzdana, većina posjeta
+se neće izbrojati. To je cijena koju analitika ovdje plaća, i zato sajt na
+nju ni u čemu ne računa.
 
 Ovo objašnjenje stoji ovdje jer JSON nema komentare, a ključ `"//"` Vercel
 odbija: njegova šema ne prima nijedan nepoznat ključ i obara deploy prije

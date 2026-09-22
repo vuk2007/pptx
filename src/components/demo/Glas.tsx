@@ -290,7 +290,7 @@ export function Glas() {
       nazadPutanja="/jarvis"
       nazadNaziv="Jarvis"
       poruka={poruka}
-      napomena="Zvuk se ovdje samo gleda: ništa se ne snima, ništa se ne šalje i mikrofon nije spojen na zvučnik. Kad mikrofona nema, prikazana je ilustracija govora, a ne ničiji snimak."
+      napomena="Zvuk se ovdje samo gleda: ne snima se, ne šalje se nikuda i mikrofon nije spojen na zvučnik. Kad mikrofona nema, prikazana je ilustracija govora, a ne ničiji snimak."
       onResetuj={resetuj}
       kontrole={
         uzivo ? (
@@ -338,7 +338,7 @@ export function Glas() {
             <span>{gornjiHz ? 'nisko · 0 Hz' : 'nisko'}</span>
           </div>
           <span className={svoj.privatnost}>
-            Ništa se ne snima i ništa ne odlazi sa ovog uređaja
+Tvoj glas se ne snima i ne odlazi sa ovog uređaja
           </span>
         </div>
       </div>

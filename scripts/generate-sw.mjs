@@ -66,6 +66,13 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(zahtjev.url);
   if (url.origin !== self.location.origin) return;
 
+  /*
+    Vercelova analitika. Nema je u izvozu, pa nema šta da se keširа, a
+    keširanje njenog odgovora bi samo prljalo keš. Bez mreže poziv padne,
+    a sajt to ne osjeti.
+  */
+  if (url.pathname.startsWith('/_vercel/')) return;
+
   e.respondWith(
     caches.open(KES).then(async (kes) => {
       const izKesa = await kes.match(kljuc(url.pathname));

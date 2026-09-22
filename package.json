@@ -22,9 +22,11 @@
     "provjeri-talasi": "node scripts/provjeri-talasi.mjs",
     "provjeri-glas": "node scripts/provjeri-glas.mjs",
     "provjeri-raspored": "node scripts/provjeri-raspored.mjs",
-    "provjeri-vercel": "node scripts/provjeri-vercel.mjs"
+    "provjeri-vercel": "node scripts/provjeri-vercel.mjs",
+    "provjeri-analitiku": "node scripts/provjeri-analitiku.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "next": "^16.3.5",
     "react": "19.1.1",
     "react-dom": "19.1.1"

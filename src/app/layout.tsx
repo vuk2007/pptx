@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Barlow_Condensed, JetBrains_Mono } from 'next/font/google';
 import { RegistracijaServiceWorkera } from '@/components/RegistracijaServiceWorkera';
+import { Analitika } from '@/components/Analitika';
 import './globals.css';
 
 /* Oba fonta nose latin-ext, to je podskup u kojem žive č ć đ š ž. */
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <RegistracijaServiceWorkera />
+        <Analitika />
       </body>
     </html>
   );
