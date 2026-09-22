@@ -226,3 +226,33 @@
   .eksponati::before { display: none; }
   .eksponat::after { display: none; }
 }
+
+/* Gore desno stoje dvije akcije: izlog i povratak na ulaznu stranu. */
+.akcijeZaglavlja {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.dugmeUlaz {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: var(--meta-dodir);
+  padding: 0 1.4em;
+  font-size: 2.2vh;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--bakar-struja);
+  background: var(--maska-svijetla);
+  border: 3px solid var(--bakar);
+  border-radius: var(--radijus);
+}
+
+.dugmeUlaz:hover,
+.dugmeUlaz:focus-visible {
+  background: var(--bakar-struja);
+  color: var(--maska-duboka);
+}

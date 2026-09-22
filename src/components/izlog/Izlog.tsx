@@ -78,7 +78,7 @@ export function Izlog({ slajdovi, putanja }: { slajdovi: SlajdUIzlogu[]; putanja
           postaviBiljeske((b) => !b);
           break;
         case 'Escape':
-          router.push('/');
+          router.push('/robotika');
           break;
       }
     }

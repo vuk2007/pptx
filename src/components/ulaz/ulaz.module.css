@@ -1,0 +1,181 @@
+/*
+  Ulazna ploča: logo i naslov gore, dva projekta dolje, spojeni bakarnom
+  sabirnicom. Ista ploča kao i ostatak sajta, samo sa dva izlaza umjesto tri.
+*/
+
+.ploca {
+  position: relative;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 2vh;
+  padding: 4vh max(52px, 3vw) 3vh;
+  background: var(--maska);
+  border: 3px solid var(--ivica);
+  overflow: hidden;
+}
+
+.rupa {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--maska-duboka);
+  border: 4px solid var(--bakar);
+  opacity: 0.8;
+}
+.rupaGL { top: 18px; left: 18px; }
+.rupaGD { top: 18px; right: 18px; }
+.rupaDL { bottom: 18px; left: 18px; }
+.rupaDD { bottom: 18px; right: 18px; }
+
+.zaglavlje {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6vh;
+  text-align: center;
+}
+
+/*
+  Logo se uvijek prikazuje kao bijeli silkscreen, kakva god boja bila u
+  fajlu — tako legne na zelenu masku i slaže se sa ostatkom ploče.
+*/
+.logo {
+  height: 9vh;
+  width: auto;
+  max-width: 44vw;
+  filter: brightness(0) invert(1);
+}
+
+.naslov {
+  font-size: 7.6vh;
+  font-weight: 600;
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+}
+
+.podnaslov {
+  font-size: var(--tekst-telo);
+  color: var(--silkscreen-tih);
+}
+
+/* --- sabirnica i dva projekta --- */
+
+.izbor {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2vh;
+}
+
+.sabirnica {
+  height: 3px;
+  background: var(--bakar);
+  opacity: 0.85;
+}
+
+.projekti {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.4vw;
+  min-height: 0;
+}
+
+.projekat {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 1.2vh;
+  padding: 2.6vh 2vw 2.4vh;
+  border: 3px solid var(--boja);
+  border-radius: var(--radijus);
+  background: var(--maska-svijetla);
+  min-height: 0;
+  transition: background 140ms linear;
+}
+
+.projekat:hover,
+.projekat:focus-visible {
+  background: color-mix(in srgb, var(--boja) 16%, var(--maska-svijetla));
+}
+
+.nazivProjekta {
+  font-size: 5vh;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--boja);
+}
+
+.crtez {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crtez svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.opisProjekta {
+  font-size: var(--tekst-telo);
+  color: var(--silkscreen);
+  text-wrap: balance;
+}
+
+.mentor {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--silkscreen-tih);
+}
+
+/* --- podnožje --- */
+
+.podnozje {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2em;
+}
+
+.savjet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-mikro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--silkscreen-tih);
+}
+
+.taster {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.4em;
+  padding: 0.25em 0.5em;
+  border: 2px solid var(--bakar);
+  border-radius: 4px;
+  color: var(--bakar-struja);
+  font-weight: 700;
+}
+
+/* Štand ima TV sa daljinskim i iPad bez tastature. */
+.samoDodir {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .samoTaster {
+    display: none;
+  }
+
+  .samoDodir {
+    display: inline-flex;
+  }
+}

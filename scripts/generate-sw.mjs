@@ -20,10 +20,27 @@ function sviFajlovi(dir) {
   return rezultat;
 }
 
-const fajlovi = sviFajlovi(IZLAZ)
+const svi = sviFajlovi(IZLAZ)
   .map((f) => '/' + relative(IZLAZ, f).split(sep).join(posix.sep))
   .filter((u) => u !== '/sw.js')
   .sort();
+
+/*
+  Krupni fajlovi se keširaju odvojeno, i to je bitno.
+
+  cache.addAll je sve-ili-ništa: ako jedan fajl padne, cio keš padne. Kad
+  bi 3D model od osam megabajta bio u istom spisku, jedan prekid na lošem
+  sajamskom wifiju ostavio bi sajt bez ijednog keširanog fajla — dakle bez
+  elektronike, zbog helikoptera.
+
+  Zato mali fajlovi idu atomično i prvi, a krupni se dovlače poslije, jedan
+  po jedan, i svaki smije da padne za sebe.
+*/
+const GRANICA_KRUPNOG = 1.5 * 1024 * 1024;
+
+const velicina = (url) => statSync(join(IZLAZ, url.slice(1))).size;
+const fajlovi = svi.filter((u) => velicina(u) <= GRANICA_KRUPNOG);
+const krupni = svi.filter((u) => velicina(u) > GRANICA_KRUPNOG);
 
 // Verzija keša je otisak sadržaja: promijeni se build, promijeni se keš.
 const otisak = createHash('sha256');
@@ -36,6 +53,7 @@ const verzija = otisak.digest('hex').slice(0, 12);
 const sw = `/* Generisano sa scripts/generate-sw.mjs. Ne mijenjaj ručno. */
 const KES = 'praktikum-${verzija}';
 const FAJLOVI = ${JSON.stringify(fajlovi, null, 0)};
+const KRUPNI = ${JSON.stringify(krupni, null, 0)};
 
 /** Zahtjev za /perjanik/ ili /perjanik vodi na /perjanik/index.html u kešu. */
 function kljuc(pathname) {
@@ -51,11 +69,26 @@ self.addEventListener('install', (e) => {
   );
 });
 
+/** Krupno se dovlači tek kad sajt već radi, i svaki fajl smije da padne sam. */
+async function dovuciKrupno() {
+  const kes = await caches.open(KES);
+  for (const url of KRUPNI) {
+    if (await kes.match(url)) continue;
+    try {
+      const odgovor = await fetch(url, { cache: 'no-cache' });
+      if (odgovor.ok) await kes.put(url, odgovor);
+    } catch (greska) {
+      /* Nema mreže ili je pukla usput. Sajt radi i bez ovoga. */
+    }
+  }
+}
+
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
       .then((imena) => Promise.all(imena.filter((i) => i !== KES).map((i) => caches.delete(i))))
       .then(() => self.clients.claim())
+      .then(dovuciKrupno)
   );
 });
 
@@ -96,4 +129,8 @@ self.addEventListener('fetch', (e) => {
 `;
 
 writeFileSync(join(IZLAZ, 'sw.js'), sw, 'utf8');
-console.log(`Service worker: ${fajlovi.length} fajlova u kešu, verzija ${verzija}`);
+const uMB = (niz) => (niz.reduce((z, u) => z + velicina(u), 0) / 1024 / 1024).toFixed(1);
+console.log(
+  `Service worker: ${fajlovi.length} fajlova odmah (${uMB(fajlovi)} MB), ` +
+    `${krupni.length} krupnih naknadno (${uMB(krupni)} MB), verzija ${verzija}`,
+);

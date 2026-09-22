@@ -26,6 +26,7 @@
     "provjeri-analitiku": "node scripts/provjeri-analitiku.mjs"
   },
   "dependencies": {
+    "@google/model-viewer": "^4.3.1",
     "@vercel/analytics": "^2.0.1",
     "next": "^16.3.5",
     "react": "19.1.1",

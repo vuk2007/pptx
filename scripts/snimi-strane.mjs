@@ -16,7 +16,9 @@ const PORT = 4179;
 const OSNOVA = `http://localhost:${PORT}`;
 
 const RUTE = [
-  ['/', 'pocetna'],
+  ['/', 'ulaz'],
+  ['/robotika/', 'robotika'],
+  ['/simulator/', 'simulator'],
   ['/izlog/', 'izlog'],
   ['/perjanik/', 'perjanik'],
   ['/xgo/', 'xgo'],

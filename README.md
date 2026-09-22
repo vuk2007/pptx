@@ -100,6 +100,26 @@ po kadru. Mikrofon se čita preko `AnalyserNode`-a i nigdje se ne spaja na
 zvučnik, pa nema zavijanja u sali; nema ni `MediaRecorder`-a ni ijednog mrežnog
 poziva, tako da tvrdnja „ništa se ne snima" stoji u kodu, ne samo na ekranu.
 
+## Tri dimenzije i granica sa bibliotekama
+
+Sajt nema nijednu biblioteku za crtanje — sve je SVG i `requestAnimationFrame`.
+Jedan izuzetak je [`/simulator`](src/components/simulator/Simulator.tsx), gdje
+se prikazuje GLB model Ka-50 kolektiva: GLB se ne može prikazati bez 3D motora.
+Tu stoji Googleov `<model-viewer>`, instaliran preko npm-a i serviran iz našeg
+izvoza, bez CDN-a. Uvozi se tek u browseru, jer se pri uvozu registruje kao
+web komponenta.
+
+Model je krupan (8,2 MB), pa je service worker podijeljen u dva koraka.
+`cache.addAll` je sve-ili-ništa: da je model u istom spisku, jedan prekid na
+lošem sajamskom wifiju ostavio bi sajt bez **ijednog** keširanog fajla — dakle
+bez elektronike, zbog helikoptera. Zato sve ispod 1,5 MB ide atomično i odmah
+(3,3 MB), a krupno se dovlači poslije, jedan po jedan, i svaki fajl smije da
+padne za sebe.
+
+Logo na ulaznoj strani je [`public/prona.svg`](public/prona.svg). Trenutno je
+**privremen** — zamijeni fajl pravim logotipom, kod se ne dira. Strana ga
+svakako prikazuje kao bijeli silkscreen, pa boja u fajlu nije bitna.
+
 ## Objavljivanje
 
 Sajt je čist statički izvoz, pa na Vercelu namjerno **nema** Next.js preseta:
@@ -178,3 +198,11 @@ pravi uređaj. Ovo je spisak za provjeru na sajmu, preko Vercel adrese:
 - Bilo koja demonstracija: dupli dodir ne smije da zumira stranu, i strana ne
   smije da se gumeno vuče gore-dolje.
 - Avionski režim poslije prve posjete: sve rute i dalje rade.
+- `/simulator` — model se okreće prstom i zumira štipanjem, a strana se pri
+  tome ne pomjera.
+
+## Šta još čeka
+
+- `public/prona.svg` je privremen logo.
+- Četiri TODO-a u [`src/config/cinjenice.ts`](src/config/cinjenice.ts).
+- Dio „Simulator letenja" zasad ima samo model; sadržaj dolazi od drugog mentora.

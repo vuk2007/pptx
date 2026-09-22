@@ -19,6 +19,8 @@ const OSNOVA = `http://localhost:${PORT}`;
 
 const RUTE = [
   '/',
+  '/robotika/',
+  '/simulator/',
   '/izlog/',
   '/izlog/jarvis/',
   '/izlog/xgo/',

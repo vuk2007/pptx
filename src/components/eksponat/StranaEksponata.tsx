@@ -39,7 +39,7 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
           pomjeri(-1);
           break;
         case 'Escape':
-          router.push('/');
+          router.push('/robotika');
           break;
       }
     }
@@ -88,7 +88,7 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
             <span aria-hidden="true">▶</span>
             Pusti u petlji
           </Link>
-          <Link href="/" className={stil.dugme}>
+          <Link href="/robotika" className={stil.dugme}>
             Početna
           </Link>
         </div>

@@ -13,7 +13,7 @@ import { pokreniChrome, otvoriKarticu, uStranici, cekaj } from './cdp.mjs';
 
 const PORT_SERVERA = 4173;
 const OSNOVA = `http://localhost:${PORT_SERVERA}`;
-const RUTE = ['/', '/izlog/', '/perjanik/', '/perjanik/h-most/', '/xgo/ravnoteza/', '/jarvis/glas/', '/pocni/'];
+const RUTE = ['/', '/robotika/', '/simulator/', '/izlog/', '/perjanik/', '/perjanik/h-most/', '/xgo/ravnoteza/', '/jarvis/glas/', '/pocni/'];
 const SNIMCI = 'C:/Users/Vuk/AppData/Local/Temp/claude/c--Users-Vuk-Desktop-pptx/snimci';
 
 const greske = [];

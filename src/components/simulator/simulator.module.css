@@ -1,0 +1,64 @@
+/* Model zauzima cijelu scenu; traka napretka stoji preko njega dok se učitava. */
+
+.okvir {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.model {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: var(--maska-duboka);
+  border: 2px solid var(--ivica);
+  border-radius: 6px;
+  /* Dodir pripada modelu, ne strani. */
+  touch-action: none;
+  --poster-color: transparent;
+}
+
+/* Isti obris dok se biblioteka tek uvozi, da scena ne poskoči. */
+.mjesto {
+  width: 100%;
+  height: 100%;
+  background: var(--maska-duboka);
+  border: 2px solid var(--ivica);
+  border-radius: 6px;
+}
+
+.ucitavanje {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4vh;
+  width: min(42vw, 520px);
+}
+
+.traka {
+  width: 100%;
+  height: 12px;
+  background: var(--maska-svijetla);
+  border: 2px solid var(--bakar);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.napredak {
+  height: 100%;
+  background: var(--bakar-struja);
+  transition: width 160ms linear;
+}
+
+.postotak {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--tekst-oznaka);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--bakar-struja);
+}

@@ -46,7 +46,7 @@ export default function Pocni() {
 
       <header className={stil.zaglavlje}>
         <h1 className={stil.naslov}>Kako da počneš</h1>
-        <Link href="/" className={stil.dugme}>
+        <Link href="/robotika" className={stil.dugme}>
           Početna
         </Link>
       </header>
