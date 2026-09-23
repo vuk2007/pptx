@@ -1,92 +1,114 @@
-/* Dva pojasa jedan iznad drugog: talas gore, spektrogram dolje. */
+/*
+  Talas gore, spektrogram dolje. Spektrogram je jedina slika na sajtu u
+  paleti koja nije iz tokena: to je mapa boja za podatke (nalik na
+  „magma"), ista u obje teme, kao ekran pravog analizatora.
+*/
 
 .okvir {
   width: 100%;
   height: 100%;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.4vh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--razmak, 14px);
 }
 
-.pojas {
+.spektrogram {
   min-height: 0;
-  position: relative;
+  padding: 10px 14px 12px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
-.talas {
-  flex: 0 0 28%;
-}
-
-.spektar {
-  flex: 1 1 auto;
+.legenda {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 22px;
+  margin: 0 0 8px;
+  font-size: clamp(13px, 0.85vw, 15px);
+  color: var(--muted);
 }
 
-/*
-  Spektrogram je jedina slika na sajtu koja se crta na platnu, a ne u SVG-u:
-  drži nekoliko stotina kolona istorije, i svaka kolona ima svoju boju po
-  visini. U SVG-u bi to bilo na desetine hiljada pravougaonika po kadru.
-*/
+.skalaBoja {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skalaBoja i {
+  width: 110px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.mreza {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  column-gap: 8px;
+}
+
+.osaHz {
+  position: relative;
+  width: 4.2em;
+  font-size: clamp(12px, 0.8vw, 14px);
+  color: var(--muted);
+}
+
+.osaHz span {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.slika {
+  position: relative;
+  min-height: 0;
+}
+
 .platno {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
-  border: 2px solid var(--ivica);
-  border-radius: 6px;
-  background: var(--maska-duboka);
+  border-radius: 3px;
+  image-rendering: pixelated;
+  background: #000004;
 }
 
-.oznakaPojasa {
+.linijaHz {
   position: absolute;
-  top: 0.6vh;
-  left: 0.9vw;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--tekst-oznaka);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--silkscreen-tih);
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed rgba(252, 253, 191, 0.28);
   pointer-events: none;
-  background: color-mix(in srgb, var(--maska-duboka) 78%, transparent);
-  padding: 0.15em 0.5em;
-  border-radius: 4px;
 }
 
-.osaVisine {
+.osaT {
+  grid-column: 2;
+  position: relative;
+  height: 1.6em;
+  font-size: clamp(12px, 0.8vw, 14px);
+  color: var(--muted);
+}
+
+.osaT span {
   position: absolute;
-  right: 0.9vw;
-  top: 0.6vh;
-  bottom: 0.6vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--tekst-mikro);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--silkscreen-tih);
-  pointer-events: none;
-  gap: 0.3em;
+  top: 4px;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
-.osaVisine span {
-  background: color-mix(in srgb, var(--maska-duboka) 78%, transparent);
-  padding: 0.15em 0.5em;
-  border-radius: 4px;
+.osaT span:first-child {
+  transform: none;
 }
 
-.privatnost {
-  position: absolute;
-  bottom: 0.7vh;
-  left: 0.9vw;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--tekst-mikro);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--silkscreen-tih);
-  pointer-events: none;
-  background: color-mix(in srgb, var(--maska-duboka) 78%, transparent);
-  padding: 0.15em 0.5em;
-  border-radius: 4px;
+.osaT span:last-child {
+  transform: translateX(-100%);
 }

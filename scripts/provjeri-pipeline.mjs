@@ -30,7 +30,7 @@ execFileSync(
   { stdio: 'inherit' },
 );
 
-const { napraviRaspored, fazaU } = await import(
+const { napraviRaspored, fazaU, porukaPipelinea, ms } = await import(
   pathToFileURL(join(radni, 'lib', 'pipeline.js')).href
 );
 const { PIPELINE_VREMENA } = await import(
@@ -124,6 +124,19 @@ for (const budjenje of vrijednosti.budjenje) {
             Suština streaminga: dok zvučnik govori, mozak još piše.
             Kad prva rečenica nije i cio odgovor, to preklapanje mora postojati.
           */
+          /* Poruka prati vrijeme: prije prve riječi streaminga, između, i na kraju. */
+          const prije = porukaPipelinea(r, r.streaming.prviZvuk / 2);
+          provjeri(!prije.sta.includes('govori') && !prije.sta.includes('ranije'), `${gdje}: prije prve riječi poruka kaže „${prije.sta}"`);
+          if (r.ustedjeno > 0.01) {
+            const izmedju = porukaPipelinea(r, (r.streaming.prviZvuk + r.cekanje.prviZvuk) / 2);
+            provjeri(izmedju.sta.startsWith('Streaming već govori'), `${gdje}: između dvije prve riječi poruka „${izmedju.sta}"`);
+          }
+          const kraj = porukaPipelinea(r, r.cekanje.prviZvuk);
+          provjeri(kraj.sta.includes(ms(r.ustedjeno)), `${gdje}: na kraju poruka ne kaže uštedu ${ms(r.ustedjeno)}`);
+          for (const p of [prije, kraj, porukaPipelinea(r, null)]) {
+            provjeri(!/\d\.\d/.test(p.sta + p.zasto) && !p.sta.includes('!'), `${gdje}: tačka u broju ili uzvik u poruci`);
+          }
+
           const ostatak = r.streaming.faze.find((f) => f.id === 'mozak-ostatak');
           const govor = r.streaming.faze.find((f) => f.id === 'tekst-u-glas');
           provjeri(isto(ostatak.pocetak, govor.pocetak), `${gdje}: ostatak mozga ne kreće kad i govor`);

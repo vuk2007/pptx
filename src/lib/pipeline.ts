@@ -120,3 +120,44 @@ export function fazaU(traka: Traka, t: number): Faza | null {
   const glavne = traka.faze.filter((f) => !f.upozadini);
   return glavne.find((f) => t >= f.pocetak && t < f.kraj) ?? null;
 }
+
+/** Sekunde u milisekunde za ekran, cijeli broj. */
+export function ms(s: number): string {
+  return `${Math.round(s * 1000)} ms`;
+}
+
+const OPIS_FAZE: Record<string, string> = {
+  budjenje: 'Prvi program čeka samo riječ „Jarvis”.',
+  'glas-u-tekst': 'Tvoj glas se pretvara u tekst.',
+  mozak: 'Mozak piše odgovor, a streaming čeka samo prvu rečenicu.',
+  'tekst-u-glas': 'Prva rečenica se pretvara nazad u glas.',
+};
+
+export type PorukaPipelinea = { sta: string; zasto: string };
+
+/** Dvije linije ispod crteža: šta se sada dešava i zašto. `t` je vrijeme od početka, s; null znači da nije pokrenuto. */
+export function porukaPipelinea(r: Raspored, t: number | null): PorukaPipelinea {
+  if (t === null) {
+    return {
+      sta: 'Obje trake rade isti posao; razlika je samo kad zvučnik smije da progovori.',
+      zasto: 'Pritisni Pokreni i gledaj kad se u kojoj traci čuje prva riječ.',
+    };
+  }
+  if (t >= r.cekanje.prviZvuk) {
+    return {
+      sta: `Streaming je progovorio ${ms(r.ustedjeno)} ranije, a mozak je u obje trake radio isto.`,
+      zasto: 'Ušteda je tačno vrijeme koje mozgu treba od prve rečenice do kraja odgovora.',
+    };
+  }
+  if (t >= r.streaming.prviZvuk) {
+    return {
+      sta: 'Streaming već govori, a mozak još piše ostatak odgovora.',
+      zasto: 'U gornjoj traci zvučnik i dalje ćuti, jer čeka cio odgovor.',
+    };
+  }
+  const faza = fazaU(r.streaming, t);
+  return {
+    sta: faza ? (OPIS_FAZE[faza.id] ?? faza.naziv) : OPIS_FAZE.budjenje,
+    zasto: 'Streaming ne čeka cio odgovor: govor kreće čim je gotova prva rečenica.',
+  };
+}

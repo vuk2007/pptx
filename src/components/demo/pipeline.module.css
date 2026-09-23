@@ -1,0 +1,117 @@
+/* Gantov dijagram pipeline-a: trake u boji uloge, ispuna dolazi kad glava prođe. */
+
+.osjeti {
+  --boja: var(--osjeti);
+}
+
+.odluci {
+  --boja: var(--odluci);
+}
+
+.djeluj {
+  --boja: var(--djeluj);
+}
+
+.okvir {
+  fill: var(--panel);
+  stroke: var(--boja);
+  stroke-width: 2.5;
+}
+
+.pozadina {
+  fill: var(--panel);
+  stroke: var(--boja);
+  stroke-width: 2;
+  stroke-dasharray: 7 5;
+}
+
+.ispuna {
+  fill: color-mix(in srgb, var(--boja) 26%, transparent);
+}
+
+.ime {
+  fill: var(--boja);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.imeSitno {
+  fill: var(--boja);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.imeMalo {
+  fill: var(--boja);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.trajanje {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mreza {
+  stroke: var(--line-soft);
+  stroke-width: 1;
+}
+
+.oznaka {
+  fill: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.glava {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.sat {
+  fill: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.govor {
+  stroke: var(--djeluj);
+  stroke-width: 2;
+  stroke-dasharray: 3 6;
+  stroke-linecap: round;
+}
+
+.govorTekst {
+  fill: var(--djeluj);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.prvaRijec {
+  stroke: var(--djeluj);
+  stroke-width: 2.5;
+}
+
+.prvaRijecTekst {
+  fill: var(--djeluj);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.kota {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.vrh {
+  fill: var(--text);
+}
+
+.kotaTekst {
+  fill: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+}

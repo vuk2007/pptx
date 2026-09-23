@@ -1,0 +1,74 @@
+/* Tri radija: talasi u razmjeri, kote talasnih dužina i lenjir. */
+
+.djeluj {
+  --boja: var(--djeluj);
+}
+
+.osjeti {
+  --boja: var(--osjeti);
+}
+
+.odluci {
+  --boja: var(--odluci);
+}
+
+.naziv {
+  fill: var(--boja);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.frekvencija {
+  fill: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.nula {
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+.talas {
+  fill: none;
+  stroke: var(--boja);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.pomocna {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.kota {
+  stroke: var(--text);
+  stroke-width: 1.25;
+}
+
+.vrh {
+  fill: var(--text);
+}
+
+.natpisKote {
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.oznaka {
+  fill: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.zid {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.srafura {
+  stroke: var(--line);
+  stroke-width: 2;
+}
