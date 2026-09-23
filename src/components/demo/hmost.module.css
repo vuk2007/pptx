@@ -1,0 +1,215 @@
+/* Šema H-mosta: simboli i poluge, kao u referenci. */
+
+.zica {
+  stroke: var(--line);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.cvor {
+  fill: var(--line);
+}
+
+.prikljucak {
+  fill: var(--panel);
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+
+.poluga {
+  stroke: var(--text);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform-box: view-box;
+  transition: transform 140ms ease-out, stroke 140ms ease-out;
+}
+
+.polugaZiva {
+  stroke: var(--current);
+}
+
+/* PWM pali i gasi sklopke brzo; poluga mora da stigne. */
+.brzo .poluga {
+  transition: transform 50ms linear;
+}
+
+.oznakaSklopke {
+  fill: var(--text);
+  font-weight: 650;
+  font-size: 22px;
+}
+
+.ulazSklopke {
+  fill: var(--odluci);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cip {
+  fill: none;
+  stroke: var(--odluci);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.natpisCipa {
+  fill: var(--odluci);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.meta {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.meta:focus {
+  outline: none;
+}
+
+.meta:focus-visible {
+  stroke: var(--odluci);
+  stroke-width: 3;
+}
+
+.motor {
+  fill: var(--panel);
+  stroke: var(--djeluj);
+  stroke-width: 3;
+}
+
+.slovoMotora {
+  fill: var(--djeluj);
+  font-weight: 720;
+  font-size: 30px;
+  font-stretch: 80%;
+}
+
+.baterijaDuga {
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.baterijaKratka {
+  stroke: var(--text);
+  stroke-width: 6;
+}
+
+.tekst {
+  fill: var(--text);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.tihTekst {
+  fill: var(--muted);
+  font-size: 15px;
+}
+
+.varnica {
+  stroke: var(--fault);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* ------------------------------------------------------------ panel čipa */
+
+.panelCipa {
+  padding: clamp(12px, 1vw, 16px) clamp(14px, 1.1vw, 20px);
+  display: grid;
+  gap: clamp(8px, 1.2vh, 14px);
+}
+
+.ulazi {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ulaz {
+  font: inherit;
+  font-weight: 650;
+  font-size: 17px;
+  min-height: 48px;
+  min-width: 110px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--odluci);
+  color: var(--odluci);
+  background: transparent;
+  transition: background-color var(--prelaz), color var(--prelaz);
+}
+
+.ulaz[aria-pressed='true'] {
+  background: var(--odluci);
+  color: var(--panel);
+}
+
+.en label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.en label span {
+  color: var(--odluci);
+}
+
+.en input {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  accent-color: var(--odluci);
+}
+
+.tabela {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: clamp(14px, 0.95vw, 15px);
+}
+
+.tabela th,
+.tabela td {
+  text-align: left;
+  padding: clamp(3px, 0.55vh, 6px) 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.tabela th {
+  color: var(--muted);
+  font-weight: 560;
+}
+
+.redAktivan td {
+  background: color-mix(in srgb, var(--odluci) 16%, transparent);
+  font-weight: 650;
+}
+
+.napomena {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/*
+  Niski ekrani (iPad 9,7" u landscape-u): panel čipa se zbije u tabeli i
+  razmacima, a mete za prst ostaju najmanje 44 px.
+*/
+@media (max-height: 800px) {
+  .panelCipa {
+    gap: 6px;
+    padding-block: 10px;
+  }
+
+  .ulaz {
+    min-height: 44px;
+  }
+
+  .tabela th,
+  .tabela td {
+    padding-block: 2px;
+  }
+}

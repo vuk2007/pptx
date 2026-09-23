@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="sr-ME">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>H-most | Praktikum elektronike</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F4; --panel:#FFFFFF; --panel-2:#F5F7F9; --line:#4E5E6B; --line-soft:#C3CDD5;
+  --grid:rgba(20,33,43,.055); --text:#14212B; --muted:#5B6D7C;
+  --current:#C27C00; --osjeti:#0B8AA3; --odluci:#6A4BD4; --djeluj:#1E9151; --fault:#D2343C; --ch1:#2F6FB3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1923; --panel:#132230; --panel-2:#10202D; --line:#8FA6B8; --line-soft:#26394A;
+    --grid:rgba(160,190,215,.05); --text:#E4ECF2; --muted:#8398A9;
+    --current:#FFC857; --osjeti:#57C8E0; --odluci:#B39CFF; --djeluj:#7AD897; --fault:#FF5B61; --ch1:#8CC0F2;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1923; --panel:#132230; --panel-2:#10202D; --line:#8FA6B8; --line-soft:#26394A;
+  --grid:rgba(160,190,215,.05); --text:#E4ECF2; --muted:#8398A9;
+  --current:#FFC857; --osjeti:#57C8E0; --odluci:#B39CFF; --djeluj:#7AD897; --fault:#FF5B61; --ch1:#8CC0F2;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+body{
+  margin:0; color:var(--text); background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+.app{ max-width:1680px; margin:0 auto; padding:clamp(14px,2.2vw,32px); display:grid; gap:clamp(12px,1.4vw,20px); }
+header{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px 32px; }
+.crumb{ color:var(--muted); font-size:clamp(14px,1.1vw,17px); margin:0 0 4px; }
+h1{ margin:0; font-stretch:78%; font-weight:760; font-size:clamp(40px,4.6vw,76px); line-height:.95; letter-spacing:-.01em; }
+.lede{ margin:10px 0 0; font-size:clamp(17px,1.45vw,24px); color:var(--muted); max-width:44ch; }
+.modes{ display:inline-flex; border:1.5px solid var(--line-soft); border-radius:10px; padding:4px; background:var(--panel); }
+.modes button{ font:inherit; font-size:clamp(15px,1.1vw,18px); font-weight:600; color:var(--muted); background:none; border:0; border-radius:7px; padding:10px 18px; cursor:pointer; min-height:44px; }
+.modes button[aria-pressed="true"]{ background:var(--text); color:var(--panel); }
+.panel{ background:var(--panel); border:1.5px solid var(--line-soft); border-radius:6px; }
+.stage{ display:grid; grid-template-columns:minmax(0,1.9fr) minmax(280px,1fr); gap:clamp(12px,1.4vw,20px); }
+.schem{ padding:clamp(8px,1vw,16px); display:flex; }
+.schem svg{ width:100%; height:auto; max-height:62vh; display:block; margin:auto; }
+.side{ display:grid; gap:clamp(12px,1.4vw,20px); align-content:start; }
+.wheelcard{ display:grid; grid-template-columns:auto 1fr; align-items:center; gap:18px; padding:16px 20px; }
+.wheelcard svg{ width:clamp(110px,9vw,160px); height:auto; }
+.label{ color:var(--muted); font-size:clamp(13px,.95vw,15px); margin:0; }
+.big{ font-stretch:72%; font-weight:720; font-size:clamp(40px,3.6vw,64px); line-height:1; margin:4px 0 2px; }
+.big small{ font-size:.42em; font-weight:560; color:var(--muted); margin-left:6px; }
+.dir{ font-weight:640; font-size:clamp(16px,1.2vw,20px); color:var(--djeluj); margin:0; }
+.readouts{ display:grid; grid-template-columns:1fr 1fr; }
+.ro{ padding:14px 18px; border-top:1.5px solid var(--line-soft); }
+.ro:nth-child(-n+2){ border-top:0; }
+.ro:nth-child(odd){ border-right:1.5px solid var(--line-soft); }
+.ro .v{ font-stretch:72%; font-weight:700; font-size:clamp(28px,2.3vw,40px); line-height:1.05; margin-top:4px; }
+.ro .v small{ font-size:.5em; font-weight:560; color:var(--muted); margin-left:4px; }
+.ro .sub{ color:var(--muted); font-size:13px; margin-top:2px; min-height:1.2em; }
+.ro.hot .v{ color:var(--fault); }
+.l298{ padding:16px 20px; display:grid; gap:14px; }
+.l298[hidden]{ display:none; }
+.inrow{ display:flex; gap:10px; flex-wrap:wrap; }
+.inbtn{ font:inherit; font-weight:650; font-size:17px; min-height:48px; min-width:110px; padding:0 16px; border-radius:8px; cursor:pointer;
+  border:1.5px solid var(--odluci); color:var(--odluci); background:transparent; }
+.inbtn[aria-pressed="true"]{ background:var(--odluci); color:var(--panel); }
+.en label{ display:flex; justify-content:space-between; font-weight:600; font-size:16px; margin-bottom:6px; }
+.en label span{ color:var(--odluci); }
+input[type=range]{ width:100%; accent-color:var(--odluci); height:32px; }
+table{ border-collapse:collapse; width:100%; font-size:15px; }
+th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line-soft); }
+th{ color:var(--muted); font-weight:560; }
+tr.on td{ background:color-mix(in srgb,var(--odluci) 16%,transparent); font-weight:650; }
+.actions{ display:flex; gap:10px; }
+.btn{ font:inherit; font-weight:650; font-size:17px; min-height:48px; padding:0 22px; border-radius:8px; cursor:pointer; border:1.5px solid var(--line); background:var(--panel); color:var(--text); }
+.btn:hover{ border-color:var(--text); }
+button:focus-visible,.hit:focus-visible,input:focus-visible{ outline:3px solid var(--odluci); outline-offset:2px; }
+.status{ padding:16px 22px; display:grid; gap:4px; }
+#msg{ margin:0; font-size:clamp(19px,1.55vw,26px); font-weight:600; line-height:1.3; }
+#msg.bad{ color:var(--fault); }
+#note{ margin:0; font-size:clamp(15px,1.15vw,19px); color:var(--muted); line-height:1.4; min-height:1.4em; }
+.scope{ padding:12px 16px 16px; }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 26px; align-items:center; margin:0 0 10px; font-size:15px; color:var(--muted); }
+.key{ display:inline-flex; align-items:center; gap:8px; }
+.key i{ width:22px; height:3px; border-radius:2px; display:inline-block; }
+.legend .right{ margin-left:auto; }
+canvas{ width:100%; height:clamp(130px,19vh,230px); display:block; border-radius:3px; }
+/* SVG */
+.wire{ stroke:var(--line); stroke-width:2.5; fill:none; stroke-linecap:round; }
+.node{ fill:var(--line); }
+.term{ fill:var(--panel); stroke:var(--line); stroke-width:2.5; }
+.lever{ stroke:var(--text); stroke-width:4; stroke-linecap:round; transition:transform .14s ease-out, stroke .14s; transform-box:view-box; }
+.lever.closed.live{ stroke:var(--current); }
+.fast .lever{ transition:transform .05s linear; }
+.swlabel{ fill:var(--text); font-weight:650; font-size:22px; }
+.gate{ fill:var(--odluci); font-weight:600; font-size:15px; opacity:0; transition:opacity .2s; }
+.l298mode .gate{ opacity:1; }
+.chip{ fill:none; stroke:var(--odluci); stroke-width:1.5; stroke-dasharray:6 5; opacity:0; transition:opacity .2s; }
+.chiplabel{ fill:var(--odluci); font-size:14px; font-weight:600; opacity:0; transition:opacity .2s; }
+.l298mode .chip,.l298mode .chiplabel{ opacity:1; }
+.hit{ fill:transparent; cursor:pointer; }
+.l298mode .hit{ cursor:default; pointer-events:none; }
+.motor{ fill:var(--panel); stroke:var(--djeluj); stroke-width:3; }
+.mtext{ fill:var(--djeluj); font-weight:720; font-size:30px; font-stretch:80%; }
+.batt-l{ stroke:var(--text); stroke-width:2.5; }
+.batt-s{ stroke:var(--text); stroke-width:6; }
+.svgtext{ fill:var(--text); font-size:17px; font-weight:650; }
+.svgmuted{ fill:var(--muted); font-size:15px; }
+.flow{ fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-width:9; }
+.pt{ fill:var(--current); }
+.spark{ stroke:var(--fault); stroke-width:3; stroke-linecap:round; }
+@media (max-width:980px){
+  .stage{ grid-template-columns:1fr; }
+  .schem svg{ max-height:none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <p class="crumb">Praktikum elektronike, Perjanik</p>
+      <h1>H-most</h1>
+      <p class="lede">Četiri prekidača odlučuju u kom smjeru struja teče kroz motor.</p>
+    </div>
+    <div class="modes" role="group" aria-label="Prikaz">
+      <button id="mManual" aria-pressed="true">Prekidači</button>
+      <button id="mChip" aria-pressed="false">Unutar L298N</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section class="panel schem">
+      <svg id="schem" viewBox="0 0 620 560" role="img" aria-label="Šema H-mosta sa baterijom, četiri prekidača i motorom">
+        <g id="gWires"></g>
+        <g id="gFlow"></g>
+        <g id="gParts"></g>
+        <g id="gPts"></g>
+        <g id="gFx"></g>
+      </svg>
+    </section>
+
+    <aside class="side">
+      <div class="panel wheelcard">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <g id="wheel" style="transform-origin:100px 100px">
+            <circle cx="100" cy="100" r="82" fill="none" stroke="var(--text)" stroke-width="16" opacity=".9"/>
+            <g id="tread"></g>
+            <circle cx="100" cy="100" r="58" fill="none" stroke="var(--line)" stroke-width="3"/>
+            <g id="spokes"></g>
+            <circle cx="100" cy="100" r="13" fill="var(--djeluj)"/>
+          </g>
+        </svg>
+        <div>
+          <p class="label">Točak, motor sa reduktorom</p>
+          <p class="big"><span id="rpm">0</span><small>o/min</small></p>
+          <p class="dir" id="dir">stoji</p>
+        </div>
+      </div>
+
+      <div class="panel readouts">
+        <div class="ro"><p class="label">Napon na motoru</p><div class="v"><span id="rV">0,0</span><small>V</small></div><div class="sub" id="rVs">&nbsp;</div></div>
+        <div class="ro" id="roI"><p class="label">Struja kroz motor</p><div class="v"><span id="rI">0,00</span><small>A</small></div><div class="sub" id="rIs">&nbsp;</div></div>
+        <div class="ro"><p class="label">Kontra-napon motora</p><div class="v"><span id="rE">0,0</span><small>V</small></div><div class="sub">raste sa brzinom</div></div>
+        <div class="ro"><p class="label">Toplota u drajveru</p><div class="v"><span id="rP">0,0</span><small>W</small></div><div class="sub" id="rPs">idealni prekidači</div></div>
+      </div>
+
+      <div class="panel l298" id="chipPanel" hidden>
+        <div class="inrow">
+          <button class="inbtn" id="in1" aria-pressed="true">IN1 = 1</button>
+          <button class="inbtn" id="in2" aria-pressed="false">IN2 = 0</button>
+        </div>
+        <div class="en">
+          <label for="duty">EN, PWM <span id="dutyV">0 %</span></label>
+          <input id="duty" type="range" min="0" max="100" step="1" value="0">
+        </div>
+        <table aria-label="Tabela istine L298N">
+          <thead><tr><th>EN</th><th>IN1</th><th>IN2</th><th>Motor</th></tr></thead>
+          <tbody>
+            <tr data-k="en0"><td>0</td><td>–</td><td>–</td><td>slobodno staje</td></tr>
+            <tr data-k="fw"><td>1</td><td>1</td><td>0</td><td>naprijed</td></tr>
+            <tr data-k="bw"><td>1</td><td>0</td><td>1</td><td>nazad</td></tr>
+            <tr data-k="b1"><td>1</td><td>1</td><td>1</td><td>kočenje</td></tr>
+            <tr data-k="b0"><td>1</td><td>0</td><td>0</td><td>kočenje</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="actions"><button class="btn" id="reset">Resetuj</button></div>
+    </aside>
+  </main>
+
+  <section class="panel status" aria-live="polite">
+    <p id="msg"></p>
+    <p id="note"></p>
+  </section>
+
+  <section class="panel scope">
+    <div class="legend">
+      <span class="key"><i style="background:var(--ch1)"></i>CH1 napon na motoru, 4 V/pod.</span>
+      <span class="key"><i style="background:var(--current)"></i>CH2 struja, 1 A/pod.</span>
+      <span class="right" id="tbase">4 s na ekranu</span>
+    </div>
+    <canvas id="scope" aria-label="Osciloskop: napon i struja motora kroz vrijeme"></canvas>
+  </section>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent.appendChild(e);return e;}
+
+/* ---------- fizika (ilustrativni parametri) ---------- */
+const VS=11.1, VD=2.0, R=4.5, KV=27, G=283, FR=1.0, FPWM=3.5, WIN=4;
+const WSS=210; // približna brzina bez opterećenja pri punom naponu, o/min
+
+/* ---------- geometrija šeme ---------- */
+const XL=240, XR=560, YT=70, YB=490, YM=280, BX=60, MX=400;
+const SW=[
+  {name:'S1',x:XL,y1:118,y2:192,gate:'IN1'},
+  {name:'S2',x:XR,y1:118,y2:192,gate:'IN2'},
+  {name:'S3',x:XL,y1:368,y2:442,gate:'ne IN1'},
+  {name:'S4',x:XR,y1:368,y2:442,gate:'ne IN2'}
+];
+const PATHS={
+  fwd:[[BX,YB],[BX,YT],[XL,YT],[XL,YM],[XR,YM],[XR,YB],[BX,YB]],
+  rev:[[BX,YB],[BX,YT],[XR,YT],[XR,YM],[XL,YM],[XL,YB],[BX,YB]],
+  shortL:[[BX,YB],[BX,YT],[XL,YT],[XL,YB],[BX,YB]],
+  shortR:[[BX,YB],[BX,YT],[XR,YT],[XR,YB],[BX,YB]],
+  brakeTop:[[XL,YM],[XR,YM],[XR,YT],[XL,YT],[XL,YM]],
+  brakeBot:[[XL,YM],[XR,YM],[XR,YB],[XL,YB],[XL,YM]]
+};
+const PD={};
+for(const k in PATHS){
+  const pts=PATHS[k]; const segs=[]; let L=0;
+  for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1];const len=Math.hypot(x2-x1,y2-y1);segs.push({x1,y1,dx:x2-x1,dy:y2-y1,len,start:L});L+=len;}
+  PD[k]={segs,L,str:pts.map(p=>p.join(',')).join(' ')};
+}
+function pointAt(p,d){d=((d%p.L)+p.L)%p.L;for(const s of p.segs){if(d<=s.start+s.len){const f=(d-s.start)/s.len;return [s.x1+s.dx*f,s.y1+s.dy*f];}}return [0,0];}
+
+/* ---------- crtanje statike ---------- */
+const svg=$('#schem'), gW=$('#gWires'), gF=$('#gFlow'), gP=$('#gParts'), gPts=$('#gPts'), gFx=$('#gFx');
+const line=(x1,y1,x2,y2,cls='wire',p=gW)=>el('line',{x1,y1,x2,y2,class:cls},p);
+line(BX,YT,BX,258); line(BX,302,BX,YB);
+line(BX,YT,XR,YT); line(BX,YB,XR,YB);
+for(const s of SW){ }
+[[XL],[XR]].forEach(([x])=>{line(x,YT,x,118);line(x,192,x,368);line(x,442,x,YB);});
+line(XL,YM,MX-44,YM); line(MX+44,YM,XR,YM);
+line(MX,YB,MX,508); line(MX-24,508,MX+24,508); line(MX-14,517,MX+14,517); line(MX-5,526,MX+5,526);
+// baterija
+line(36,258,84,258,'batt-l',gP); line(48,270,72,270,'batt-s',gP); line(36,290,84,290,'batt-l',gP); line(48,302,72,302,'batt-s',gP);
+el('text',{x:92,y:254,class:'svgtext'},gP).textContent='+';
+el('text',{x:96,y:286,class:'svgtext'},gP).textContent='11,1 V';
+el('text',{x:96,y:308,class:'svgmuted'},gP).textContent='3S LiPo';
+// čvorovi
+[[XL,YM],[XR,YM],[XL,YT],[XR,YT],[XL,YB],[XR,YB],[MX,YB]].forEach(([x,y])=>el('circle',{cx:x,cy:y,r:5,class:'node'},gP));
+// L298N okviri
+el('rect',{x:156,y:100,width:146,height:360,rx:6,class:'chip'},gP);
+el('rect',{x:476,y:100,width:138,height:360,rx:6,class:'chip'},gP);
+el('text',{x:158,y:93,class:'chiplabel'},gP).textContent='L298N, strana A';
+el('text',{x:478,y:93,class:'chiplabel'},gP).textContent='L298N, strana B';
+// motor
+el('circle',{cx:MX,cy:YM,r:44,class:'motor'},gP);
+el('text',{x:MX,y:YM+11,'text-anchor':'middle',class:'mtext'},gP).textContent='M';
+const rotor=el('circle',{cx:MX,cy:YM-32,r:4.5,fill:'var(--djeluj)'},gP);
+rotor.style.transformOrigin=`${MX}px ${YM}px`; rotor.style.transformBox='view-box';
+el('text',{x:MX,y:YM+74,'text-anchor':'middle',class:'svgmuted'},gP).textContent='motor';
+// prekidači
+const levers=[], hits=[];
+SW.forEach((s,i)=>{
+  el('circle',{cx:s.x,cy:s.y1,r:5,class:'term'},gP);
+  el('circle',{cx:s.x,cy:s.y2,r:5,class:'term'},gP);
+  const lv=el('line',{x1:s.x,y1:s.y1,x2:s.x,y2:s.y2-5,class:'lever'},gP);
+  lv.style.transformOrigin=`${s.x}px ${s.y1}px`; lv.style.transform='rotate(-26deg)';
+  levers.push(lv);
+  const my=(s.y1+s.y2)/2;
+  el('text',{x:s.x-20,y:my+4,'text-anchor':'end',class:'swlabel'},gP).textContent=s.name;
+  el('text',{x:s.x-20,y:my+26,'text-anchor':'end',class:'gate'},gP).textContent=s.gate;
+  const h=el('rect',{x:s.x-44,y:s.y1-16,width:96,height:s.y2-s.y1+32,class:'hit',tabindex:0,role:'button','aria-label':`Prekidač ${s.name}`,'aria-pressed':'false'},gP);
+  hits.push(h);
+  const act=()=>{ if(st.mode!=='manual')return; st.sw[i]=!st.sw[i]; checkFault(); };
+  h.addEventListener('click',act);
+  h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}});
+});
+el('text',{x:310,y:548,'text-anchor':'middle',class:'svgmuted'},gP).textContent='Tačke pokazuju smjer struje, od plusa ka masi. Brže tačke znače jaču struju.';
+// tok i čestice
+const flow=el('polyline',{class:'flow',points:'',stroke:'var(--current)',opacity:0},gF);
+const pts=[]; for(let i=0;i<70;i++){pts.push(el('circle',{r:4.5,class:'pt',cx:-20,cy:-20},gPts));}
+const sparks=[]; for(let i=0;i<9;i++){sparks.push(el('line',{class:'spark',x1:0,y1:0,x2:0,y2:0,opacity:0},gFx));}
+// točak
+const tread=$('#tread'), spokes=$('#spokes');
+for(let i=0;i<24;i++){const a=i/24*Math.PI*2;el('line',{x1:100+76*Math.cos(a),y1:100+76*Math.sin(a),x2:100+88*Math.cos(a),y2:100+88*Math.sin(a),stroke:'var(--panel)','stroke-width':3,opacity:.55},tread);}
+for(let i=0;i<5;i++){const a=i/5*Math.PI*2;el('line',{x1:100+13*Math.cos(a),y1:100+13*Math.sin(a),x2:100+58*Math.cos(a),y2:100+58*Math.sin(a),stroke:'var(--line)','stroke-width':6,'stroke-linecap':'round'},spokes);}
+const wheel=$('#wheel');
+
+/* ---------- stanje ---------- */
+const st={mode:'manual',sw:[false,false,false,false],in1:true,in2:false,duty:0,omega:0,I:0,fault:null,protectUntil:-1,angle:0,off:0,v:{}};
+const samples=[];
+
+function classify(s){
+  if((s[0]&&s[2])||(s[1]&&s[3])) return {type:'short',side:(s[0]&&s[2])?'L':'R'};
+  if(s[0]&&s[3]) return {type:'drive',dir:1};
+  if(s[1]&&s[2]) return {type:'drive',dir:-1};
+  if(s[0]&&s[1]) return {type:'brake',path:'brakeTop'};
+  if(s[2]&&s[3]) return {type:'brake',path:'brakeBot'};
+  return {type:'open',n:s.filter(Boolean).length};
+}
+const chipSw=()=>[st.in1,st.in2,!st.in1,!st.in2];
+function checkFault(){
+  const c=classify(st.sw);
+  if(c.type==='short'&&!st.fault) st.fault={side:c.side,t0:T};
+}
+
+let T=0;
+function step(dt){
+  const E=st.omega/KV;
+  const chip=st.mode==='chip';
+  const vdrive=chip?VS-VD:VS;
+  const frac=chip?st.duty:1;
+  const cmd=chip?(st.duty>0?classify(chipSw()):{type:'open',n:0}):classify(st.sw);
+  let I=0;
+  if(cmd.type==='drive') I=(cmd.dir*vdrive*frac-E)/R;
+  else if(cmd.type==='brake') I=(-E/R)*frac;
+  st.I=I;
+  st.omega+=(G*I-FR*st.omega)*dt;
+  if(cmd.type!=='drive'&&Math.abs(st.omega)<0.3) st.omega=0;
+
+  // PWM faza
+  const ph=(T*FPWM)%1;
+  const pwmOn=!chip||(st.duty>=0.999)||(st.duty>0&&ph<st.duty);
+  const inst=chip?(pwmOn&&st.duty>0?chipSw():[false,false,false,false]):st.sw;
+  const ic=classify(inst);
+
+  let Ii=I;
+  if(chip&&cmd.type==='drive'&&st.duty>0&&st.duty<0.999){
+    const A=Math.min(0.55,0.9*(vdrive/R)*st.duty*(1-st.duty))*cmd.dir;
+    Ii= pwmOn ? I-A/2+A*(ph/st.duty) : I+A/2-A*((ph-st.duty)/(1-st.duty));
+  }
+  let Vi;
+  if(ic.type==='drive') Vi=ic.dir*vdrive;
+  else if(ic.type==='brake'||ic.type==='short') Vi=0;
+  else Vi=E;
+
+  let Va;
+  if(!chip) Va=Vi;
+  else if(cmd.type==='drive') Va=st.duty*cmd.dir*vdrive+(1-st.duty)*E;
+  else if(cmd.type==='brake') Va=(1-st.duty)*E;
+  else Va=E;
+
+  const short=ic.type==='short';
+  st.v={cmd,ic,Ii,Vi,Va,E,pwmOn,short};
+  samples.push({t:T,v:Vi,i:short?99:Ii,f:short});
+  while(samples.length&&samples[0].t<T-WIN-0.1) samples.shift();
+
+  if(st.fault&&T-st.fault.t0>1.6){
+    if(st.fault.side==='L'){st.sw[0]=false;st.sw[2]=false;} else {st.sw[1]=false;st.sw[3]=false;}
+    st.fault=null; st.protectUntil=T+4;
+  }
+}
+
+/* ---------- prikaz ---------- */
+const fmt=(n,d)=>(n<-1e-9&&Math.abs(n).toFixed(d)!==(0).toFixed(d)?'−':'')+Math.abs(n).toFixed(d).replace('.',',');
+let lastMsg='', lastNote='', frame=0;
+function render(dt){
+  const v=st.v; const chip=st.mode==='chip';
+  const inst=chip?(v.pwmOn&&st.duty>0?chipSw():[false,false,false,false]):st.sw;
+  const live=Math.abs(v.Ii)>0.02||v.short;
+  levers.forEach((lv,i)=>{
+    lv.style.transform=inst[i]?'rotate(0deg)':'rotate(-26deg)';
+    lv.classList.toggle('closed',inst[i]);
+    lv.classList.toggle('live',inst[i]&&live);
+    hits[i].setAttribute('aria-pressed',String(st.sw[i]));
+  });
+
+  // tok struje
+  let key=null, sign=1, speed=0;
+  const ic=v.ic;
+  if(ic.type==='drive'){key=ic.dir>0?'fwd':'rev'; sign=Math.sign(v.Ii*ic.dir)||1; speed=Math.min(600,Math.abs(v.Ii)*125);}
+  else if(ic.type==='brake'){key=ic.path; sign=v.Ii>=0?1:-1; speed=Math.min(600,Math.abs(v.Ii)*125);}
+  else if(ic.type==='short'){key=ic.side==='L'?'shortL':'shortR'; speed=720;}
+  const show=key&&(speed>4);
+  if(show){
+    const p=PD[key];
+    flow.setAttribute('points',p.str);
+    flow.setAttribute('stroke',ic.type==='short'?'var(--fault)':'var(--current)');
+    const k=ic.type==='short'?(0.35+0.25*Math.sin(T*28)):0.12+0.22*Math.min(1,Math.abs(v.Ii)/2);
+    flow.setAttribute('opacity',k.toFixed(3));
+    st.off+=sign*speed*dt;
+    const spacing=26, n=Math.min(pts.length,Math.floor(p.L/spacing));
+    for(let i=0;i<pts.length;i++){
+      if(i<n){const [x,y]=pointAt(p,st.off+i*(p.L/n));pts[i].setAttribute('cx',x.toFixed(1));pts[i].setAttribute('cy',y.toFixed(1));pts[i].style.fill=ic.type==='short'?'var(--fault)':'';}
+      else {pts[i].setAttribute('cx',-20);pts[i].setAttribute('cy',-20);}
+    }
+  } else {
+    flow.setAttribute('opacity',0);
+    pts.forEach(c=>{c.setAttribute('cx',-20);c.setAttribute('cy',-20);});
+  }
+  // varnice
+  if(v.short){
+    const x=ic.side==='L'?XL:XR;
+    sparks.forEach((s,i)=>{const a=i/sparks.length*Math.PI*2+T*9;const r1=9+Math.random()*4,r2=18+Math.random()*16;
+      s.setAttribute('x1',x+r1*Math.cos(a));s.setAttribute('y1',YM+r1*Math.sin(a));s.setAttribute('x2',x+r2*Math.cos(a));s.setAttribute('y2',YM+r2*Math.sin(a));s.setAttribute('opacity',Math.random()>.35?1:0);});
+  } else sparks.forEach(s=>s.setAttribute('opacity',0));
+
+  // točak i rotor
+  st.angle+=st.omega*6*dt*0.22;
+  wheel.style.transform=`rotate(${st.angle}deg)`;
+  rotor.style.transform=`rotate(${st.angle*3}deg)`;
+
+  if(frame%5===0){
+    const rpm=Math.abs(st.omega);
+    $('#rpm').textContent=Math.round(rpm);
+    $('#dir').textContent=rpm<1?'stoji':(st.omega>0?'naprijed':'nazad');
+    $('#rV').textContent=fmt(v.Va,1);
+    $('#rVs').textContent=chip&&v.cmd.type==='drive'?'srednja vrijednost':'\u00a0';
+    $('#rE').textContent=fmt(v.E,1);
+    if(v.short){$('#rI').textContent='> 20';$('#rIs').textContent='kratak spoj, zaobilazi motor';$('#roI').classList.add('hot');}
+    else{$('#rI').textContent=fmt(st.I,2);$('#rIs').textContent=Math.abs(st.I)>1.9?'blizu granice L298N (2 A)':'\u00a0';$('#roI').classList.remove('hot');}
+    if(chip){const P=v.cmd.type==='drive'?VD*Math.abs(st.I):0;$('#rP').textContent=fmt(P,1);$('#rPs').textContent='oko 2 V pada na tranzistorima';}
+    else{$('#rP').textContent='0,0';$('#rPs').textContent='idealni prekidači';}
+  }
+  const [m,n,bad]=message();
+  if(m!==lastMsg){$('#msg').textContent=m;lastMsg=m;$('#msg').classList.toggle('bad',!!bad);}
+  if(n!==lastNote){$('#note').textContent=n;lastNote=n;}
+  drawScope();
+  frame++;
+}
+
+function message(){
+  const v=st.v, c=v.cmd, w=Math.abs(st.omega);
+  if(st.mode==='manual'){
+    if(c.type==='short') return [`Kratak spoj! ${c.side==='L'?'S1 i S3':'S2 i S4'} spajaju plus direktno sa masom, a struja zaobilazi motor.`,'Pravi drajver ovo nikad ne smije dozvoliti. Za trenutak će zaštita otvoriti prekidače.',true];
+    if(c.type==='drive'){
+      const m=c.dir>0?'S1 i S4 su zatvoreni: struja ide kroz motor s lijeva na desno i točak se vrti naprijed.':'S2 i S3 su zatvoreni: struja ide kroz motor s desna na lijevo. Isti motor, obrnut smjer.';
+      const n=(w<0.55*WSS&&Math.abs(st.I)>0.9)?'Šiljak struje na startu: motor koji miruje ne proizvodi kontra-napon, pa struju ograničava samo otpor namotaja.':'Kako se točak vrti brže, motor proizvodi kontra-napon, pa struja pada na onoliko koliko treba za savladavanje trenja.';
+      return [m,n];
+    }
+    if(c.type==='brake'){
+      if(w>3) return ['Oba kraja motora su spojena zajedno. Motor koji se vrti postaje generator, a ta struja ga koči.','Uporedi: ovako se točak zaustavi mnogo brže nego kad samo otvoriš kolo.'];
+      return ['Oba kraja motora su na istom naponu, pa kroz motor ne teče struja.','Kad se motor vrti, ovaj spoj ga koči. Probaj: pokreni ga, pa zatvori S1 i S2.'];
+    }
+    if(T<st.protectUntil) return ['Zaštita je otvorila prekidače.','Bez zaštite bi tranzistori na toj strani pregorjeli za djelić sekunde.'];
+    if(c.n===1) return ['Jedan zatvoren prekidač nije dovoljan: struja nema zatvoren put od plusa do mase.', w>3?'Točak se i dalje zaustavlja sam, od trenja.':'Treba ti zatvoren put: gore na jednoj strani, dolje na drugoj.'];
+    if(w>3) return ['Kolo je otvoreno. Nema struje, a točak se zaustavlja sam, od trenja.','Napon na motoru ipak nije nula: motor koji se vrti je generator. Pogledaj CH1.'];
+    return ['Zatvori dva prekidača i gledaj kuda teče struja.','Dodirni prekidač da ga zatvoriš. Na tastaturi: 1, 2, 3 i 4.'];
+  } else {
+    const d=Math.round(st.duty*100);
+    if(st.duty===0) return ['EN = 0: čip drži sve prekidače otvorene i motor slobodno staje.','Povuci klizač EN. On određuje koliki dio vremena je most uključen.'];
+    if(c.type==='drive'){
+      const avg=fmt(st.duty*(VS-VD),1);
+      return [`IN1 = ${+st.in1}, IN2 = ${+st.in2}: čip zatvara ${c.dir>0?'S1 i S4':'S2 i S3'}, a EN ih pali ${d} % vremena. Motor u prosjeku dobija ${avg} V.`,
+        st.duty>0.85?'Čak i na 100 % motor ne dobija punih 11,1 V: oko 2 V ostaje na tranzistorima L298N i odlazi u toplotu.':'Svaki ulaz bira gornji ili donji prekidač svoje strane, nikad oba. Zato unutar čipa kratak spoj nije moguć.'];
+    }
+    return [`IN1 = IN2 = ${+st.in1}: obje strane motora su na istom potencijalu i motor koči.`,'Ovo je „brzo zaustavljanje" iz tabele. Za lagano zaustavljanje, spusti EN na nulu.'];
+  }
+}
+
+/* ---------- osciloskop ---------- */
+const cv=$('#scope'), ctx=cv.getContext('2d'); let dpr=1, C={};
+function readVars(){const cs=getComputedStyle(document.documentElement);['panel-2','line-soft','line','ch1','current','fault','muted'].forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());}
+function sizeCanvas(){dpr=Math.min(2,window.devicePixelRatio||1);const r=cv.getBoundingClientRect();cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);}
+new ResizeObserver(sizeCanvas).observe(cv);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readVars);
+new MutationObserver(readVars).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+function drawScope(){
+  const w=cv.width,h=cv.height; if(!w||!h)return;
+  ctx.fillStyle=C['panel-2']; ctx.fillRect(0,0,w,h);
+  ctx.lineWidth=1; ctx.strokeStyle=C['line-soft'];
+  ctx.beginPath();
+  for(let i=1;i<10;i++){const x=Math.round(i*w/10)+.5;ctx.moveTo(x,0);ctx.lineTo(x,h);}
+  for(let j=1;j<8;j++){const y=Math.round(j*h/8)+.5;ctx.moveTo(0,y);ctx.lineTo(w,y);}
+  ctx.stroke();
+  ctx.strokeStyle=C.line; ctx.globalAlpha=.55; ctx.beginPath();
+  const mid=Math.round(h/2)+.5; ctx.moveTo(0,mid); ctx.lineTo(w,mid);
+  for(let i=0;i<50;i++){const x=Math.round(i*w/50)+.5;ctx.moveTo(x,mid-3*dpr);ctx.lineTo(x,mid+3*dpr);}
+  ctx.stroke(); ctx.globalAlpha=1;
+  const t0=T-WIN, X=t=>(t-t0)/WIN*w;
+  // kratak spoj: crvena traka
+  ctx.fillStyle=C.fault; ctx.globalAlpha=.14;
+  for(let k=0;k<samples.length-1;k++){ if(samples[k].f){ctx.fillRect(X(samples[k].t),0,Math.max(1,X(samples[k+1].t)-X(samples[k].t))+1,h);} }
+  ctx.globalAlpha=1;
+  const trace=(key,scale,color)=>{
+    ctx.strokeStyle=color; ctx.lineWidth=2.25*dpr; ctx.lineJoin='round'; ctx.beginPath();
+    let prev=null;
+    for(const s of samples){const x=X(s.t);let y=h/2-(s[key]/scale)*(h/2);y=Math.max(2*dpr,Math.min(h-2*dpr,y));
+      if(prev===null)ctx.moveTo(x,y);else{ if(key==='v'){ctx.lineTo(x,prev);} ctx.lineTo(x,y);} prev=y;}
+    ctx.stroke();
+  };
+  trace('v',16,C.ch1);
+  trace('i',4,C.current);
+}
+
+/* ---------- kontrole ---------- */
+function setMode(m){
+  st.mode=m;
+  $('#mManual').setAttribute('aria-pressed',String(m==='manual'));
+  $('#mChip').setAttribute('aria-pressed',String(m==='chip'));
+  svg.classList.toggle('l298mode',m==='chip');
+  svg.classList.toggle('fast',m==='chip');
+  $('#chipPanel').hidden=m!=='chip';
+  $('#tbase').textContent=m==='chip'?'4 s na ekranu. PWM je usporen: stvarno se pali i gasi oko 490 puta u sekundi.':'4 s na ekranu';
+  st.fault=null; st.sw=[false,false,false,false];
+  updChip();
+}
+function updChip(){
+  $('#in1').setAttribute('aria-pressed',String(st.in1)); $('#in1').textContent=`IN1 = ${+st.in1}`;
+  $('#in2').setAttribute('aria-pressed',String(st.in2)); $('#in2').textContent=`IN2 = ${+st.in2}`;
+  $('#duty').value=Math.round(st.duty*100); $('#dutyV').textContent=`${Math.round(st.duty*100)} %`;
+  const k=st.duty===0?'en0':(st.in1&&!st.in2?'fw':(!st.in1&&st.in2?'bw':(st.in1?'b1':'b0')));
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.toggle('on',r.dataset.k===k));
+}
+$('#mManual').onclick=()=>setMode('manual');
+$('#mChip').onclick=()=>setMode('chip');
+$('#in1').onclick=()=>{st.in1=!st.in1;updChip();};
+$('#in2').onclick=()=>{st.in2=!st.in2;updChip();};
+$('#duty').oninput=e=>{st.duty=e.target.value/100;updChip();};
+function reset(){st.sw=[false,false,false,false];st.in1=true;st.in2=false;st.duty=0;st.omega=0;st.I=0;st.fault=null;st.protectUntil=-1;samples.length=0;updChip();}
+$('#reset').onclick=reset;
+window.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(st.mode==='manual'&&['1','2','3','4'].includes(k)){st.sw[+k-1]=!st.sw[+k-1];checkFault();}
+  else if(st.mode==='chip'&&k==='1'){st.in1=!st.in1;updChip();}
+  else if(st.mode==='chip'&&k==='2'){st.in2=!st.in2;updChip();}
+  else if(st.mode==='chip'&&(k==='arrowup'||k==='arrowright')){st.duty=Math.min(1,Math.round(st.duty*100+5)/100);updChip();e.preventDefault();}
+  else if(st.mode==='chip'&&(k==='arrowdown'||k==='arrowleft')){st.duty=Math.max(0,Math.round(st.duty*100-5)/100);updChip();e.preventDefault();}
+  else if(k==='r'){reset();}
+  else if(k==='m'){setMode(st.mode==='manual'?'chip':'manual');}
+});
+
+/* ---------- petlja ---------- */
+readVars(); sizeCanvas(); updChip();
+let last=performance.now();
+function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;T+=dt;step(dt);render(dt);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

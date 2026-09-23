@@ -1,13 +1,18 @@
 import type { Metadata, Viewport } from 'next';
-import { Barlow_Condensed, JetBrains_Mono } from 'next/font/google';
+import { Archivo, JetBrains_Mono } from 'next/font/google';
 import { RegistracijaServiceWorkera } from '@/components/RegistracijaServiceWorkera';
 import { Analitika } from '@/components/Analitika';
 import './globals.css';
 
-/* Oba fonta nose latin-ext, to je podskup u kojem žive č ć đ š ž. */
-const tekst = Barlow_Condensed({
+/*
+  Archivo je varijabilan i po debljini i po širini: naslovi i velike brojke
+  se sužavaju (font-stretch oko 72-78 %), tekst ostaje normalne širine.
+  next/font ga preuzme pri buildu i servira sa našeg domena, pa radi offline.
+  Oba fonta nose latin-ext, to je podskup u kojem žive č ć đ š ž.
+*/
+const tekst = Archivo({
   subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '600', '700'],
+  axes: ['wdth'],
   variable: '--font-tekst',
   display: 'swap',
 });
@@ -38,7 +43,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#061a13',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#edf1f4' },
+    { media: '(prefers-color-scheme: dark)', color: '#0e1923' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

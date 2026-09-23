@@ -55,6 +55,33 @@ export const XGO_SIGURNOST = {
   mostSaljeStopAkoLaptopCuti: 2000,
 } as const;
 
+/**
+ * Model motora sa reduktorom, preuzet iz referenca-h-most.html.
+ * Ilustrativni parametri: ponašanje je fizički tačno, a same vrijednosti
+ * nijesu izmjerene na Perjaniku. Ne mijenjati bez dogovora.
+ */
+export const MOTOR = {
+  /** Napon baterije (3S LiPo), V. */
+  napajanje: 11.1,
+  /** Pad napona na tranzistorima L298N, V. */
+  padNaDrajveru: 2.0,
+  /** Otpor namotaja, Ω. */
+  otpor: 4.5,
+  /** Brzina točka po voltu kontra-napona, o/min po V. */
+  kv: 27,
+  /** Koliko struja ubrzava točak, (o/min)/s po A. */
+  pojacanje: 283,
+  /** Trenje, 1/s. */
+  trenje: 1.0,
+  /** Približna brzina bez opterećenja pri punom naponu, o/min. */
+  bezOpterecenja: 210,
+  /** Granica struje L298N po kanalu, A. */
+  granicaL298N: 2,
+} as const;
+
+/** Koliko puta u sekundi L298N stvarno pali i gasi most (PWM sa Arduina), iz reference. */
+export const PWM_STVARNO_HZ = 490;
+
 /** Ilustrativni naponi za H-most demonstraciju. */
 export const NAPON = {
   ulaz: 11.1,

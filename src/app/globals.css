@@ -1,31 +1,86 @@
 /*
-  Dizajn sistem: štampana ploča.
-  Tamnozelena lemna maska, prigušen bakar koji se pali kad kroz njega teče struja,
-  bijeli silkscreen, i tri LED boje za petlju osjeti-odluči-djeluj.
+  Dizajn sistem: mjerni instrument i tehnička šema (referenca-h-most.html).
+
+  Boje nose značenje i samo značenje:
+    --current                      struja i energija
+    --osjeti / --odluci / --djeluj petlja osjeti-odluči-djeluj
+    --fault                        samo greške i opasnost
+    --ch1                          drugi kanal na osciloskopu
+  Sve ostalo je neutralno.
+
+  Tema prati sistem; data-theme="light" ili "dark" na <html> je nadjačava.
 */
 
 :root {
-  /* --- ploča --- */
-  --maska: #0a2b1f;
-  --maska-duboka: #061a13;
-  --maska-svijetla: #11402e;
-  --ivica: #14402e;
+  --bg: #edf1f4;
+  --panel: #ffffff;
+  --panel-2: #f5f7f9;
+  --line: #4e5e6b;
+  --line-soft: #c3cdd5;
+  --grid: rgba(20, 33, 43, 0.055);
+  --text: #14212b;
+  --muted: #5b6d7c;
+  --current: #c27c00;
+  --osjeti: #0b8aa3;
+  --odluci: #6a4bd4;
+  --djeluj: #1e9151;
+  --fault: #d2343c;
+  --ch1: #2f6fb3;
+  color-scheme: light;
+}
 
-  /* --- bakar --- */
-  --bakar: #a9702e;
-  --bakar-struja: #f2c57c;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0e1923;
+    --panel: #132230;
+    --panel-2: #10202d;
+    --line: #8fa6b8;
+    --line-soft: #26394a;
+    --grid: rgba(160, 190, 215, 0.05);
+    --text: #e4ecf2;
+    --muted: #8398a9;
+    --current: #ffc857;
+    --osjeti: #57c8e0;
+    --odluci: #b39cff;
+    --djeluj: #7ad897;
+    --fault: #ff5b61;
+    --ch1: #8cc0f2;
+    color-scheme: dark;
+  }
+}
 
-  /* --- silkscreen --- */
-  --silkscreen: #eef4ef;
-  --silkscreen-tih: #8fae9f;
+:root[data-theme='dark'] {
+  --bg: #0e1923;
+  --panel: #132230;
+  --panel-2: #10202d;
+  --line: #8fa6b8;
+  --line-soft: #26394a;
+  --grid: rgba(160, 190, 215, 0.05);
+  --text: #e4ecf2;
+  --muted: #8398a9;
+  --current: #ffc857;
+  --osjeti: #57c8e0;
+  --odluci: #b39cff;
+  --djeluj: #7ad897;
+  --fault: #ff5b61;
+  --ch1: #8cc0f2;
+  color-scheme: dark;
+}
 
-  /* --- tri LED-a petlje --- */
-  --osjeti: #38c6f4;
-  --odluci: #b98cf7;
-  --djeluj: #ff6a4d;
-
-  /* --- upozorenje (kratak spoj, pregrijavanje, odbačen paket) --- */
-  --alarm: #ff3b30;
+:root {
+  /*
+    Prelazna imena iz PCB sistema. Demonstracije koje još nijesu prevedene
+    na nov izgled ih koriste; kad posljednja pređe, ovaj blok se briše.
+  */
+  --maska: var(--panel);
+  --maska-duboka: var(--bg);
+  --maska-svijetla: var(--panel-2);
+  --ivica: var(--line-soft);
+  --bakar: var(--line);
+  --bakar-struja: var(--current);
+  --silkscreen: var(--text);
+  --silkscreen-tih: var(--muted);
+  --alarm: var(--fault);
 
   /* --- tipografska skala, vezana za visinu ekrana --- */
   --tekst-recenica: 8vh;
@@ -36,6 +91,9 @@
 
   --meta-dodir: 64px;
   --radijus: 6px;
+
+  /* Pokret: kratko i bez odskakanja. */
+  --prelaz: 160ms ease-out;
 }
 
 *,
@@ -52,10 +110,20 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--maska-duboka);
-  color: var(--silkscreen);
-  font-family: var(--font-tekst), system-ui, sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  font-family: var(--font-tekst), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Inženjerska mreža od 24 px preko pozadine. */
+body {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 body {
@@ -105,8 +173,8 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--bakar-struja);
-  outline-offset: 4px;
+  outline: 3px solid var(--odluci);
+  outline-offset: 2px;
 }
 
 /* --- silkscreen oznake: verzal, razmaknuto, mono --- */

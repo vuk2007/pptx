@@ -27,6 +27,15 @@ const RUTE = [
   '/izlog/perjanik/',
   '/perjanik/',
   '/perjanik/h-most/',
+  /* Režim L298N dodaje cijeli panel na stranu; mora stati i on. */
+  {
+    ruta: '/perjanik/h-most/',
+    stanje: 'L298N',
+    pripremi: `(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+      return true;
+    })()`,
+  },
   '/perjanik/pwm/',
   '/perjanik/radio/',
   '/perjanik/suspenzija/',
@@ -168,11 +177,16 @@ try {
 
     let palihUVelicini = 0;
 
-    for (const ruta of RUTE) {
+    for (const unos of RUTE) {
+      const { ruta, stanje, pripremi } = typeof unos === 'string' ? { ruta: unos } : unos;
       await kartica.posalji('Page.navigate', { url: OSNOVA + ruta });
       await cekaj(500);
       await uStranici(kartica, 'document.fonts.ready.then(() => true)');
       await cekaj(250);
+      if (pripremi) {
+        await uStranici(kartica, pripremi);
+        await cekaj(400);
+      }
       provjereno++;
 
       const sirovi = await uStranici(kartica, MJERA);
@@ -186,7 +200,7 @@ try {
       });
       for (const p of problemi) {
         palihUVelicini++;
-        greske.push(`${velicina.naziv}  ${ruta}  ${p.vrsta}: „${p.sta}"  (${p.gdje})`);
+        greske.push(`${velicina.naziv}  ${ruta}${stanje ? ` (${stanje})` : ''}  ${p.vrsta}: „${p.sta}"  (${p.gdje})`);
       }
     }
 

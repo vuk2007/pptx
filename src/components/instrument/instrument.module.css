@@ -1,0 +1,357 @@
+/*
+  Izgled mjernog instrumenta, preuzet iz referenca-h-most.html.
+  Paneli su ravni, tanka ivica, radius najviše 6 px. Bez sjenki i gradijenata.
+
+  Razlika od reference je samo raspored: referenca skroluje (na 1920 × 1080
+  visoka je 1344 px), a ovdje sve mora stati na jedan ekran jer se na TV-u
+  prelazi klikerom. Zato je strana sa očitavanjima visoka koliko i cijelo
+  tijelo, a status i osciloskop stoje jedan pored drugog ispod šeme.
+*/
+
+.okvir {
+  --razmak: clamp(10px, 1.1vw, 20px);
+  height: 100svh;
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: clamp(12px, 1.7vw, 30px) clamp(16px, 2.2vw, 40px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--razmak);
+  /* Na dodir: crtež se dira, strana se ne klizi i ne zumira. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/*
+  4K ekran bez skaliranja sistema daje 3840 CSS piksela: sve bi bilo sitno
+  u sredini. Tada se cijeli instrument uveća dvostruko, kao 1080p.
+*/
+@media (min-width: 2560px) and (min-height: 1400px) {
+  .okvir {
+    zoom: 2;
+    height: 50svh;
+  }
+}
+
+.panel {
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+}
+
+/* ------------------------------------------------------------ zaglavlje */
+
+.zaglavlje {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 32px;
+}
+
+.naslovi {
+  min-width: 0;
+}
+
+.putanja {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 32px;
+  /* Meta za prst veća od teksta, bez guranja naslova. */
+  padding: 6px 12px 6px 0;
+  margin: -6px 0 -2px;
+  color: var(--muted);
+  font-size: clamp(14px, 1.1vw, 17px);
+}
+
+.putanja:hover,
+.putanja:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.naslov {
+  margin: 0;
+  font-stretch: 78%;
+  font-weight: 760;
+  font-size: clamp(38px, min(4.6vw, 7vh), 76px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+
+.uvod {
+  margin: 8px 0 0;
+  font-size: clamp(16px, min(1.45vw, 2.3vh), 24px);
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.komande {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.rezimi {
+  display: inline-flex;
+  border: 1.5px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 4px;
+  background: var(--panel);
+}
+
+.rezimi button {
+  font: inherit;
+  font-size: clamp(15px, 1.1vw, 18px);
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  padding: 10px 18px;
+  min-height: 44px;
+  white-space: nowrap;
+  transition: background-color var(--prelaz), color var(--prelaz);
+}
+
+.rezimi button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--panel);
+}
+
+.dugme {
+  font: inherit;
+  font-weight: 650;
+  font-size: clamp(15px, 1.1vw, 17px);
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 8px;
+  border: 1.5px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  white-space: nowrap;
+  transition: border-color var(--prelaz);
+}
+
+.dugme:hover {
+  border-color: var(--text);
+}
+
+/* ------------------------------------------------------------ tijelo */
+
+.tijelo {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(300px, 1fr);
+  gap: var(--razmak);
+}
+
+.glavno {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--razmak);
+}
+
+.sema {
+  min-height: 0;
+  padding: clamp(6px, 0.8vw, 14px);
+  display: flex;
+}
+
+.sema svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  margin: auto;
+}
+
+.dno {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: var(--razmak);
+  align-items: stretch;
+}
+
+.dnoSamo {
+  display: grid;
+}
+
+.strana {
+  min-height: 0;
+  display: grid;
+  gap: var(--razmak);
+  align-content: start;
+}
+
+/* ------------------------------------------------------------ status */
+
+.status {
+  padding: clamp(12px, 1vw, 18px) clamp(14px, 1.2vw, 22px);
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.sta {
+  margin: 0;
+  font-size: clamp(17px, min(1.4vw, 2.3vh), 25px);
+  font-weight: 600;
+  line-height: 1.28;
+}
+
+.staGreska {
+  color: var(--fault);
+}
+
+.zasto {
+  margin: 0;
+  font-size: clamp(15px, min(1.05vw, 1.75vh), 19px);
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------ osciloskop */
+
+.osciloskop {
+  padding: 10px 14px 14px;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  align-items: center;
+  margin: 0 0 8px;
+  font-size: clamp(13px, 0.85vw, 15px);
+  color: var(--muted);
+}
+
+.kljuc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kljuc i {
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.legendaDesno {
+  margin-left: auto;
+}
+
+.platno {
+  width: 100%;
+  height: clamp(110px, 17vh, 220px);
+  display: block;
+  border-radius: 3px;
+}
+
+/* ------------------------------------------------------------ očitavanja */
+
+.natpis {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(13px, 0.95vw, 15px);
+}
+
+.ocitavanja {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.ocitavanje {
+  padding: clamp(10px, 0.8vw, 14px) clamp(12px, 1vw, 18px);
+  border-top: 1.5px solid var(--line-soft);
+}
+
+.ocitavanje:nth-child(-n + 2) {
+  border-top: 0;
+}
+
+.ocitavanje:nth-child(odd) {
+  border-right: 1.5px solid var(--line-soft);
+}
+
+.vrijednost {
+  font-stretch: 72%;
+  font-weight: 700;
+  font-size: clamp(26px, min(2.3vw, 3.7vh), 40px);
+  line-height: 1.05;
+  margin-top: 4px;
+}
+
+.vrijednost small {
+  font-size: 0.5em;
+  font-weight: 560;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.pod {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 2px;
+  min-height: 1.2em;
+}
+
+.vruce .vrijednost {
+  color: var(--fault);
+}
+
+/* ------------------------------------------------------------ točak */
+
+.tocak {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: clamp(10px, 0.9vw, 16px) clamp(14px, 1.1vw, 20px);
+}
+
+.tocak svg {
+  width: clamp(92px, min(8vw, 13vh), 150px);
+  height: auto;
+  display: block;
+}
+
+.veliko {
+  margin: 4px 0 2px;
+  font-stretch: 72%;
+  font-weight: 720;
+  font-size: clamp(38px, min(3.6vw, 5.6vh), 64px);
+  line-height: 1;
+}
+
+.veliko small {
+  font-size: 0.42em;
+  font-weight: 560;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.smjer {
+  margin: 0;
+  font-weight: 640;
+  font-size: clamp(16px, 1.2vw, 20px);
+  color: var(--djeluj);
+}
+
+/* ------------------------------------------------------------ uži ekrani */
+
+@media (max-width: 1280px) {
+  .tijelo {
+    grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+  }
+}

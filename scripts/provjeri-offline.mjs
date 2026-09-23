@@ -77,11 +77,15 @@ try {
   const naslovOffline = await uStranici(kartica, `document.querySelector('h1')?.textContent ?? ''`);
   provjeri(naslovOffline.includes('Praktikum'), `Offline osvježavanje početne daje naslov: "${naslovOffline}"`);
 
+  /*
+    document.fonts.check() vraća true i za ime koje ne postoji, pa se ovdje
+    traži stvarno učitan font sa tim imenom.
+  */
   const fontUcitan = await uStranici(
     kartica,
-    `document.fonts.ready.then(() => document.fonts.check('1em "Barlow Condensed"'))`,
+    `document.fonts.ready.then(() => [...document.fonts].some((f) => f.family.replaceAll('"', '') === 'Archivo' && f.status === 'loaded'))`,
   );
-  provjeri(fontUcitan === true, `Font iz keša renderuje offline (Barlow Condensed: ${fontUcitan})`);
+  provjeri(fontUcitan === true, `Font iz keša renderuje offline (Archivo učitan: ${fontUcitan})`);
 
   await snimi(kartica, `${SNIMCI}/02-offline-pocetna.png`);
 
