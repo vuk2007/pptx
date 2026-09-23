@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BOJA, NAZIV, OZNAKA_LED } from '@/components/ploca/primitivi';
 import { PrikazSlajda } from '@/components/izlog/PrikazSlajda';
 import { blok, type BlokId } from '@/sadrzaj/slajdovi';
 import { eksponat, type EksponatId } from '@/lib/rute';
@@ -68,47 +67,37 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
   }
 
   const slajd = slajdovi[indeks];
-  const boja = BOJA[podaci.naglasak];
+  const uloga = { osjeti: 'osjeti', odluci: 'odluči', djeluj: 'djeluj' }[podaci.naglasak];
 
   return (
-    <main className={stil.ploca} onPointerDown={naPritisak} onPointerUp={naOtpustanje}>
-      <span className={`${stil.rupa} ${stil.rupaGL}`} aria-hidden="true" />
-      <span className={`${stil.rupa} ${stil.rupaGD}`} aria-hidden="true" />
-
+    <main className={stil.strana} onPointerDown={naPritisak} onPointerUp={naOtpustanje}>
       <header className={stil.zaglavlje}>
-        <div className={stil.naslovnaGrupa}>
+        <div>
+          <Link href="/robotika" className={stil.putanja}>
+            <span aria-hidden="true">←</span>
+            Praktikum elektronike
+          </Link>
           <h1 className={stil.naslov}>{podaci.naziv}</h1>
-          <span className={stil.uloga} style={{ ['--boja' as string]: boja }}>
-            {OZNAKA_LED[podaci.naglasak]} {NAZIV[podaci.naglasak]}
-          </span>
+          <p className={stil.podnaslov}>
+            {podaci.podnaslov}. <span style={{ color: `var(--${podaci.naglasak})` }}>Naglasak: {uloga}.</span>
+          </p>
         </div>
-
-        <div className={stil.akcije}>
-          <Link href={`/izlog/${id}`} className={stil.dugme}>
-            <span aria-hidden="true">▶</span>
-            Pusti u petlji
-          </Link>
-          <Link href="/robotika" className={stil.dugme}>
-            Početna
-          </Link>
-        </div>
+        <Link href={`/izlog/${id}`} className={stil.dugme}>
+          Pusti u petlji
+        </Link>
       </header>
 
       <div className={stil.pojas}>
         <button className={stil.strelica} onClick={() => pomjeri(-1)} aria-label="Prethodni slajd">
           ←
         </button>
-
-        <div className={stil.scena}>
-          <PrikazSlajda slajd={slajd} />
-        </div>
-
+        <PrikazSlajda slajd={slajd} />
         <button className={stil.strelica} onClick={() => pomjeri(1)} aria-label="Sljedeći slajd">
           →
         </button>
       </div>
 
-      <div className={stil.podnozje}>
+      <footer className={stil.podnozje}>
         <div className={stil.brojac}>
           <div className={stil.tacke}>
             {slajdovi.map((s, i) => (
@@ -116,15 +105,15 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
                 key={s.id}
                 className={stil.tackaDugme}
                 onClick={() => postaviIndeks(i)}
-                aria-label={`Slajd ${i + 1}: ${s.recenica}`}
+                aria-label={`Slajd ${i + 1}: ${s.naslov}`}
                 aria-current={i === indeks ? 'true' : undefined}
               >
-                <span className={`${stil.tacka} ${i === indeks ? stil.tackaAktivna : ''}`} />
+                <span className={i === indeks ? stil.tackaAktivna : stil.tacka} />
               </button>
             ))}
           </div>
-          <span className="oznaka">
-            Slajd {indeks + 1} od {slajdovi.length}
+          <span>
+            slajd {indeks + 1} od {slajdovi.length}
           </span>
         </div>
 
@@ -140,7 +129,7 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
             </Link>
           ))}
         </nav>
-      </div>
+      </footer>
     </main>
   );
 }

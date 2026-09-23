@@ -1,0 +1,92 @@
+/* Slajd: tekst lijevo, šema desno u ravnom panelu. Gleda se sa dva do četiri metra. */
+
+.slajd {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.5fr);
+  gap: clamp(20px, 3vw, 56px);
+  align-items: center;
+}
+
+.tekst {
+  container-type: inline-size;
+  display: grid;
+  gap: clamp(14px, 2.4vh, 30px);
+  align-content: center;
+}
+
+.naslov {
+  margin: 0;
+  font-stretch: 74%;
+  font-weight: 760;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.naslovKratak {
+  /* Naslov se mjeri širinom svoje kolone, da nikad ne pređe u šemu. */
+  font-size: clamp(40px, min(21cqi, 15vh), 170px);
+}
+
+.naslovSrednji {
+  font-size: clamp(36px, min(16cqi, 12vh), 136px);
+}
+
+.naslovDug {
+  font-size: clamp(32px, min(13cqi, 10vh), 112px);
+}
+
+.recenica {
+  margin: 0;
+  font-size: clamp(20px, min(2.3vw, 4vh), 42px);
+  line-height: 1.25;
+  font-weight: 500;
+  max-width: 24ch;
+  text-wrap: pretty;
+}
+
+.demo {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  font-size: clamp(15px, min(1.2vw, 2.1vh), 21px);
+  font-weight: 650;
+  transition: border-color var(--prelaz);
+}
+
+.demo:hover,
+.demo:focus-visible {
+  border-color: var(--text);
+}
+
+.sema {
+  margin: 0;
+  align-self: center;
+  padding: clamp(10px, 1.4vw, 26px);
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+}
+
+/* Panel prati oblik šeme; kad je ekran nizak, šema se smanji unutar panela. */
+.sema svg {
+  height: auto;
+  max-height: calc(var(--ekran, 100svh) - 300px);
+}
+
+@media (max-width: 900px) {
+  .slajd {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+  .sema svg {
+    max-height: 46vh;
+  }
+}

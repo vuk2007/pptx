@@ -1,13 +1,16 @@
 import { FAILSAFE_MS } from '@/config/cinjenice';
-import type { BojaPetlje } from '@/components/ploca/primitivi';
+
+export type BojaPetlje = 'osjeti' | 'odluci' | 'djeluj';
 
 export type BlokId = 'uvod' | 'jarvis' | 'xgo' | 'perjanik' | 'zatvaranje';
 
 export type Slajd = {
   id: string;
+  /** Kratak naslov, krupno i usko. */
+  naslov: string;
   /** Jedna rečenica. Nikad dvije. */
   recenica: string;
-  /** Ključ ilustracije u src/components/ilustracije/registar.tsx */
+  /** Ključ šeme u src/components/slajdovi/crtezi.tsx */
   ilustracija: string;
   /** Dio bilješke nivoa 2 koji pripada ovom slajdu. Tekst je doslovan iz scenarija. */
   biljeska: string[];
@@ -29,6 +32,7 @@ export const BLOKOVI: Blok[] = [
     slajdovi: [
       {
         id: 'uvod-petlja',
+        naslov: 'Osjeti, odluči, djeluj',
         recenica: 'Svaki robot radi tri stvari: osjeti, odluči i djeluje.',
         ilustracija: 'petlja',
         biljeska: [
@@ -46,6 +50,7 @@ export const BLOKOVI: Blok[] = [
     slajdovi: [
       {
         id: 'jarvis-ko-je',
+        naslov: 'Jarvis',
         recenica: 'Ovo je Jarvis. Reci „Jarvis” i pitaj ga šta god hoćeš.',
         ilustracija: 'jarvis-ko-je',
         biljeska: [],
@@ -53,6 +58,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'jarvis-talasi',
+        naslov: 'Glas je talas',
         recenica: 'Tvoj glas su talasi u vazduhu.',
         ilustracija: 'jarvis-talasi',
         biljeska: [
@@ -63,6 +69,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'jarvis-budjenje',
+        naslov: 'Buđenje',
         recenica: 'Prvi program čeka samo riječ „Jarvis”.',
         ilustracija: 'jarvis-budjenje',
         biljeska: ['Prvi program sluša samo jednu riječ, „Jarvis”, i tek tada se budi.'],
@@ -70,6 +77,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'jarvis-glas-u-tekst',
+        naslov: 'Glas u tekst',
         recenica: 'Drugi program pretvara glas u tekst.',
         ilustracija: 'jarvis-glas-u-tekst',
         biljeska: ['Onda drugi program, koji radi ovdje na laptopu, pretvara tvoj glas u tekst.'],
@@ -77,6 +85,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'jarvis-mozak',
+        naslov: 'Mozak',
         recenica: 'Mozak smišlja odgovor.',
         ilustracija: 'jarvis-mozak',
         biljeska: ['Taj tekst ide jezičkom modelu, to je mozak, koji smisli odgovor.'],
@@ -84,6 +93,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'jarvis-tekst-u-glas',
+        naslov: 'Tekst u glas',
         recenica: 'Treći program pretvara tekst u glas.',
         ilustracija: 'jarvis-tekst-u-glas',
         biljeska: [
@@ -93,6 +103,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'jarvis-streaming',
+        naslov: 'Bez čekanja',
         recenica: 'Ne čeka se: prva rečenica svira dok se druga još piše.',
         ilustracija: 'jarvis-streaming',
         biljeska: [
@@ -111,6 +122,7 @@ export const BLOKOVI: Blok[] = [
     slajdovi: [
       {
         id: 'xgo-pas',
+        naslov: 'Robot pas',
         recenica: 'Ovo je robot pas. Probaj ga lagano gurnuti.',
         ilustracija: 'xgo-pas',
         biljeska: [],
@@ -118,6 +130,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'xgo-imu',
+        naslov: 'IMU',
         recenica: 'Senzor u njemu osjeća nagib, kao tvoje uho ravnotežu.',
         ilustracija: 'xgo-imu',
         biljeska: [
@@ -128,6 +141,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'xgo-petlja',
+        naslov: 'Povratna sprega',
         recenica: 'Mjeri, ispravi, pa opet mjeri. Stotinama puta u sekundi.',
         ilustracija: 'xgo-petlja',
         biljeska: [
@@ -138,6 +152,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'xgo-svugdje',
+        naslov: 'Svuda oko tebe',
         recenica: 'Na istom principu rade dronovi, rakete i autopilot.',
         ilustracija: 'xgo-svugdje',
         biljeska: ['Na njoj rade dronovi, rakete, autopilot u avionu, čak i klima u kući.'],
@@ -145,6 +160,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'xgo-motori',
+        naslov: '15 motora',
         recenica: '15 motora: 12 u nogama, 3 u ruci.',
         ilustracija: 'xgo-motori',
         biljeska: ['Pas ima 15 motora, 12 u nogama i 3 u ruci na leđima kojom može da uhvati predmet.'],
@@ -152,6 +168,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'xgo-komanda',
+        naslov: 'Od glasa do pokreta',
         recenica: 'Tvoj glas postaje radio poruka, a poruka postaje pokret.',
         ilustracija: 'xgo-komanda',
         biljeska: [
@@ -170,6 +187,7 @@ export const BLOKOVI: Blok[] = [
     slajdovi: [
       {
         id: 'perjanik-rover',
+        naslov: 'Perjanik',
         recenica: 'Rover kao oni na Marsu. Nije kupljen, napravili smo ga sami.',
         ilustracija: 'perjanik-rover',
         biljeska: [],
@@ -177,6 +195,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'perjanik-stampa',
+        naslov: '3D štampa',
         recenica: 'Skoro sve je odštampano na 3D štampaču, sloj po sloj.',
         ilustracija: 'perjanik-stampa',
         biljeska: [
@@ -186,6 +205,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'perjanik-suspenzija',
+        naslov: 'Suspenzija',
         recenica: 'Poluge drže sva četiri točka na zemlji.',
         ilustracija: 'perjanik-suspenzija',
         biljeska: [
@@ -196,6 +216,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'perjanik-arduino',
+        naslov: 'Arduino',
         recenica: 'Mozak je Arduino, računar koji košta koliko jedna igrica.',
         ilustracija: 'perjanik-arduino',
         biljeska: ['Mozak je Arduino, mali računar koji košta koliko jedna igrica.'],
@@ -203,6 +224,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'perjanik-radio',
+        naslov: 'Radio i WiFi',
         recenica: 'Komande idu radiom, kamera šalje sliku preko WiFi-ja.',
         ilustracija: 'perjanik-radio',
         biljeska: [
@@ -213,6 +235,7 @@ export const BLOKOVI: Blok[] = [
       },
       {
         id: 'perjanik-failsafe',
+        naslov: 'Failsafe',
         recenica: 'Ako izgubi signal, sam stane.',
         ilustracija: 'perjanik-failsafe',
         biljeska: [
@@ -230,6 +253,7 @@ export const BLOKOVI: Blok[] = [
     slajdovi: [
       {
         id: 'zatvaranje-pocni',
+        naslov: 'Počni i ti',
         recenica: 'Sve ovo je počelo sa jednim micro:bitom ili Arduinom i nekoliko žica.',
         ilustracija: 'zatvaranje',
         biljeska: [

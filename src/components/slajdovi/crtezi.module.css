@@ -1,0 +1,280 @@
+/*
+  Šeme na slajdovima: gledaju se sa dva do četiri metra, pa su slova
+  krupnija nego u demonstracijama. Linije su 2 do 2,5 px, boja samo za
+  ulogu (osjeti, odluči, djeluj), struju i grešku.
+*/
+
+.svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zica,
+.zicaDebela {
+  stroke: var(--line);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.zicaDebela {
+  stroke-width: 4;
+}
+
+.zicaTanka {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.isprekidano {
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+  fill: none;
+}
+
+.osa {
+  stroke: var(--line-soft);
+  stroke-width: 2;
+}
+
+.cvor {
+  fill: var(--line);
+}
+
+.vrh {
+  fill: var(--line);
+}
+
+.blok {
+  fill: var(--panel);
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+
+.blokOsjeti,
+.blokOdluci,
+.blokDjeluj {
+  fill: var(--panel);
+  stroke-width: 2.5;
+}
+
+.blokOsjeti {
+  stroke: var(--osjeti);
+}
+
+.blokOdluci {
+  stroke: var(--odluci);
+}
+
+.blokDjeluj {
+  stroke: var(--djeluj);
+}
+
+.naslovBloka {
+  fill: var(--text);
+  font-size: 30px;
+  font-weight: 720;
+  font-stretch: 80%;
+}
+
+.naslovBlokaVeliki {
+  fill: var(--osjeti);
+  font-size: 40px;
+  font-weight: 740;
+  font-stretch: 78%;
+}
+
+.tekst {
+  fill: var(--text);
+  font-size: 24px;
+  font-weight: 650;
+}
+
+.tih {
+  fill: var(--muted);
+  font-size: 21px;
+}
+
+.osjeti,
+.odluci,
+.djeluj,
+.greska,
+.struja2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.osjeti {
+  fill: var(--osjeti);
+}
+
+.odluci {
+  fill: var(--odluci);
+}
+
+.djeluj {
+  fill: var(--djeluj);
+}
+
+.greska {
+  fill: var(--fault);
+}
+
+.struja2 {
+  fill: var(--current);
+}
+
+.simbolDebeo {
+  stroke: var(--osjeti);
+  stroke-width: 5;
+}
+
+.slovoMotora {
+  fill: var(--djeluj);
+  font-weight: 740;
+}
+
+.signal,
+.signalOsjeti,
+.signalDjeluj {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.signalOsjeti {
+  stroke: var(--osjeti);
+}
+
+.signalDjeluj {
+  stroke: var(--djeluj);
+}
+
+.logika {
+  fill: none;
+  stroke: var(--odluci);
+  stroke-width: 3;
+}
+
+.pozadina {
+  fill: var(--panel);
+  stroke: var(--odluci);
+  stroke-width: 2;
+  stroke-dasharray: 7 5;
+}
+
+.prvaRijec {
+  stroke: var(--djeluj);
+  stroke-width: 2.5;
+}
+
+.kota {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.vrhKote {
+  fill: var(--text);
+}
+
+.luk {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.osaSenzora {
+  stroke: var(--osjeti);
+  stroke-width: 2.5;
+}
+
+.noga {
+  fill: none;
+  stroke: var(--djeluj);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sila {
+  stroke: var(--text);
+  stroke-width: 4;
+}
+
+.poluga {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.tocak {
+  fill: var(--panel);
+  stroke: var(--text);
+  stroke-width: 3;
+}
+
+.zglob {
+  fill: var(--panel);
+  stroke: var(--text);
+  stroke-width: 3;
+}
+
+.kamen {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+
+.sloj {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.slojNovi {
+  fill: var(--panel);
+  stroke: var(--djeluj);
+  stroke-width: 2.5;
+}
+
+.struja {
+  fill: none;
+  stroke: var(--current);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.vrhStruje {
+  fill: var(--current);
+}
+
+.ledTijelo {
+  fill: var(--panel);
+  stroke: var(--djeluj);
+  stroke-width: 2.5;
+}
+
+.svjetlo {
+  stroke: var(--djeluj);
+  stroke-width: 2;
+}
+
+.vrhSvjetla {
+  fill: var(--djeluj);
+}
+
+.paket {
+  fill: var(--text);
+}
+
+.trakaGreske {
+  fill: color-mix(in srgb, var(--fault) 18%, transparent);
+  stroke: var(--fault);
+  stroke-width: 2;
+}

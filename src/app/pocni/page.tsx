@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { existsSync, readFileSync } from 'node:fs';
 import { KLUBOVI_TEKST, QR_URL } from '@/config/cinjenice';
-import { Ilustracija } from '@/components/ilustracije/registar';
+import { Sema } from '@/components/slajdovi/crtezi';
 import stil from '@/components/pocni/pocni.module.css';
 
 export const metadata: Metadata = { title: 'Kako da počneš — Praktikum elektronike' };
@@ -15,17 +15,14 @@ const ALATI = [
   {
     naziv: 'micro:bit i MakeCode',
     opis: 'Besplatno i radi u browseru. Ne treba ti ništa da instaliraš.',
-    oznaka: 'A1',
   },
   {
     naziv: 'Arduino',
     opis: 'Mali računar koji pokreće Perjanika. Isti onaj sa slajda.',
-    oznaka: 'U1',
   },
   {
     naziv: 'Tinkercad Circuits',
     opis: 'Besplatan simulator kola. Spajaš žice na ekranu i odmah vidiš da li radi.',
-    oznaka: 'S1',
   },
 ];
 
@@ -40,39 +37,36 @@ export default function Pocni() {
   const qr = qrKod();
 
   return (
-    <main className={stil.ploca}>
-      <span className={`${stil.rupa} ${stil.rupaGL}`} aria-hidden="true" />
-      <span className={`${stil.rupa} ${stil.rupaGD}`} aria-hidden="true" />
-
+    <main className={stil.strana}>
       <header className={stil.zaglavlje}>
-        <h1 className={stil.naslov}>Kako da počneš</h1>
-        <Link href="/robotika" className={stil.dugme}>
-          Početna
+        <div>
+          <Link href="/robotika" className={stil.putanja}>
+            <span aria-hidden="true">←</span>
+            Praktikum elektronike
+          </Link>
+          <h1 className={stil.naslov}>Kako da počneš</h1>
+          <p className={stil.uvod}>Sve ovo je počelo sa jednim micro:bitom ili Arduinom i nekoliko žica.</p>
+        </div>
+        <Link href="/izlog" className={stil.dugme}>
+          Nazad na izlog
         </Link>
       </header>
 
-      <p className={stil.recenica}>
-        Sve ovo je počelo sa jednim micro:bitom ili Arduinom i nekoliko žica.
-      </p>
-
       <div className={stil.sredina}>
-        <div className={stil.crtez}>
-          <Ilustracija kljuc="zatvaranje" />
-        </div>
+        <figure className={stil.crtez}>
+          <Sema kljuc="zatvaranje" opis="Prvo kolo: pin, otpornik, LED i masa" />
+        </figure>
 
         <div className={stil.desno}>
           <nav className={stil.alati} aria-label="Odakle da kreneš">
             {ALATI.map((a) => (
               <div key={a.naziv} className={stil.alat}>
-                <span className={stil.oznakaAlata}>{a.oznaka}</span>
                 <span className={stil.nazivAlata}>{a.naziv}</span>
                 <span className={stil.opisAlata}>{a.opis}</span>
               </div>
             ))}
-
             {KLUBOVI_TEKST && (
               <div className={stil.alat}>
-                <span className={stil.oznakaAlata}>K1</span>
                 <span className={stil.nazivAlata}>Klubovi kod nas</span>
                 <span className={stil.opisAlata}>{KLUBOVI_TEKST}</span>
               </div>
@@ -89,13 +83,6 @@ export default function Pocni() {
           )}
         </div>
       </div>
-
-      <footer className={stil.podnozje}>
-        <span className="mikro">Jedna pločica, nekoliko žica, i jedna LED koja se upali kad treba.</span>
-        <Link href="/izlog" className={stil.veza}>
-          Nazad na izlog
-        </Link>
-      </footer>
     </main>
   );
 }

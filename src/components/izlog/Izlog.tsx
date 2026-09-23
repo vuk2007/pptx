@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IZLOG_PAUZA_SEKUNDE, IZLOG_SEKUNDE_PO_SLAJDU } from '@/config/cinjenice';
-import { BOJA, NAZIV, OZNAKA_LED, type BojaPetlje } from '@/components/ploca/primitivi';
-import type { SlajdUIzlogu } from '@/sadrzaj/slajdovi';
+import type { BojaPetlje, SlajdUIzlogu } from '@/sadrzaj/slajdovi';
 import { PrikazSlajda } from './PrikazSlajda';
 import stil from './izlog.module.css';
 
-const SVE_BOJE: BojaPetlje[] = ['osjeti', 'odluci', 'djeluj'];
+const ULOGE: { id: BojaPetlje; rijec: string }[] = [
+  { id: 'osjeti', rijec: 'osjeti' },
+  { id: 'odluci', rijec: 'odluči' },
+  { id: 'djeluj', rijec: 'djeluj' },
+];
 
 /**
  * Automatska prezentacija. Sama prelazi na sljedeći slajd, a svaka ručna
@@ -121,116 +124,85 @@ export function Izlog({ slajdovi, putanja }: { slajdovi: SlajdUIzlogu[]; putanja
 
   return (
     <main
-      className={stil.okvir}
+      className={stil.izlog}
       onPointerDown={naPritisak}
       onPointerUp={naOtpustanje}
       aria-roledescription="prezentacija"
       aria-label={`${putanja}, slajd ${indeks + 1} od ${ukupno}`}
     >
-      <span className={`${stil.rupa} ${stil.rupaGL}`} aria-hidden="true" />
-      <span className={`${stil.rupa} ${stil.rupaGD}`} aria-hidden="true" />
-      <span className={`${stil.rupa} ${stil.rupaDL}`} aria-hidden="true" />
-      <span className={`${stil.rupa} ${stil.rupaDD}`} aria-hidden="true" />
+      <h1 className="samo-za-citace">Praktikum elektronike, {putanja}</h1>
 
-      <h1 className="samo-za-citace">
-        Praktikum elektronike — {putanja}
-      </h1>
-
-      <header>
-        <div className={stil.letvaGore}>
-          <div className={stil.putanja}>
-            <span className="oznaka" style={{ color: 'var(--bakar-struja)' }}>
-              {putanja}
+      <header className={stil.vrh}>
+        <span className={stil.putanja}>
+          Praktikum elektronike, {putanja}: {slajd.nazivBloka}
+        </span>
+        {/* Uloga bloka u petlji: istaknuta je ona koju blok naglašava. */}
+        <span className={stil.uloge} aria-label={naglasak ? `Naglasak: ${ULOGE.find((u) => u.id === naglasak)?.rijec}` : undefined}>
+          {ULOGE.map((u) => (
+            <span key={u.id} className={`${stil.uloga} ${naglasak === undefined || naglasak === u.id ? stil.ulogaAktivna : ''}`} style={{ ['--boja' as string]: `var(--${u.id})` }}>
+              <i />
+              {u.rijec}
             </span>
-            <span className="oznaka">
-              {slajd.nazivBloka} · {indeks + 1}/{ukupno}
-            </span>
-          </div>
-
-          <div className={stil.ledovi}>
-            {SVE_BOJE.map((b) => {
-              const aktivan = naglasak === undefined || naglasak === b;
-              return (
-                <span
-                  key={b}
-                  className={`${stil.led} ${aktivan ? stil.ledAktivan : ''}`}
-                  style={{ ['--boja-led' as string]: BOJA[b] }}
-                >
-                  <span className={stil.ledTacka} />
-                  {OZNAKA_LED[b]} {NAZIV[b]}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className={stil.sinaNapretka}>
-          <div
-            key={`${indeks}-${pauzirano}-${biljeskeOtvorene}`}
-            className={stil.strujaNapretka}
-            style={{
-              ['--trajanje' as string]: `${IZLOG_SEKUNDE_PO_SLAJDU}s`,
-              animationDuration: `${IZLOG_SEKUNDE_PO_SLAJDU}s`,
-              animationPlayState: pauzirano || biljeskeOtvorene ? 'paused' : 'running',
-            }}
-          />
-        </div>
+          ))}
+        </span>
+        <span className={stil.brojac}>
+          {indeks + 1} / {ukupno}
+        </span>
       </header>
+
+      {/* Traka do sljedećeg slajda. Stoji dok je izlog pauziran. */}
+      <div className={stil.napredak} aria-hidden="true">
+        <i
+          key={`${indeks}-${pauzirano}-${biljeskeOtvorene}`}
+          style={{
+            animationDuration: `${IZLOG_SEKUNDE_PO_SLAJDU}s`,
+            animationPlayState: pauzirano || biljeskeOtvorene ? 'paused' : 'running',
+          }}
+        />
+      </div>
 
       <PrikazSlajda slajd={slajd} />
 
-      <div className={stil.letvaDolje}>
+      <footer className={stil.dno}>
         <div className={stil.tacke}>
           {slajdovi.map((s, i) => (
             <button
               key={s.id}
               className={stil.tackaDugme}
               onClick={() => skoci(i)}
-              aria-label={`Slajd ${i + 1}: ${s.recenica}`}
+              aria-label={`Slajd ${i + 1}: ${s.naslov}`}
               aria-current={i === indeks ? 'true' : undefined}
             >
-              <span className={`${stil.tacka} ${i === indeks ? stil.tackaAktivna : ''}`} />
+              <span className={i === indeks ? stil.tackaAktivna : stil.tacka} />
             </button>
           ))}
         </div>
 
         <div className={stil.savjeti}>
-          {(pauzirano || biljeskeOtvorene) && <span className={`${stil.savjet} ${stil.pauza}`}>auto pauziran</span>}
-
-          {/*
-            Na iPadu nema tastature, pa spisak tastera tamo samo zbunjuje.
-            Umjesto njega stoji ono što na dodir zaista radi.
-          */}
-          <span className={`${stil.savjet} ${stil.samoDodir}`}>prevuci za sljedeći slajd</span>
-
-          <span className={`${stil.savjet} ${stil.samoTaster}`}>
-            <span className={stil.taster}>←</span>
-            <span className={stil.taster}>→</span>
-            slajd
+          {(pauzirano || biljeskeOtvorene) && <span className={stil.pauza}>auto pauziran</span>}
+          {/* Na iPadu nema tastature, pa spisak tastera tamo samo zbunjuje. */}
+          <span className={stil.samoDodir}>prevuci za sljedeći slajd</span>
+          <span className={stil.samoTaster}>
+            <kbd>←</kbd>
+            <kbd>→</kbd> slajd
           </span>
-          <span className={`${stil.savjet} ${stil.samoTaster}`}>
-            <span className={stil.taster}>N</span>
-            bilješke
+          <span className={stil.samoTaster}>
+            <kbd>N</kbd> bilješke
           </span>
-          <span className={`${stil.savjet} ${stil.samoTaster}`}>
-            <span className={stil.taster}>ESC</span>
-            početna
+          <span className={stil.samoTaster}>
+            <kbd>Esc</kbd> početna
           </span>
         </div>
-      </div>
+      </footer>
 
       {biljeskeOtvorene && (
         <aside className={stil.biljeske}>
           <div className={stil.zaglavljeBiljezaka}>
-            <span className="oznaka" style={{ color: 'var(--bakar-struja)' }}>
-              Bilješke · {slajd.nazivBloka}
-            </span>
-            <button className={stil.savjet} onClick={() => postaviBiljeske(false)}>
-              <span className={stil.taster}>N</span>
-              zatvori
+            <span>Bilješke: {slajd.nazivBloka}</span>
+            <button className={stil.zatvori} onClick={() => postaviBiljeske(false)}>
+              <kbd>N</kbd> zatvori
             </button>
           </div>
-
           <BiljeskeBloka slajdovi={slajdovi} tekuci={slajd.id} />
         </aside>
       )}

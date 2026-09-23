@@ -1,330 +1,220 @@
-/* Izlog: ploča preko cijelog ekrana, sa gornjom i donjom letvom. */
+/*
+  Izlog na TV-u: vrh sa putanjom i ulogom bloka, tanka traka do
+  sljedećeg slajda, slajd, pa tačke i tasteri na dnu. Sve na jednom ekranu.
+*/
 
-.okvir {
-  position: relative;
+.izlog {
+  --ekran: 100svh;
   height: 100svh;
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: clamp(14px, 2vw, 34px) clamp(16px, 2.6vw, 48px);
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 1.4vh;
-  padding: 2.4vh max(52px, 2.6vw);
-  background: var(--maska);
-  border: 3px solid var(--ivica);
-  overflow: hidden;
-  /* Na dodir: bez klizanja stranice i bez slučajnog zumiranja. */
-  touch-action: none;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(10px, 1.6vh, 20px);
+  position: relative;
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Rupe za montažu, kao na pravoj ploči. */
-.rupa {
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--maska-duboka);
-  border: 4px solid var(--bakar);
-  opacity: 0.8;
-}
-.rupaGL { top: 18px; left: 18px; }
-.rupaGD { top: 18px; right: 18px; }
-.rupaDL { bottom: 18px; left: 18px; }
-.rupaDD { bottom: 18px; right: 18px; }
-
-/* --- gornja letva --- */
-
-.letvaGore {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2vw;
-  padding: 0 1.4vw;
-}
-
-.putanja {
-  display: flex;
-  align-items: baseline;
-  gap: 0.8em;
-}
-
-.ledovi {
-  display: flex;
-  gap: 1.4vw;
-  align-items: center;
-}
-
-.led {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--tekst-oznaka);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--silkscreen-tih);
-  opacity: 0.4;
-  transition: opacity 180ms linear;
-}
-
-.ledAktivan {
-  opacity: 1;
-  color: var(--boja-led);
-}
-
-.ledTacka {
-  width: 1.5vh;
-  height: 1.5vh;
-  border-radius: 50%;
-  background: var(--boja-led);
-  box-shadow: 0 0 0 0.35vh color-mix(in srgb, var(--boja-led) 26%, transparent);
-}
-
-.led:not(.ledAktivan) .ledTacka {
-  background: var(--maska-svijetla);
-  box-shadow: inset 0 0 0 2px var(--boja-led);
-}
-
-/* --- vod napretka: svjetlo putuje s lijeva na desno, i slajd se mijenja --- */
-
-.sinaNapretka {
-  position: relative;
-  height: 6px;
-  margin: 0 1.4vw;
-  background: var(--bakar);
-  opacity: 0.45;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.strujaNapretka {
-  position: absolute;
-  inset: 0;
-  background: var(--bakar-struja);
-  transform-origin: left center;
-  transform: scaleX(0);
-  animation: napredak linear forwards;
-}
-
-@keyframes napredak {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-/*
-  Uz prefers-reduced-motion globalno pravilo gasi svaku animaciju, ali ovdje
-  traka nosi informaciju — koliko je ostalo do prelaza. Umjesto glatkog
-  klizanja, pomjera se u koracima. Specifičnost klase nadjačava globalni `*`.
-*/
-@media (prefers-reduced-motion: reduce) {
-  .strujaNapretka {
-    animation-duration: var(--trajanje) !important;
-    animation-iteration-count: 1 !important;
-    animation-timing-function: steps(10, end) !important;
+@media (min-width: 2560px) and (min-height: 1400px) {
+  .izlog {
+    zoom: 2;
+    height: 50svh;
+    --ekran: 50svh;
   }
 }
 
-/* --- sadržaj slajda --- */
-
-.slajd {
-  display: grid;
-  grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
-  align-items: center;
-  gap: 2.4vw;
-  height: 100%;
-  min-height: 0;
-  padding: 0 1.4vw;
-}
-
-.kolonaTeksta {
+.vrh {
   display: flex;
-  flex-direction: column;
-  gap: 3vh;
-  align-items: flex-start;
-  min-width: 0;
-}
-
-.recenica {
-  font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.005em;
-  text-wrap: balance;
-}
-
-.kolonaCrteza {
-  height: 100%;
-  min-height: 0;
-  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  gap: 8px 28px;
+  font-size: clamp(14px, min(1.1vw, 2vh), 19px);
+  color: var(--muted);
 }
 
-.dugmeDemo {
+.putanja {
+  margin-right: auto;
+}
+
+.uloge {
+  display: inline-flex;
+  gap: 18px;
+}
+
+.uloga {
   display: inline-flex;
   align-items: center;
-  gap: 0.6em;
-  min-height: var(--meta-dodir);
-  padding: 0 1.6em;
-  font-size: 2.6vh;
+  gap: 7px;
+  color: var(--muted);
   font-weight: 600;
-  color: var(--bakar-struja);
-  border: 3px solid var(--bakar);
-  border-radius: var(--radijus);
-  background: var(--maska-svijetla);
-  transition: background 140ms linear, color 140ms linear;
 }
 
-.dugmeDemo:hover,
-.dugmeDemo:focus-visible {
-  background: var(--bakar-struja);
-  color: var(--maska-duboka);
+.uloga i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--boja);
 }
 
-/* --- donja letva --- */
+.ulogaAktivna {
+  color: var(--boja);
+}
 
-.letvaDolje {
+.ulogaAktivna i {
+  background: var(--boja);
+}
+
+.brojac {
+  font-weight: 650;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.napredak {
+  height: 2px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.napredak i {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  transform-origin: left;
+  animation-name: napredak;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes napredak {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.dno {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 2vw;
-  padding: 0 1.4vw;
+  gap: 8px 24px;
 }
 
 .tacke {
   display: flex;
-  gap: 0.7vw;
-  align-items: center;
-}
-
-.tacka {
-  width: 1.3vh;
-  height: 1.3vh;
-  border-radius: 50%;
-  background: var(--maska-svijetla);
-  border: 2px solid var(--bakar);
-  padding: 0;
-}
-
-.tackaAktivna {
-  background: var(--bakar-struja);
-  border-color: var(--bakar-struja);
-  transform: scale(1.35);
+  flex-wrap: wrap;
 }
 
 .tackaDugme {
-  /* Meta za dodir je veća od tačke koja se vidi. */
+  width: 30px;
+  height: 36px;
   display: grid;
   place-items: center;
-  width: 3vh;
-  height: 3vh;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.tacka,
+.tackaAktivna {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+}
+
+.tackaAktivna {
+  background: var(--text);
+  border-color: var(--text);
 }
 
 .savjeti {
   display: flex;
-  gap: 1.6vw;
-  align-items: center;
   flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.savjet {
-  display: inline-flex;
   align-items: center;
-  gap: 0.45em;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--tekst-mikro);
-  letter-spacing: 0.08em;
-  color: var(--silkscreen-tih);
-  text-transform: uppercase;
+  gap: 6px 20px;
+  font-size: clamp(13px, min(0.95vw, 1.8vh), 16px);
+  color: var(--muted);
 }
 
-.taster {
-  display: inline-grid;
-  place-items: center;
-  min-width: 2.4em;
-  padding: 0.25em 0.5em;
-  border: 2px solid var(--bakar);
+.savjeti kbd,
+.zatvori kbd {
+  font: inherit;
+  font-weight: 650;
+  padding: 1px 7px;
+  margin-right: 4px;
+  border: 1.5px solid var(--line-soft);
   border-radius: 4px;
-  color: var(--bakar-struja);
-  font-weight: 700;
+  color: var(--text);
 }
 
 .pauza {
-  color: var(--bakar-struja);
+  color: var(--text);
+  font-weight: 650;
 }
 
-/* --- panel bilježaka --- */
-
-.biljeske {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-height: 46vh;
-  overflow-y: auto;
-  touch-action: pan-y;
-  background: var(--maska-duboka);
-  border-top: 4px solid var(--bakar);
-  padding: 2.4vh 3vw 3vh;
-  display: flex;
-  flex-direction: column;
-  gap: 1.4vh;
-}
-
-.zaglavljeBiljezaka {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2vw;
-}
-
-.tekstBiljeske {
-  font-size: var(--tekst-telo);
-  line-height: 1.34;
-  color: var(--silkscreen-tih);
-  max-width: 62ch;
-}
-
-/* Dio scenarija koji pripada baš ovom slajdu. */
-.segmentAktivan {
-  color: var(--silkscreen);
-}
-
-.bezBiljeske {
-  font-size: var(--tekst-telo);
-  color: var(--silkscreen-tih);
-  opacity: 0.7;
-}
-
-/* --- uži ekrani i iPad u portretu --- */
-
-@media (max-aspect-ratio: 5/4) {
-  .slajd {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 2vh;
-  }
-
-  .recenica {
-    font-size: 5.4vh !important;
-  }
-}
-
-/*
-  Štand ima TV sa daljinskim i iPad bez tastature. Savjet mora da odgovara
-  onome što gledalac zaista ima u ruci.
-*/
 .samoDodir {
   display: none;
 }
 
-@media (pointer: coarse) {
+@media (hover: none) and (pointer: coarse) {
+  .samoDodir {
+    display: inline;
+  }
   .samoTaster {
     display: none;
   }
+}
 
-  .samoDodir {
-    display: inline-flex;
-  }
+.biljeske {
+  position: absolute;
+  right: clamp(16px, 2.6vw, 48px);
+  bottom: clamp(70px, 10vh, 120px);
+  width: min(560px, 44vw);
+  max-height: 62vh;
+  overflow: auto;
+  padding: 18px 22px;
+  background: var(--panel);
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+}
+
+.zaglavljeBiljezaka {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.zatvori {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  min-height: 44px;
+}
+
+.tekstBiljeske {
+  margin: 0;
+  font-size: clamp(16px, 1.2vw, 21px);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.segmentAktivan {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.bezBiljeske {
+  margin: 0;
+  color: var(--muted);
 }
