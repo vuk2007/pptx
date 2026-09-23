@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/provjeri-vercel.mjs && node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
+    "build": "node scripts/provjeri-vercel.mjs && node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-pwm.mjs && node scripts/provjeri-radio.mjs && node scripts/provjeri-suspenzija.mjs && node scripts/provjeri-servo.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
     "start": "node scripts/serve.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -24,7 +24,11 @@
     "provjeri-raspored": "node scripts/provjeri-raspored.mjs",
     "provjeri-vercel": "node scripts/provjeri-vercel.mjs",
     "provjeri-analitiku": "node scripts/provjeri-analitiku.mjs",
-    "provjeri-modele": "node scripts/provjeri-modele.mjs"
+    "provjeri-modele": "node scripts/provjeri-modele.mjs",
+    "provjeri-pwm": "node scripts/provjeri-pwm.mjs",
+    "provjeri-radio": "node scripts/provjeri-radio.mjs",
+    "provjeri-suspenzija": "node scripts/provjeri-suspenzija.mjs",
+    "provjeri-servo": "node scripts/provjeri-servo.mjs"
   },
   "dependencies": {
     "@google/model-viewer": "^4.3.1",

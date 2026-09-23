@@ -1,7 +1,8 @@
 'use client';
 
-import type { ReactNode, Ref } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 import Link from 'next/link';
+import { neprelomno } from '@/lib/format';
 import stil from './instrument.module.css';
 
 /*
@@ -100,8 +101,8 @@ export function Rezimi<T extends string>({
 export function StatusLinija({ sta, zasto, greska = false }: { sta: string; zasto: string; greska?: boolean }) {
   return (
     <section className={`${stil.panel} ${stil.status}`} role="status" aria-live="polite">
-      <p className={`${stil.sta} ${greska ? stil.staGreska : ''}`}>{sta}</p>
-      <p className={stil.zasto}>{zasto}</p>
+      <p className={`${stil.sta} ${greska ? stil.staGreska : ''}`}>{neprelomno(sta)}</p>
+      <p className={stil.zasto}>{neprelomno(zasto)}</p>
     </section>
   );
 }
@@ -199,6 +200,87 @@ export function KarticaTocka({
       </div>
     </div>
   );
+}
+
+/** Panel sa kontrolama na strani. */
+export function PanelKontrola({ children }: { children: ReactNode }) {
+  return <div className={`${stil.panel} ${stil.kontrole}`}>{children}</div>;
+}
+
+/**
+  Taster. Sa `pritisnut` je prekidač koji drži stanje (aria-pressed);
+  bez njega je obično dugme. Boja nosi značenje, pa se zadaje imenom tokena.
+*/
+export function Taster({
+  pritisnut,
+  boja = 'text',
+  onClick,
+  disabled,
+  children,
+}: {
+  pritisnut?: boolean;
+  boja?: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      className={stil.taster}
+      style={{ '--boja-tastera': `var(--${boja})` } as CSSProperties}
+      aria-pressed={pritisnut}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Klizač sa natpisom i vrijednošću iznad, meta za prst visoka 44 px. */
+export function Klizac({
+  id,
+  natpis,
+  vrijednost,
+  prikaz,
+  min = 0,
+  max = 100,
+  korak = 1,
+  boja = 'odluci',
+  onPromjena,
+}: {
+  id: string;
+  natpis: string;
+  vrijednost: number;
+  prikaz: string;
+  min?: number;
+  max?: number;
+  korak?: number;
+  boja?: string;
+  onPromjena: (novo: number) => void;
+}) {
+  return (
+    <div className={stil.klizac} style={{ '--boja-klizaca': `var(--${boja})` } as CSSProperties}>
+      <label htmlFor={id}>
+        {natpis} <span>{prikaz}</span>
+      </label>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={korak}
+        value={vrijednost}
+        aria-valuetext={prikaz}
+        onChange={(e) => onPromjena(Number(e.target.value))}
+      />
+    </div>
+  );
+}
+
+/** Sitna napomena na dnu strane: šta je ilustrativno ili usporeno. */
+export function Napomena({ children }: { children: ReactNode }) {
+  return <p className={stil.napomena}>{children}</p>;
 }
 
 export { stil as instrumentStil };

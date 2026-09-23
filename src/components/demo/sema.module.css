@@ -1,0 +1,142 @@
+/*
+  Zajednički simboli tehničke šeme: žice 2,5 px, čvorovi kao tačke,
+  blokovi kao tanki okviri. Boja nosi značenje, oblik ostaje neutralan.
+*/
+
+.zica {
+  stroke: var(--line);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.zicaTanka {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.isprekidano {
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-dasharray: 7 6;
+  fill: none;
+}
+
+.cvor {
+  fill: var(--line);
+}
+
+.blok {
+  fill: var(--panel);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.cip {
+  fill: var(--panel-2);
+  stroke: var(--odluci);
+  stroke-width: 2;
+}
+
+.naslovCipa {
+  fill: var(--odluci);
+  font-weight: 720;
+  font-size: 26px;
+  font-stretch: 78%;
+}
+
+.pin {
+  fill: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tekst {
+  fill: var(--text);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.tekstVeliki {
+  fill: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  font-stretch: 80%;
+}
+
+.tih {
+  fill: var(--muted);
+  font-size: 15px;
+}
+
+.greska {
+  fill: var(--fault);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.stanjeUkljuceno {
+  fill: var(--current);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.motor {
+  fill: var(--panel);
+  stroke: var(--djeluj);
+  stroke-width: 3;
+}
+
+.slovoMotora {
+  fill: var(--djeluj);
+  font-weight: 720;
+  font-size: 30px;
+  font-stretch: 80%;
+}
+
+.baterijaDuga {
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.baterijaKratka {
+  stroke: var(--text);
+  stroke-width: 6;
+}
+
+/* Logički signal: odluka iz mozga. Visoko je u boji logike, nisko neutralno. */
+.logikaVisoko {
+  stroke: var(--odluci);
+  stroke-width: 3;
+  fill: none;
+  transition: stroke var(--prelaz);
+}
+
+.logikaNisko {
+  stroke: var(--line-soft);
+  stroke-width: 3;
+  fill: none;
+  transition: stroke var(--prelaz);
+}
+
+.oznakaLogike {
+  fill: var(--odluci);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.meta {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.meta:focus {
+  outline: none;
+}
+
+.meta:focus-visible {
+  stroke: var(--odluci);
+  stroke-width: 3;
+}

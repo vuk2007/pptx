@@ -348,6 +348,71 @@
   color: var(--djeluj);
 }
 
+/* ------------------------------------------------------------ kontrole */
+
+.kontrole {
+  padding: clamp(12px, 1vw, 16px) clamp(14px, 1.1vw, 20px);
+  display: grid;
+  gap: clamp(8px, 1.2vh, 14px);
+}
+
+.redTastera {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.taster {
+  --boja-tastera: var(--text);
+  font: inherit;
+  font-weight: 650;
+  font-size: clamp(15px, 1vw, 17px);
+  min-height: 48px;
+  min-width: 96px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--boja-tastera);
+  color: var(--boja-tastera);
+  background: transparent;
+  white-space: nowrap;
+  transition: background-color var(--prelaz), color var(--prelaz);
+}
+
+.taster[aria-pressed='true'] {
+  background: var(--boja-tastera);
+  color: var(--panel);
+}
+
+.taster:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.klizac label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.klizac label span {
+  color: var(--boja-klizaca);
+}
+
+.klizac input {
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  accent-color: var(--boja-klizaca);
+}
+
+.napomena {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* ------------------------------------------------------------ uži ekrani */
 
 @media (max-width: 1280px) {

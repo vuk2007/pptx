@@ -19,7 +19,7 @@ const modul = await prevedi(
 );
 const hm = await modul.uvezi('src/lib/h-most.ts');
 const motor = await modul.uvezi('src/lib/motor.ts');
-const { broj } = await modul.uvezi('src/lib/format.ts');
+const { broj, neprelomno, NBSP } = await modul.uvezi('src/lib/format.ts');
 const { MOTOR } = await modul.uvezi('src/config/cinjenice.ts');
 modul.pocisti();
 
@@ -258,6 +258,19 @@ for (const [n, d, ocekujem] of [
   [11.1, 1, '11,1'],
 ]) {
   provjeri(broj(n, d) === ocekujem, `broj(${n}, ${d}) daje „${broj(n, d)}", očekivano „${ocekujem}"`);
+}
+
+/* Broj i jedinica ostaju u istom redu; riječi koje samo počinju slovom jedinice se ne diraju. */
+for (const [ulaz, izlaz] of [
+  ['zagrijali su se na 72 °C!', `zagrijali su se na 72${NBSP}°C!`],
+  ['dobija 5,5 V.', `dobija 5,5${NBSP}V.`],
+  ['B = 180° − A', `B = 180°${NBSP}−${NBSP}A`],
+  ['svakih 40 ms i', `svakih 40${NBSP}ms i`],
+  ['na 90° se isti', 'na 90° se isti'],
+  ['oko 2 Arduina', 'oko 2 Arduina'],
+  ['pali 60 % vremena', `pali 60${NBSP}% vremena`],
+]) {
+  provjeri(neprelomno(ulaz) === izlaz, `neprelomno(„${ulaz}") daje „${neprelomno(ulaz)}"`);
 }
 
 for (const g of greske) console.log(`  PAD  ${g}`);

@@ -1,414 +1,367 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { SilkTekst, Vod } from '@/components/ploca/primitivi';
-import { Tocak } from '@/components/ilustracije/oblici';
+import { useEffect, useRef, useState } from 'react';
+import { broj } from '@/lib/format';
 import { useAnimacija } from '@/lib/animacija';
-import { OkvirDemonstracije, PrekidacRezima } from './OkvirDemonstracije';
-import stil from './demo.module.css';
+import { GEOMETRIJA, PRAG_VISI, rijesi, stepeni, type Poluga, type Suspenzija as Rjesenje } from '@/lib/suspenzija';
+import type { Poruka } from '@/lib/h-most';
+import {
+  Klizac,
+  Napomena,
+  Ocitavanja,
+  Ocitavanje,
+  Okvir,
+  PanelKontrola,
+  Rezimi,
+  StatusLinija,
+} from '@/components/instrument/Okvir';
+import stil from './sema.module.css';
+import sus from './suspenzija.module.css';
 
-/*
-  Rocker sa diferencijalom. Perjanik ima ČETIRI točka: po jednu polugu sa dva
-  točka sa svake strane, i diferencijal koji drži tijelo na prosjeku dvije poluge.
+/* ------------------------------------------------ geometrija crteža */
 
-  Bez suspenzije je tijelo kruto: kad jedan točak stane na kamen, jedan drugi
-  ostane u vazduhu i vrti se u prazno.
-*/
+const OSOVINA = 330;
+/** Tlo lijeve strane (sa kamenom) i desne strane, svaka u svom bočnom pogledu. */
+const TLO_L = 236;
+const TLO_D = 470;
+const R = GEOMETRIJA.rTocka;
+const KAMEN_MIN = OSOVINA - 280;
+const KAMEN_MAX = OSOVINA + 280;
+const POCETNI_KAMEN = OSOVINA + 118;
+const X_TLA = [24, 700] as const;
 
-const TLO_BLIZU = 452;
-const DUBINA_X = 86;
-const DUBINA_Y = 46;
-const TLO_DALEKO = TLO_BLIZU - DUBINA_Y;
+/* Tijelo i diferencijal, desno od dva pogleda. */
+const TIJELO = { x: 838, y: 150, pola: 92, visina: 44 };
+const DIFERENCIJAL = { x: 838, y: 390 };
 
-const X_ROVERA = 520;
-const POLA_POLUGE = 118;
-const R_TOCKA = 44;
+/** Podignutost u jedinicama crteža → y u SVG-u (y raste naniže). */
+const yOd = (tlo: number, podignutost: number) => tlo - R - podignutost;
 
-const VISINA_KAMENA = 56;
-const POLA_KAMENA = 76;
-const RAMPA = 18;
-const X_KAMEN_MIN = 250;
-const X_KAMEN_MAX = 900;
+const REZIMI = [
+  { id: 'diferencijal', natpis: 'Sa diferencijalom' },
+  { id: 'kruto', natpis: 'Bez suspenzije' },
+] as const;
 
-/* Prikaz odnaprijed: diferencijal i dvije poluge. */
-const INSET_X = 1150;
-const INSET_Y = 300;
+const ugao = (rad: number) => `${broj(stepeni(rad), 1)}°`;
 
-/** Visina tla na datom mjestu: nula, osim ispod kamena. */
-function visinaTla(x: number, xKamena: number) {
-  const d = Math.abs(x - xKamena);
-  if (d >= POLA_KAMENA) return 0;
-  if (d > POLA_KAMENA - RAMPA) return (VISINA_KAMENA * (POLA_KAMENA - d)) / RAMPA;
-  return VISINA_KAMENA;
+function porukaZa(r: Rjesenje, kruto: boolean): Poruka {
+  const naTlu = r.tockovi.filter((t) => t.zazor <= PRAG_VISI).length;
+  const nagnuta = Math.abs(stepeni(r.lijeva.ugao)) > 0.2;
+  if (kruto) {
+    if (naTlu < 4) {
+      return {
+        sta: 'Bez suspenzije tijelo je kruto: jedan točak desne strane visi u vazduhu.',
+        zasto: 'Taj točak nema oslonac, pa se vrti u prazno i ne gura rover.',
+      };
+    }
+    return {
+      sta: 'Bez suspenzije, na ravnom, sva četiri točka su na tlu.',
+      zasto: 'Provuci kamen ispod lijevog točka i gledaj desnu stranu.',
+    };
+  }
+  if (nagnuta) {
+    return {
+      sta: `Lijeva poluga se nagnula ${ugao(r.lijeva.ugao)}, a oba njena točka su i dalje na tlu.`,
+      zasto: `Diferencijal drži tijelo na prosjeku dvije poluge, pa je tijelo nagnuto samo ${ugao(r.tijelo)}.`,
+    };
+  }
+  return {
+    sta: 'Sva četiri točka su na tlu i tijelo je vodoravno.',
+    zasto: 'Provuci kamen ispod lijevog točka: poluga se nagne, a diferencijal podijeli nagib na pola.',
+  };
 }
 
 export function Suspenzija() {
-  const [xKamena, postaviKamen] = useState(700);
+  const [xKamena, postaviKamen] = useState(POCETNI_KAMEN);
   const [kruto, postaviKruto] = useState(false);
+  const r = rijesi(OSOVINA, xKamena, kruto);
+  const poruka = porukaZa(r, kruto);
+  const naTlu = r.tockovi.filter((t) => t.zazor <= PRAG_VISI).length;
 
+  /* Točak koji visi vrti se u prazno: motor ga vozi, a ništa ga ne drži. */
+  const paociRef = useRef<(SVGGElement | null)[]>([]);
   const ugaoTocka = useRef(0);
-  const blizuNazadRef = useRef<SVGGElement | null>(null);
-  const blizuNaprijedRef = useRef<SVGGElement | null>(null);
-  const dalekoNazadRef = useRef<SVGGElement | null>(null);
-  const dalekoNaprijedRef = useRef<SVGGElement | null>(null);
-
-  /* --- geometrija zavisi samo od položaja kamena i režima --- */
-
-  /*
-    Ugao poluge zavisi od visine tla ispod točkova, ali se i sami točkovi
-    pomjere vodoravno kad se poluga zarotira. Zato se rješava u nekoliko
-    prolaza: bez toga točak na ivici kamena ispadne par piksela iznad tla
-    i pogrešno se prijavi kao da visi.
-  */
-  let ugaoBlizu = 0;
-  let hNazad = 0;
-  let hNaprijed = 0;
-  for (let prolaz = 0; prolaz < 4; prolaz++) {
-    hNazad = visinaTla(X_ROVERA - POLA_POLUGE * Math.cos(ugaoBlizu), xKamena);
-    hNaprijed = visinaTla(X_ROVERA + POLA_POLUGE * Math.cos(ugaoBlizu), xKamena);
-    ugaoBlizu = Math.asin(
-      Math.max(-0.6, Math.min(0.6, (hNazad - hNaprijed) / (2 * POLA_POLUGE))),
-    );
-  }
-
-  /* Osovina se podigne za prosjek visina ispod dva točka. */
-  const yOsovineBlizu = TLO_BLIZU - R_TOCKA - (hNazad + hNaprijed) / 2;
-
-  /*
-    Sa suspenzijom daleka strana ostaje ravna, jer je na ravnom tlu.
-    Bez suspenzije je sve zavareno, pa daleka strana nosi isti ugao i njen
-    prednji točak ode iznad svoje podloge.
-  */
-  const ugaoDaleko = kruto ? ugaoBlizu : 0;
-  /*
-    Kruta daleka strana se spusti taman dok njen NIŽI točak ne dodirne tlo.
-    Onaj drugi onda ostane gore — to je točak koji se vrti u prazno.
-  */
-  const yOsovineDaleko = kruto
-    ? TLO_DALEKO - R_TOCKA - POLA_POLUGE * Math.abs(Math.sin(ugaoBlizu))
-    : TLO_DALEKO - R_TOCKA;
-
-  /*
-    Sa suspenzijom tijelo sjedi na prosjeku dvije poluge — to radi diferencijal.
-    Bez nje je tijelo zavareno za polugu, pa nosi njen puni ugao.
-  */
-  const ugaoTijela = kruto ? ugaoBlizu : (ugaoBlizu + 0) / 2;
-
-  const tocakBlizu = (smjer: -1 | 1) => ({
-    x: X_ROVERA + smjer * POLA_POLUGE * Math.cos(ugaoBlizu),
-    y: yOsovineBlizu + smjer * POLA_POLUGE * Math.sin(ugaoBlizu),
-  });
-
-  const tocakDaleko = (smjer: -1 | 1) => ({
-    x: X_ROVERA - DUBINA_X + smjer * POLA_POLUGE * Math.cos(ugaoDaleko),
-    y: yOsovineDaleko + smjer * POLA_POLUGE * Math.sin(ugaoDaleko),
-  });
-
-  const bz = tocakBlizu(-1);
-  const bn = tocakBlizu(1);
-  const dz = tocakDaleko(-1);
-  const dn = tocakDaleko(1);
-
-  /* Koliko je koji točak iznad svoje podloge. */
-  const zazor = (tocak: { x: number; y: number }, tlo: number, saKamenom: boolean) => {
-    const visina = saKamenom ? visinaTla(tocak.x, xKamena) : 0;
-    return Math.max(0, tlo - visina - R_TOCKA - tocak.y);
-  };
-
-  const zazori = [
-    zazor(bz, TLO_BLIZU, true),
-    zazor(bn, TLO_BLIZU, true),
-    zazor(dz, TLO_DALEKO, false),
-    zazor(dn, TLO_DALEKO, false),
-  ];
-  const uVazduhu = zazori.map((z) => z > 8);
-  const brojUVazduhu = uVazduhu.filter(Boolean).length;
-
-  /* Točak koji ne dodiruje tlo vrti se u prazno. */
+  const visi = r.tockovi.map((t) => t.zazor > PRAG_VISI);
   useAnimacija((dt) => {
     ugaoTocka.current = (ugaoTocka.current + 300 * dt) % 360;
-    const parovi: [SVGGElement | null, boolean][] = [
-      [blizuNazadRef.current, uVazduhu[0]],
-      [blizuNaprijedRef.current, uVazduhu[1]],
-      [dalekoNazadRef.current, uVazduhu[2]],
-      [dalekoNaprijedRef.current, uVazduhu[3]],
-    ];
-    const centri = [bz, bn, dz, dn];
-    parovi.forEach(([element, prazno], i) => {
-      if (!element) return;
-      element.setAttribute(
-        'transform',
-        prazno ? `rotate(${ugaoTocka.current} ${centri[i].x} ${centri[i].y})` : '',
-      );
+    paociRef.current.forEach((g, i) => {
+      if (!g) return;
+      const t = r.tockovi[i];
+      g.setAttribute('transform', visi[i] ? `rotate(${ugaoTocka.current} ${t.x} ${yOd(i < 2 ? TLO_L : TLO_D, t.y)})` : '');
     });
   });
 
-  /* --- prevlačenje kamena --- */
+  /* Prevlačenje kamena: pozicija prsta u koordinate crteža. */
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const vuceSe = useRef(false);
-
-  function uKoordinateSvg(klijentX: number) {
+  const vuce = useRef(false);
+  function pomjeri(klijentX: number, klijentY: number) {
     const svg = svgRef.current;
-    if (!svg) return null;
-    const okvir = svg.getBoundingClientRect();
-    /* viewBox je 1480 širok i uklapa se po visini, pa računamo stvarnu razmjeru. */
-    const razmjera = Math.min(okvir.width / 1480, okvir.height / 640);
-    const lijevo = okvir.left + (okvir.width - 1480 * razmjera) / 2;
-    return (klijentX - lijevo) / razmjera;
+    const matrica = svg?.getScreenCTM();
+    if (!svg || !matrica) return;
+    const tacka = new DOMPoint(klijentX, klijentY).matrixTransform(matrica.inverse());
+    postaviKamen(Math.round(Math.max(KAMEN_MIN, Math.min(KAMEN_MAX, tacka.x))));
   }
 
-  function pomjeriKamen(klijentX: number) {
-    const x = uKoordinateSvg(klijentX);
-    if (x === null) return;
-    postaviKamen(Math.max(X_KAMEN_MIN, Math.min(X_KAMEN_MAX, x)));
-  }
+  useEffect(() => {
+    const naTaster = (e: KeyboardEvent) => {
+      const cilj = e.target as HTMLElement | null;
+      if (cilj?.tagName === 'INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === 'arrowleft') postaviKamen((x) => Math.max(KAMEN_MIN, x - 12));
+      else if (k === 'arrowright') postaviKamen((x) => Math.min(KAMEN_MAX, x + 12));
+      else if (k === 'm') postaviKruto((v) => !v);
+      else if (k === 'r') naResetuj();
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', naTaster);
+    return () => window.removeEventListener('keydown', naTaster);
+  }, []);
 
-  function resetuj() {
-    postaviKamen(700);
+  function naResetuj() {
+    postaviKamen(POCETNI_KAMEN);
     postaviKruto(false);
   }
 
-  const poruka = kruto
-    ? brojUVazduhu > 0
-      ? 'Bez suspenzije tijelo je kruto: jedan točak visi u vazduhu i vrti se u prazno.'
-      : 'Bez suspenzije, na ravnom, sve izgleda u redu. Provuci kamen ispod nekog točka.'
-    : brojUVazduhu > 0
-      ? 'Poluga se nagnula, ali jedan točak je i dalje gore.'
-      : hNazad > 4 || hNaprijed > 4
-        ? 'Poluga se nagnula taman toliko da oba njena točka ostanu na zemlji, a tijelo sjedi na prosjeku.'
-        : 'Provuci kamen ispod nekog točka i gledaj šta radi poluga.';
+  const G = GEOMETRIJA;
+  const kamen = [
+    [xKamena - G.polaKamena, TLO_L],
+    [xKamena - G.polaKamena + G.kosina, TLO_L - G.visinaKamena],
+    [xKamena + G.polaKamena - G.kosina, TLO_L - G.visinaKamena],
+    [xKamena + G.polaKamena, TLO_L],
+  ]
+    .map((t) => t.join(','))
+    .join(' ');
 
   return (
-    <OkvirDemonstracije
+    <Okvir
+      nazad={{ naziv: 'Perjanik', putanja: '/perjanik' }}
       naslov="Suspenzija"
-      oznaka="Perjanik · rocker sa diferencijalom"
-      nazadPutanja="/perjanik"
-      nazadNaziv="Perjanik"
-      poruka={poruka}
-      alarm={kruto && brojUVazduhu > 0}
-      napomena="Pojednostavljeno. NASA ima tri točka po strani; mi imamo dva — jeftinije, a i dalje sva četiri na zemlji."
-      onResetuj={resetuj}
-      kontrole={
-        <PrekidacRezima ukljucen={kruto} onPromjena={postaviKruto}>
-          Bez suspenzije
-        </PrekidacRezima>
-      }
-    >
-      <svg
-        ref={svgRef}
-        viewBox="0 0 1480 640"
-        preserveAspectRatio="xMidYMid meet"
-        onPointerDown={(e) => {
-          vuceSe.current = true;
-          (e.target as Element).setPointerCapture?.(e.pointerId);
-          pomjeriKamen(e.clientX);
-        }}
-        onPointerMove={(e) => vuceSe.current && pomjeriKamen(e.clientX)}
-        onPointerUp={() => {
-          vuceSe.current = false;
-        }}
-        onPointerCancel={() => {
-          vuceSe.current = false;
-        }}
-      >
-        {/* --- daleka strana, prigušena, sa svojim tlom --- */}
-        <g opacity={0.42}>
-          <Vod tacke={`${120 - DUBINA_X},${TLO_DALEKO} ${1000 - DUBINA_X},${TLO_DALEKO}`} debljina={5} />
-          <line x1={dz.x} y1={dz.y} x2={dn.x} y2={dn.y} stroke="var(--silkscreen)" strokeWidth={9} strokeLinecap="round" />
-          <g ref={dalekoNazadRef}>
-            <Tocak x={dz.x} y={dz.y} r={R_TOCKA} boja={uVazduhu[2] ? 'var(--alarm)' : 'var(--silkscreen)'} />
-          </g>
-          <g ref={dalekoNaprijedRef}>
-            <Tocak x={dn.x} y={dn.y} r={R_TOCKA} boja={uVazduhu[3] ? 'var(--alarm)' : 'var(--silkscreen)'} />
-          </g>
-        </g>
-
-        {/* --- tlo sa kamenom --- */}
-        <Vod
-          tacke={[
-            `120,${TLO_BLIZU}`,
-            `${xKamena - POLA_KAMENA},${TLO_BLIZU}`,
-            `${xKamena - POLA_KAMENA + RAMPA},${TLO_BLIZU - VISINA_KAMENA}`,
-            `${xKamena + POLA_KAMENA - RAMPA},${TLO_BLIZU - VISINA_KAMENA}`,
-            `${xKamena + POLA_KAMENA},${TLO_BLIZU}`,
-            `1000,${TLO_BLIZU}`,
-          ].join(' ')}
-          debljina={6}
-        />
-
-        {/* kamen je meta za prst, pa ima i nevidljivu veliku ručku */}
-        <g className={stil.prekidacSvg} role="slider" tabIndex={0}
-          aria-label="Položaj kamena"
-          aria-valuemin={X_KAMEN_MIN}
-          aria-valuemax={X_KAMEN_MAX}
-          aria-valuenow={Math.round(xKamena)}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowLeft') { e.preventDefault(); postaviKamen((x) => Math.max(X_KAMEN_MIN, x - 24)); }
-            if (e.key === 'ArrowRight') { e.preventDefault(); postaviKamen((x) => Math.min(X_KAMEN_MAX, x + 24)); }
+      uvod="Dvije poluge i diferencijal drže sva četiri točka na tlu."
+      rezimi={<Rezimi opis="Suspenzija" opcije={REZIMI} izabran={kruto ? 'kruto' : 'diferencijal'} onIzbor={(id) => postaviKruto(id === 'kruto')} />}
+      onResetuj={naResetuj}
+      status={<StatusLinija sta={poruka.sta} zasto={poruka.zasto} greska={kruto && naTlu < 4} />}
+      sema={
+        <svg
+          ref={svgRef}
+          viewBox="0 0 960 520"
+          role="img"
+          aria-label="Dva bočna pogleda na Perjanika: lijeva strana sa kamenom i desna strana na ravnom, pa nagib tijela i diferencijal"
+          onPointerDown={(e) => {
+            vuce.current = true;
+            (e.target as Element).setPointerCapture?.(e.pointerId);
+            pomjeri(e.clientX, e.clientY);
           }}
+          onPointerMove={(e) => vuce.current && pomjeri(e.clientX, e.clientY)}
+          onPointerUp={() => (vuce.current = false)}
+          onPointerCancel={() => (vuce.current = false)}
         >
-          <rect x={xKamena - POLA_KAMENA - 12} y={TLO_BLIZU - VISINA_KAMENA - 12} width={POLA_KAMENA * 2 + 24} height={VISINA_KAMENA + 82} fill="transparent" />
-          <rect className={stil.okvirFokusa} x={xKamena - POLA_KAMENA - 12} y={TLO_BLIZU - VISINA_KAMENA - 12} width={POLA_KAMENA * 2 + 24} height={VISINA_KAMENA + 82} rx={6}
-            fill="none" stroke="var(--bakar-struja)" strokeWidth={3} />
-          <SilkTekst x={xKamena} y={TLO_BLIZU + 34} sredina velicina={19} boja="var(--bakar-struja)">
-            kamen
-          </SilkTekst>
-          <SilkTekst x={xKamena} y={TLO_BLIZU + 58} sredina velicina={15} boja="var(--silkscreen-tih)" debljina={400}>
-            prevuci me
-          </SilkTekst>
-        </g>
+          {/* lijeva strana, sa kamenom */}
+          <text x={X_TLA[0]} y={40} className={stil.tekst}>
+            lijeva strana
+          </text>
+          <Tlo tlo={TLO_L} />
+          <polygon points={kamen} className={sus.kamen} />
+          <PolugaCrtez p={r.lijeva} tlo={TLO_L} visi={[visi[0], visi[1]]} paociRef={paociRef} indeks={0} oznaka="θL" />
 
-        {/* --- bliža poluga i točkovi --- */}
-        <line x1={bz.x} y1={bz.y} x2={bn.x} y2={bn.y} stroke="var(--silkscreen)" strokeWidth={11} strokeLinecap="round" />
-        <circle cx={X_ROVERA} cy={yOsovineBlizu} r={13} fill="var(--maska-duboka)" stroke="var(--bakar)" strokeWidth={5} />
-        <g ref={blizuNazadRef}>
-          <Tocak x={bz.x} y={bz.y} r={R_TOCKA} boja={uVazduhu[0] ? 'var(--alarm)' : 'var(--silkscreen)'} />
-        </g>
-        <g ref={blizuNaprijedRef}>
-          <Tocak x={bn.x} y={bn.y} r={R_TOCKA} boja={uVazduhu[1] ? 'var(--alarm)' : 'var(--silkscreen)'} />
-        </g>
+          {/* desna strana, na ravnom */}
+          <text x={X_TLA[0]} y={TLO_L + 64} className={stil.tekst}>
+            desna strana
+          </text>
+          <Tlo tlo={TLO_D} />
+          <PolugaCrtez p={r.desna} tlo={TLO_D} visi={[visi[2], visi[3]]} paociRef={paociRef} indeks={2} oznaka="θD" />
 
-        {/* nosači od tijela do obje osovine */}
-        {(() => {
-          const dnoTijela = (yOsovineBlizu + yOsovineDaleko) / 2 - 98;
-          return (
-            <g stroke="var(--silkscreen)" strokeWidth={8} strokeLinecap="round">
-              <line x1={X_ROVERA} y1={dnoTijela} x2={X_ROVERA} y2={yOsovineBlizu} />
-              <line x1={X_ROVERA - DUBINA_X} y1={dnoTijela} x2={X_ROVERA - DUBINA_X} y2={yOsovineDaleko} opacity={0.42} />
-            </g>
-          );
-        })()}
+          {/* oznake točkova koji vise */}
+          {r.tockovi.map((t, i) =>
+            visi[i] ? (
+              <text key={i} x={t.x} y={yOd(i < 2 ? TLO_L : TLO_D, t.y) - R - 12} textAnchor="middle" className={stil.greska}>
+                visi
+              </text>
+            ) : null,
+          )}
 
-        {/* --- tijelo: sjedi na prosjeku dvije poluge --- */}
-        {(() => {
-          const cx = X_ROVERA - DUBINA_X / 2;
-          /* Tijelo stoji iznad točkova, dovoljno visoko da ih ne prekriva. */
-          const cy = (yOsovineBlizu + yOsovineDaleko) / 2 - 136;
-          const stepeni = (ugaoTijela * 180) / Math.PI;
-          return (
-            <g transform={`rotate(${stepeni} ${cx} ${cy})`}>
-              <rect x={cx - 132} y={cy - 38} width={264} height={76} rx={12}
-                fill="var(--maska-svijetla)" stroke="var(--silkscreen)" strokeWidth={5} />
-              <SilkTekst x={cx} y={cy + 8} sredina velicina={21} boja="var(--silkscreen)">
-                PERJANIK
-              </SilkTekst>
-            </g>
-          );
-        })()}
+          {/* ručka za kamen: meta za prst i tastaturu */}
+          <rect
+            x={xKamena - G.polaKamena - 14}
+            y={TLO_L - G.visinaKamena - 14}
+            width={G.polaKamena * 2 + 28}
+            height={G.visinaKamena + 40}
+            rx={6}
+            className={stil.meta}
+            tabIndex={0}
+            role="slider"
+            aria-label="Položaj kamena"
+            aria-valuemin={KAMEN_MIN}
+            aria-valuemax={KAMEN_MAX}
+            aria-valuenow={xKamena}
+          />
 
-        {/* oznaka točka koji visi */}
-        {uVazduhu.map((prazno, i) => {
-          if (!prazno) return null;
-          const centar = [bz, bn, dz, dn][i];
-          return (
-            <g key={i}>
-              <SilkTekst x={centar.x} y={centar.y - R_TOCKA - 20} sredina velicina={17} boja="var(--alarm)">
-                vrti se u prazno
-              </SilkTekst>
-            </g>
-          );
-        })}
+          <Tijelo ugao={r.tijelo} />
+          <Diferencijal x={DIFERENCIJAL.x} y={DIFERENCIJAL.y} lijeva={r.lijeva.ugao} desna={r.desna.ugao} kruto={kruto} />
+        </svg>
+      }
+      strana={
+        <>
+          <Ocitavanja>
+            <Ocitavanje natpis="Lijeva poluga, θL" vrijednost={broj(stepeni(r.lijeva.ugao), 1)} jedinica="°" pod="strana sa kamenom" />
+            <Ocitavanje natpis="Desna poluga, θD" vrijednost={broj(stepeni(r.desna.ugao), 1)} jedinica="°" pod={kruto ? 'zavarena za tijelo' : 'na ravnom'} />
+            <Ocitavanje natpis="Tijelo" vrijednost={broj(stepeni(r.tijelo), 1)} jedinica="°" pod={kruto ? 'nosi ugao poluge' : 'prosjek dvije poluge'} />
+            <Ocitavanje natpis="Točkova na tlu" vrijednost={String(naTlu)} jedinica="od 4" pod={naTlu < 4 ? 'jedan se vrti u prazno' : ''} vruce={naTlu < 4} />
+          </Ocitavanja>
 
-        {/* --- prikaz odnaprijed: diferencijal --- */}
-        <PrikazOdnaprijed ugaoBlizu={ugaoBlizu} ugaoDaleko={ugaoDaleko} kruto={kruto} />
-      </svg>
-    </OkvirDemonstracije>
+          <PanelKontrola>
+            <Klizac
+              id="kamen"
+              natpis="Položaj kamena"
+              vrijednost={xKamena}
+              prikaz={broj(xKamena - OSOVINA, 0)}
+              min={KAMEN_MIN}
+              max={KAMEN_MAX}
+              boja="text"
+              onPromjena={postaviKamen}
+            />
+          </PanelKontrola>
+
+          <Napomena>
+            Uglovi su izračunati iz geometrije crteža; mjere su ilustrativne. Pozitivan ugao znači prednji točak gore. Kamen možeš i
+            prevući prstom po gornjem crtežu.
+          </Napomena>
+        </>
+      }
+    />
   );
 }
 
-/**
- * Dijagram diferencijala, gledan odnaprijed i mjeren U ODNOSU NA TIJELO.
- *
- * Greda je pričvršćena za tijelo u sredini, a krajevima za dvije poluge.
- * Kad jedna poluga ide gore, druga mora dolje — a tijelo ostaje na sredini,
- * to jest na prosjeku dva ugla. Bez diferencijala grede nema i tijelo nema
- * na čemu da se izravna.
- */
-function PrikazOdnaprijed({
-  ugaoBlizu,
-  ugaoDaleko,
-  kruto,
-}: {
-  ugaoBlizu: number;
-  ugaoDaleko: number;
-  kruto: boolean;
-}) {
-  const pola = 126;
-  const OKVIR = { x: INSET_X - pola - 58, y: INSET_Y - 124, w: (pola + 58) * 2, h: 252 };
+/* ------------------------------------------------------------------ dijelovi */
 
-  /* Poluge se ovdje mjere u odnosu na tijelo, pa su tačno suprotne. */
-  const razlika = (ugaoBlizu - ugaoDaleko) / 2;
-  const otklon = kruto ? 0 : -Math.sin(razlika) * 150;
-
+function Tlo({ tlo }: { tlo: number }) {
   return (
     <g>
-      <SilkTekst x={OKVIR.x} y={OKVIR.y - 16} velicina={20} boja="var(--silkscreen)">
-        odnaprijed
-      </SilkTekst>
+      <line x1={X_TLA[0]} y1={tlo} x2={X_TLA[1]} y2={tlo} className={stil.zica} />
+      {Array.from({ length: Math.floor((X_TLA[1] - X_TLA[0]) / 20) }, (_, i) => (
+        <line key={i} x1={X_TLA[0] + 12 + i * 20} y1={tlo + 2} x2={X_TLA[0] + i * 20} y2={tlo + 14} className={stil.zicaTanka} />
+      ))}
+    </g>
+  );
+}
 
-      <rect x={OKVIR.x} y={OKVIR.y} width={OKVIR.w} height={OKVIR.h} rx={10}
-        fill="var(--maska-duboka)" stroke="var(--ivica)" strokeWidth={2} />
-
-      {/* tijelo je referenca: uvijek vodoravno u ovom prikazu */}
-      <rect x={INSET_X - 96} y={INSET_Y - 86} width={192} height={54} rx={8}
-        fill="var(--maska-svijetla)" stroke="var(--silkscreen)" strokeWidth={4} />
-      <SilkTekst x={INSET_X} y={INSET_Y - 52} sredina velicina={17} boja="var(--silkscreen)">
-        tijelo
-      </SilkTekst>
-
-      {/* osovina grede, pričvršćena za tijelo */}
-      <line x1={INSET_X} y1={INSET_Y - 32} x2={INSET_X} y2={INSET_Y} stroke="var(--silkscreen)" strokeWidth={6} />
-
-      {kruto ? (
-        <>
-          {/* nema grede: obje strane su zavarene za tijelo */}
-          <rect x={INSET_X - pola} y={INSET_Y - 10} width={pola * 2} height={20} rx={4}
-            fill="var(--maska-svijetla)" stroke="var(--silkscreen-tih)" strokeWidth={4} />
-          <g stroke="var(--alarm)" strokeWidth={5} strokeLinecap="round">
-            <line x1={INSET_X - 16} y1={INSET_Y - 16} x2={INSET_X + 16} y2={INSET_Y + 16} />
-            <line x1={INSET_X + 16} y1={INSET_Y - 16} x2={INSET_X - 16} y2={INSET_Y + 16} />
+function PolugaCrtez({
+  p,
+  tlo,
+  visi,
+  paociRef,
+  indeks,
+  oznaka,
+}: {
+  p: Poluga;
+  tlo: number;
+  visi: [boolean, boolean];
+  paociRef: React.RefObject<(SVGGElement | null)[]>;
+  indeks: number;
+  oznaka: string;
+}) {
+  const yOs = yOd(tlo, p.podignutost);
+  return (
+    <g>
+      <line x1={p.nazad.x} y1={yOd(tlo, p.nazad.y)} x2={p.naprijed.x} y2={yOd(tlo, p.naprijed.y)} className={sus.poluga} />
+      {[p.nazad, p.naprijed].map((t, i) => (
+        <g key={i}>
+          <circle cx={t.x} cy={yOd(tlo, t.y)} r={R} className={visi[i] ? sus.tocakVisi : sus.tocak} />
+          <g
+            ref={(el) => {
+              paociRef.current[indeks + i] = el;
+            }}
+          >
+            <line x1={t.x} y1={yOd(tlo, t.y) - R + 6} x2={t.x} y2={yOd(tlo, t.y) + R - 6} className={stil.zica} />
           </g>
-        </>
-      ) : (
-        <>
-          <line x1={INSET_X - pola} y1={INSET_Y + otklon} x2={INSET_X + pola} y2={INSET_Y - otklon}
-            stroke="var(--bakar-struja)" strokeWidth={10} strokeLinecap="round" />
-          <circle cx={INSET_X} cy={INSET_Y} r={11}
-            fill="var(--maska-duboka)" stroke="var(--bakar)" strokeWidth={5} />
-        </>
-      )}
-
-      {[
-        { x: INSET_X - pola, y: kruto ? 0 : otklon, natpis: 'bliža' },
-        { x: INSET_X + pola, y: kruto ? 0 : -otklon, natpis: 'dalja' },
-      ].map((kraj) => (
-        <g key={kraj.natpis}>
-          <circle cx={kraj.x} cy={INSET_Y + kraj.y} r={10} fill="var(--bakar)" />
-          <SilkTekst x={kraj.x} y={INSET_Y + kraj.y + 38} sredina velicina={15}
-            boja="var(--silkscreen-tih)" debljina={400}>
-            {kraj.natpis}
-          </SilkTekst>
-          <SilkTekst x={kraj.x} y={INSET_Y + kraj.y + 58} sredina velicina={15}
-            boja="var(--silkscreen-tih)" debljina={400}>
-            poluga
-          </SilkTekst>
+          <circle cx={t.x} cy={yOd(tlo, t.y)} r={4} className={stil.cvor} />
         </g>
       ))}
+      <LukUgla x={OSOVINA} y={yOs} ugao={p.ugao} oznaka={oznaka} />
+      <circle cx={OSOVINA} cy={yOs} r={7} className={sus.osovina} />
+    </g>
+  );
+}
 
-      {(kruto ? ['nema grede,', 'nema izravnavanja'] : ['jedna gore, druga dolje —', 'tijelo ostaje na sredini']).map(
-        (red, i) => (
-          <SilkTekst
-            key={red}
-            x={OKVIR.x}
-            y={OKVIR.y + OKVIR.h + 30 + i * 26}
-            velicina={17}
-            boja={kruto ? 'var(--alarm)' : 'var(--silkscreen-tih)'}
-            debljina={400}
-          >
-            {red}
-          </SilkTekst>
-        ),
+/** Luk ugla od vodoravne pomoćne linije do poluge, označen kao na tehničkom crtežu. */
+function LukUgla({ x, y, ugao, oznaka }: { x: number; y: number; ugao: number; oznaka: string }) {
+  const r = 56;
+  const kraj = { x: x + r * Math.cos(ugao), y: y - r * Math.sin(ugao) };
+  const vidljiv = Math.abs(stepeni(ugao)) > 0.2;
+  /* Oznaka ide iznad lijevo kad prednji kraj ide gore (tamo je poluga niže), inače ispod lijevo. */
+  const gore = ugao > 0;
+  return (
+    <g>
+      <line x1={x} y1={y} x2={x + r + 14} y2={y} className={sus.pomocna} />
+      {vidljiv && (
+        <>
+          <path d={`M${x + r},${y} A${r},${r} 0 0 ${ugao > 0 ? 0 : 1} ${kraj.x},${kraj.y}`} className={sus.luk} />
+          <text x={x - 16} y={gore ? y - 14 : y + 28} textAnchor="end" className={sus.natpisUgla}>
+            {oznaka}
+          </text>
+        </>
       )}
     </g>
   );
 }
+
+/** Tijelo sa strane: koliko je nagnuto u odnosu na vodoravno. */
+function Tijelo({ ugao }: { ugao: number }) {
+  const { x, y, pola, visina } = TIJELO;
+  return (
+    <g>
+      <text x={x} y={40} textAnchor="middle" className={stil.tekst}>
+        tijelo
+      </text>
+      <line x1={x - pola - 20} y1={y} x2={x + pola + 20} y2={y} className={sus.pomocna} />
+      <g transform={`rotate(${-stepeni(ugao)} ${x} ${y})`}>
+        <rect x={x - pola} y={y - visina / 2} width={pola * 2} height={visina} rx={4} className={stil.blok} />
+        <line x1={x - pola} y1={y} x2={x + pola} y2={y} className={stil.zicaTanka} />
+      </g>
+      <circle cx={x} cy={y} r={4} className={stil.cvor} />
+      <text x={x} y={y + 66} textAnchor="middle" className={stil.tih}>
+        nagib tijela
+      </text>
+    </g>
+  );
+}
+
+/**
+  Diferencijal, šematski: greda na sredini tijela, krajevima vezana za dvije
+  poluge. Jedna poluga gore znači drugu dolje, u odnosu na tijelo.
+*/
+function Diferencijal({ x, y, lijeva, desna, kruto }: { x: number; y: number; lijeva: number; desna: number; kruto: boolean }) {
+  const pola = 70;
+  const otklon = kruto ? 0 : Math.sin((lijeva - desna) / 2) * 3.2 * pola;
+  return (
+    <g>
+      <text x={x} y={y - 104} textAnchor="middle" className={stil.tekst}>
+        diferencijal
+      </text>
+      <text x={x} y={y - 82} textAnchor="middle" className={stil.tih}>
+        šematski, prema tijelu
+      </text>
+      <rect x={x - pola - 30} y={y - 60} width={(pola + 30) * 2} height={150} rx={4} className={sus.okvirDiferencijala} />
+      {kruto ? (
+        <>
+          <line x1={x - pola} y1={y} x2={x + pola} y2={y} className={sus.gredaKruta} />
+          <text x={x} y={y + 50} textAnchor="middle" className={stil.greska}>
+            nema grede
+          </text>
+        </>
+      ) : (
+        <>
+          <line x1={x - pola} y1={y + otklon} x2={x + pola} y2={y - otklon} className={sus.greda} />
+          <text x={x - pola} y={y + otklon + 30} textAnchor="middle" className={stil.tih}>
+            lijeva
+          </text>
+          <text x={x + pola} y={y - otklon + 30} textAnchor="middle" className={stil.tih}>
+            desna
+          </text>
+        </>
+      )}
+      <circle cx={x} cy={y} r={7} className={sus.osovina} />
+    </g>
+  );
+}
+

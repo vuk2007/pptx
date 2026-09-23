@@ -1,0 +1,146 @@
+/* Tabela bajtova i vremenska linija prijema. */
+
+.heks {
+  fill: var(--text);
+  font-size: 19px;
+  font-weight: 650;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.heksGreska {
+  fill: var(--fault);
+  font-size: 19px;
+  font-weight: 700;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.celija {
+  fill: var(--panel);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.celijaJedan {
+  fill: var(--text);
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.celijaGreska {
+  fill: var(--fault);
+  stroke: var(--fault);
+  stroke-width: 1.5;
+}
+
+.bit {
+  fill: var(--muted);
+  font-size: 21px;
+  font-weight: 650;
+}
+
+.bitSvijetao {
+  fill: var(--panel);
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.slaze {
+  fill: var(--djeluj);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.neSlaze {
+  fill: var(--fault);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------ linija */
+
+.linija {
+  padding: 10px 14px 12px;
+  display: grid;
+  align-content: start;
+}
+
+.linija svg {
+  width: 100%;
+  height: auto;
+  max-height: clamp(130px, 21vh, 250px);
+  display: block;
+}
+
+.legenda {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: clamp(13px, 0.85vw, 15px);
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.kljucGreska {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kljucGreska::before {
+  content: '';
+  width: 6px;
+  height: 16px;
+  border-radius: 1px;
+  background: var(--fault);
+}
+
+.osa {
+  fill: var(--muted);
+  font-size: 15px;
+}
+
+.failsafe,
+.failsafeStao {
+  margin: 4px 0 0;
+  font-size: clamp(13px, 0.85vw, 15px);
+  color: var(--muted);
+}
+
+.failsafeStao {
+  color: var(--fault);
+  font-weight: 650;
+}
+
+.paket {
+  fill: var(--text);
+}
+
+.paketOdbacen {
+  fill: var(--fault);
+}
+
+.paketPokvaren {
+  fill: none;
+  stroke: var(--fault);
+  stroke-width: 2;
+}
+
+.trakaOkvir {
+  fill: var(--panel-2);
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+.traka {
+  fill: var(--line);
+}
+
+.trakaStao {
+  fill: var(--fault);
+}
+
+.bilo {
+  fill: var(--fault);
+  font-size: 13px;
+  font-weight: 600;
+}

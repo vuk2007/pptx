@@ -20,6 +20,8 @@ export type Kanal = {
   skala: number;
   /** Stepenasto crtanje, za signale koji skaču (napon sa prekidača). */
   stepenasto?: boolean;
+  /** Gdje je nula kanala, u podjelama iznad sredine. Kao ručica „position" na pravom osciloskopu. */
+  nula?: number;
 };
 
 export type Uzorak = { t: number; v: readonly number[]; greska: boolean };
@@ -42,6 +44,15 @@ export class Snimak {
 
   ocisti() {
     this.uzorci.length = 0;
+  }
+
+  /**
+    Cijeli ekran odjednom, za signal koji se ponavlja: osciloskop „okine"
+    na ivici impulsa i uvijek crta istu periodu, umjesto da je vuče ulijevo.
+  */
+  zamijeni(uzorci: Uzorak[], sada: number) {
+    this.uzorci = uzorci;
+    this.sada = sada;
   }
 }
 
@@ -162,10 +173,11 @@ export function Oscilloskop({
       ctx.lineJoin = 'round';
       ctx.beginPath();
       const polaEkrana = (kanal.skala * PODJELA_Y) / 2;
+      const nula = h / 2 - ((kanal.nula ?? 0) / (PODJELA_Y / 2)) * (h / 2);
       let prethodni: number | null = null;
       for (const u of uzorci) {
         const x = X(u.t);
-        let y = h / 2 - (u.v[n] / polaEkrana) * (h / 2);
+        let y = nula - (u.v[n] / polaEkrana) * (h / 2);
         y = Math.max(2 * d, Math.min(h - 2 * d, y));
         if (prethodni === null) ctx.moveTo(x, y);
         else {
@@ -175,6 +187,16 @@ export function Oscilloskop({
         prethodni = y;
       }
       ctx.stroke();
+
+      /* Oznaka nule na lijevoj ivici, u boji kanala, kad nula nije na sredini. */
+      if (kanal.nula) {
+        ctx.fillStyle = C[kanal.boja];
+        ctx.beginPath();
+        ctx.moveTo(0, nula - 6 * d);
+        ctx.lineTo(9 * d, nula);
+        ctx.lineTo(0, nula + 6 * d);
+        ctx.fill();
+      }
     });
   });
 

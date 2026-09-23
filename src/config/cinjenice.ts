@@ -82,6 +82,32 @@ export const MOTOR = {
 /** Koliko puta u sekundi L298N stvarno pali i gasi most (PWM sa Arduina), iz reference. */
 export const PWM_STVARNO_HZ = 490;
 
+/**
+ * Jednostavan model servoa za demonstraciju dvostrukog servoa.
+ * ILUSTRATIVNO: koji servo pokreće rame ruke nije potvrđeno (vidi RUKA_NA_SAJMU),
+ * pa ovo nijesu podaci iz datasheet-a. Kad se servo zna, zamijeniti. Na ekranu piše da je ilustrativno.
+ */
+export const SERVO_ILUSTRATIVNI = {
+  /** Napon napajanja servoa, V. */
+  napon: 5,
+  /** Otpor namotaja, Ω. Struja zastoja je napon kroz otpor. */
+  otpor: 2,
+  /** Struja dok servo samo drži položaj, A. */
+  strujaMirovanja: 0.1,
+  /** Greška ugla iznad koje regulator daje pun napon, stepeni. */
+  punaSnagaIznad: 10,
+  /** Brzina slobodnog okretanja, stepeni u sekundi. */
+  brzina: 300,
+  /** Temperatura okoline, °C. */
+  okolina: 25,
+  /** Koliko se servo zagrije po vatu, °C/W. */
+  toplotniOtpor: 6,
+  /** Vremenska konstanta zagrijavanja, s. Ubrzana za demonstraciju. */
+  vrijemeZagrijavanja: 6,
+  /** Iznad ove temperature prikaz je u boji greške, °C. */
+  granica: 70,
+} as const;
+
 /** Ilustrativni naponi za H-most demonstraciju. */
 export const NAPON = {
   ulaz: 11.1,
