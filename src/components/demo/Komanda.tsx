@@ -2,338 +2,396 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { XGO_RADIO, XGO_SIGURNOST } from '@/config/cinjenice';
-import { Komponenta, SilkTekst, Strelica, Vod } from '@/components/ploca/primitivi';
-import { Antena, Mikrofon, Pas, RadioLukovi } from '@/components/ilustracije/oblici';
 import { useAnimacija } from '@/lib/animacija';
+import { broj } from '@/lib/format';
 import {
-  BAJTOVI_SJEDI,
-  BAJTOVI_SU_ILUSTRATIVNI,
-  napraviSerijskiPaket,
-  racunChecksuma,
-  uHeks,
-} from '@/lib/xgo-paket';
-import { OkvirDemonstracije } from './OkvirDemonstracije';
-import stil from './demo.module.css';
+  aktivnaVeza,
+  BLOKOVI,
+  korakKomande,
+  MJESTO_KOMANDE,
+  odbacen,
+  PAKET,
+  POCETNO_KOMANDA,
+  porukaKomande,
+  posalji,
+  primljeniPaket,
+  RIJEC,
+  sjeo,
+  VEZE,
+  type Blok,
+  type StanjeKomande,
+} from '@/lib/komanda';
+import { BAJTOVI_SU_ILUSTRATIVNI, racunChecksuma, uHeks } from '@/lib/xgo-paket';
+import {
+  Napomena,
+  Ocitavanja,
+  Ocitavanje,
+  Okvir,
+  PanelKontrola,
+  Rezimi,
+  StatusLinija,
+  Taster,
+  instrumentStil,
+} from '@/components/instrument/Okvir';
+import stil from './sema.module.css';
+import km from './komanda.module.css';
 
 /*
-  Put jedne riječi od mikrofona do noge. Na svakoj karici poruka promijeni
-  oblik: tekst, pa radio poruka, pa serijski paket, pa uglovi zglobova.
-
-  Ništa se usput ne gubi — samo se prevodi.
+  Put komande kao blok dijagram: šest blokova, pet veza, i na svakoj vezi
+  bajtovi koji njome stvarno idu. Logika je u lib/komanda.ts.
 */
 
-const Y_RED1 = 170;
-const Y_RED2 = 350;
-const SIRINA = 160;
-const VISINA = 92;
+const REZIMI = [
+  { id: 'ispravno', natpis: 'Ispravan paket' },
+  { id: 'smetnja', natpis: 'Smetnja na serijskoj vezi' },
+] as const;
 
-const SERIJSKI = napraviSerijskiPaket(BAJTOVI_SJEDI.komanda, BAJTOVI_SJEDI.adresa, BAJTOVI_SJEDI.podaci);
-const RACUN = racunChecksuma(
-  SERIJSKI[2],
-  BAJTOVI_SJEDI.komanda,
-  BAJTOVI_SJEDI.adresa,
-  BAJTOVI_SJEDI.podaci,
-);
+/* ------------------------------------------------------------------ raspored */
 
-type Karika = {
-  naziv: string;
-  oznaka?: string;
-  boja: string;
-  x: number;
-  y: number;
-  /** Kako poruka izgleda kad stigne dovde. */
-  oblik: string;
-  opisOblika: string;
-};
+const SIRINA = 130;
+const VISINA = 64;
+const RED_1 = 120;
+const RED_2 = 410;
 
-const KARIKE: Karika[] = [
-  { naziv: 'JARVIS', boja: 'var(--odluci)', x: 60, y: Y_RED1, oblik: '„sjedi”', opisOblika: 'izgovorena riječ' },
-  { naziv: 'HUB', oznaka: 'laptop', boja: 'var(--odluci)', x: 300, y: Y_RED1, oblik: 'komanda: sjedi', opisOblika: 'poruka u programu' },
-  { naziv: 'micro:bit', oznaka: 'most', boja: 'var(--odluci)', x: 540, y: Y_RED1, oblik: 'radio.send("sjedi")', opisOblika: 'preko USB-a' },
-  { naziv: 'RADIO', oznaka: `grupa ${XGO_RADIO.grupa}`, boja: 'var(--bakar-struja)', x: 780, y: Y_RED1, oblik: `${XGO_RADIO.mhz} MHz`, opisOblika: 'kroz vazduh' },
-  { naziv: 'micro:bit', oznaka: 'u psu', boja: 'var(--odluci)', x: 780, y: Y_RED2, oblik: 'primljeno: sjedi', opisOblika: 'ista riječ, drugi uređaj' },
-  { naziv: 'SERIJSKA', oznaka: 'veza', boja: 'var(--bakar-struja)', x: 540, y: Y_RED2, oblik: `${SERIJSKI.length} bajta`, opisOblika: 'paket sa checksumom' },
-  { naziv: 'ESP32', oznaka: 'računa', boja: 'var(--odluci)', x: 300, y: Y_RED2, oblik: 'uglovi za 12 zglobova', opisOblika: 'kinematika' },
-  { naziv: 'MOTORI', boja: 'var(--djeluj)', x: 60, y: Y_RED2, oblik: 'pas sjeda', opisOblika: 'pokret' },
+/** Lijeva ivica i red svakog bloka, redom kao u BLOKOVI. */
+const MJESTA = [
+  { x: 20, y: RED_1 },
+  { x: 400, y: RED_1 },
+  { x: 830, y: RED_1 },
+  { x: 830, y: RED_2 },
+  { x: 370, y: RED_2 },
+  { x: 20, y: RED_2 },
 ];
 
-/** Sekundi po jednoj karici. */
-const PO_KARICI = 0.85;
+type T = { x: number; y: number };
+
+/** Početak i kraj svake veze: od ivice jednog bloka do ivice sljedećeg. */
+function krajeviVeze(i: number): [T, T] {
+  const a = MJESTA[i];
+  const b = MJESTA[i + 1];
+  if (a.y === b.y) {
+    const desno = b.x > a.x;
+    return [
+      { x: desno ? a.x + SIRINA : a.x, y: a.y },
+      { x: desno ? b.x : b.x + SIRINA, y: b.y },
+    ];
+  }
+  return [
+    { x: a.x + SIRINA / 2, y: a.y + VISINA / 2 },
+    { x: b.x + SIRINA / 2, y: b.y - VISINA / 2 },
+  ];
+}
 
 export function Komanda() {
-  const [korak, postaviKorak] = useState(-1);
-  const [ide, postaviIde] = useState(false);
+  const stanje = useRef<StanjeKomande>(POCETNO_KOMANDA);
+  const [st, postavi] = useState<StanjeKomande>(POCETNO_KOMANDA);
+  const kadar = useRef(0);
+  const porukaRef = useRef<SVGRectElement | null>(null);
 
-  const napredak = useRef(0);
-  const ideRef = useRef(ide);
-  useEffect(() => {
-    ideRef.current = ide;
-  }, [ide]);
-
-  const iskraRef = useRef<SVGGElement | null>(null);
+  function promijeni(novo: (s: StanjeKomande) => StanjeKomande) {
+    stanje.current = novo(stanje.current);
+    postavi(stanje.current);
+  }
 
   useAnimacija((dt) => {
-    if (!ideRef.current) return;
-    napredak.current += dt / PO_KARICI;
+    const prije = stanje.current;
+    const s = korakKomande(prije, dt);
+    stanje.current = s;
 
-    const noviKorak = Math.floor(napredak.current);
-    if (noviKorak >= KARIKE.length) {
-      postaviKorak(KARIKE.length - 1);
-      postaviIde(false);
-      return;
+    /* Poruka putuje duž aktivne veze. */
+    const i = aktivnaVeza(s);
+    if (i !== null && porukaRef.current) {
+      const [a, b] = krajeviVeze(i);
+      const t = s.napredak - i;
+      porukaRef.current.setAttribute('transform', `translate(${a.x + (b.x - a.x) * t} ${a.y + (b.y - a.y) * t})`);
     }
-    postaviKorak(noviKorak);
-
-    /* Iskra putuje od karike do karike. */
-    const od = KARIKE[noviKorak];
-    const do_ = KARIKE[Math.min(KARIKE.length - 1, noviKorak + 1)];
-    const t = napredak.current - noviKorak;
-    const x = od.x + SIRINA / 2 + (do_.x - od.x) * t;
-    const y = od.y + VISINA / 2 + (do_.y - od.y) * t;
-    iskraRef.current?.setAttribute('transform', `translate(${x} ${y})`);
+    if (aktivnaVeza(s) !== aktivnaVeza(prije) || s.ide !== prije.ide || ++kadar.current % 5 === 0) postavi(s);
   });
 
-  function posalji() {
-    napredak.current = 0;
-    postaviKorak(0);
-    postaviIde(true);
-  }
+  useEffect(() => {
+    const naTaster = (e: KeyboardEvent) => {
+      const cilj = e.target as HTMLElement | null;
+      if (cilj?.tagName === 'INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === 'arrowright' || k === 'pagedown' || k === '1') {
+        if (!stanje.current.ide) promijeni(posalji);
+      } else if (k === 'm') promijeni((s) => ({ ...POCETNO_KOMANDA, pokvaren: !s.pokvaren }));
+      else if (k === 'r') promijeni(() => POCETNO_KOMANDA);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', naTaster);
+    return () => window.removeEventListener('keydown', naTaster);
+  }, []);
 
-  function resetuj() {
-    napredak.current = 0;
-    postaviKorak(-1);
-    postaviIde(false);
-  }
-
-  const tekuca = korak >= 0 ? KARIKE[korak] : null;
-  const poruka = tekuca
-    ? `${tekuca.naziv}: ${tekuca.oblik} — ${tekuca.opisOblika}.`
-    : 'Jedna riječ pređe osam karika dok ne postane pokret. Pošalji je i gledaj u šta se pretvara.';
+  const poruka = porukaKomande(st);
+  const aktivna = aktivnaVeza(st);
+  /** Do kojeg bloka je poruka stigla (uključivo). */
+  const stigla = st.poslata ? Math.floor(st.napredak) : -1;
 
   return (
-    <OkvirDemonstracije
+    <Okvir
+      nazad={{ naziv: 'XGO psi', putanja: '/xgo' }}
       naslov="Put komande"
-      oznaka="XGO · od riječi do pokreta"
-      nazadPutanja="/xgo"
-      nazadNaziv="XGO psi"
-      poruka={poruka}
-      napomena={
-        BAJTOVI_SU_ILUSTRATIVNI
-          ? 'Okvir paketa i račun checksuma su pravi; same vrijednosti bajtova su ilustrativne dok se ne potvrde.'
-          : undefined
+      uvod={`Na svakoj od pet veza riječ „${RIJEC}” ima drugi oblik, dok ne postane pokret.`}
+      rezimi={
+        <Rezimi
+          opis="Serijska veza"
+          opcije={REZIMI}
+          izabran={st.pokvaren ? 'smetnja' : 'ispravno'}
+          onIzbor={(id) => promijeni(() => ({ ...POCETNO_KOMANDA, pokvaren: id === 'smetnja' }))}
+        />
       }
-      onResetuj={resetuj}
-      kontrole={
-        <button className={stil.dugme} onClick={posalji} disabled={ide}>
-          <span aria-hidden="true">▶</span> Pošalji „sjedi”
-        </button>
+      onResetuj={() => promijeni(() => POCETNO_KOMANDA)}
+      status={<StatusLinija sta={poruka.sta} zasto={poruka.zasto} greska={poruka.greska} />}
+      osciloskop={<Checksum st={st} />}
+      sema={
+        <svg viewBox="0 0 1000 540" role="img" aria-label="Blok dijagram puta komande, sa bajtovima na svakoj vezi">
+          {VEZE.map((v, i) => (
+            <VezaCrtez key={i} i={i} st={st} stanje={i === aktivna ? 'aktivna' : i < stigla ? 'prosla' : 'ceka'} />
+          ))}
+
+          {BLOKOVI.map((b, i) => (
+            <BlokCrtez
+              key={i}
+              blok={b}
+              x={MJESTA[i].x}
+              y={MJESTA[i].y}
+              dosla={stigla >= i}
+              ispod={
+                i === 4 && odbacen(st)
+                  ? { tekst: 'paket odbačen', klasa: stil.greska }
+                  : i === 5 && sjeo(st)
+                    ? { tekst: 'pas sjeda', klasa: km.pokret }
+                    : null
+              }
+            />
+          ))}
+
+          {/* poruka na putu */}
+          <rect
+            ref={porukaRef}
+            x={-8}
+            y={-8}
+            width={16}
+            height={16}
+            rx={2}
+            className={km.poruka}
+            visibility={st.ide ? 'visible' : 'hidden'}
+            transform={`translate(${MJESTA[0].x + SIRINA} ${RED_1})`}
+          />
+        </svg>
       }
-    >
-      <svg viewBox="0 0 1480 640" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        {/* --- vodovi između karika --- */}
-        {KARIKE.slice(0, -1).map((od, i) => {
-          const do_ = KARIKE[i + 1];
-          const aktivan = korak > i;
-          const vodoravno = od.y === do_.y;
-          const tacke = vodoravno
-            ? `${Math.min(od.x, do_.x) + SIRINA},${od.y + VISINA / 2} ${Math.max(od.x, do_.x)},${od.y + VISINA / 2}`
-            : `${od.x + SIRINA / 2},${od.y + VISINA} ${od.x + SIRINA / 2},${do_.y}`;
-          return (
-            <g key={od.naziv + i}>
-              <Vod tacke={tacke} debljina={5} struja={aktivan ? 'naprijed' : false} brzina={0.6} />
-              {vodoravno && (
-                <Strelica
-                  x={(od.x + SIRINA + Math.max(od.x, do_.x)) / 2 + (do_.x > od.x ? 0 : -SIRINA)}
-                  y={od.y + VISINA / 2}
-                  ugao={do_.x > od.x ? 0 : 180}
-                />
-              )}
-            </g>
-          );
-        })}
+      strana={
+        <>
+          <Ocitavanja>
+            <Ocitavanje natpis="Radio do psa" vrijednost={String(XGO_RADIO.mhz)} jedinica="MHz" pod={`grupa ${XGO_RADIO.grupa}`} />
+            <Ocitavanje natpis="Serijski paket" vrijednost={String(PAKET.length)} jedinica="bajtova" pod="okvir 0x55 0x00 … 0x00 0xAA" />
+            <Ocitavanje natpis="Pas staje bez komande" vrijednost={String(XGO_SIGURNOST.pasStajeBezKomande)} jedinica="ms" pod="prva kočnica" />
+            <Ocitavanje
+              natpis="Most šalje stop"
+              vrijednost={broj(XGO_SIGURNOST.mostSaljeStopAkoLaptopCuti / 1000, 0)}
+              jedinica="s"
+              pod="ako laptop toliko ćuti"
+            />
+          </Ocitavanja>
 
-        {/* radio skok kroz vazduh */}
-        <RadioLukovi x={KARIKE[3].x + SIRINA / 2} y={KARIKE[3].y + VISINA + 34} broj={3} razmak={20}
-          smjer={1} boja="var(--bakar-struja)" opacity={korak >= 3 ? 1 : 0.25} />
+          <PanelKontrola>
+            <div className={instrumentStil.redTastera}>
+              <Taster boja="odluci" disabled={st.ide} onClick={() => promijeni(posalji)}>
+                Pošalji „{RIJEC}”
+              </Taster>
+            </div>
+          </PanelKontrola>
 
-        {/* --- karike --- */}
-        {KARIKE.map((k, i) => {
-          const aktivna = korak === i;
-          const prosla = korak > i;
-          return (
-            <g key={k.naziv + i} opacity={korak < 0 || prosla || aktivna ? 1 : 0.4}>
-              <Komponenta
-                x={k.x}
-                y={k.y}
-                w={SIRINA}
-                h={VISINA}
-                natpis={k.naziv}
-                oznaka={k.oznaka}
-                boja={aktivna ? 'var(--bakar-struja)' : k.boja}
-                noge={2}
-              />
-              {aktivna && (
-                <rect x={k.x - 8} y={k.y - 8} width={SIRINA + 16} height={VISINA + 16} rx={8}
-                  fill="none" stroke="var(--bakar-struja)" strokeWidth={3} />
-              )}
-              <SilkTekst x={k.x + SIRINA / 2} y={k.y + VISINA + 30} sredina velicina={15}
-                boja={aktivna ? 'var(--bakar-struja)' : 'var(--silkscreen-tih)'} debljina={400}>
-                {k.oblik}
-              </SilkTekst>
-            </g>
-          );
-        })}
-
-        {/* mikrofon i pas na krajevima lanca */}
-        <Mikrofon x={KARIKE[0].x + SIRINA / 2} y={KARIKE[0].y - 66} skala={0.5} />
-        <Antena x={KARIKE[3].x + SIRINA / 2} y={KARIKE[3].y} visina={40} />
-        <Antena x={KARIKE[4].x + SIRINA / 2} y={KARIKE[4].y} visina={40} />
-        <Pas x={KARIKE[7].x + SIRINA / 2} y={KARIKE[7].y + VISINA + 66} skala={0.36}
-          boja={korak === 7 ? 'var(--djeluj)' : 'var(--silkscreen-tih)'} />
-
-        {/* iskra koja putuje */}
-        {/* Početni položaj je prva karika — bez njega iskra jedan kadar stoji u uglu. */}
-        <g
-          ref={iskraRef}
-          opacity={ide ? 1 : 0}
-          transform={`translate(${KARIKE[0].x + SIRINA / 2} ${KARIKE[0].y + VISINA / 2})`}
-        >
-          <circle r={13} fill="var(--bakar-struja)" />
-          <circle r={26} fill="var(--bakar-struja)" opacity={0.25} />
-        </g>
-
-        {/* --- serijski paket i njegov checksum --- */}
-        <SerijskiPaket istaknut={korak >= 5} />
-
-        {/* --- sigurnosni slojevi --- */}
-        <SigurnosniSlojevi />
-      </svg>
-    </OkvirDemonstracije>
+          <Napomena>
+            Treća kočnica je fizički taster za stop, mimo AI-ja. Put je usporen da se svaka veza vidi; na prve tri veze prikazana je sama
+            riječ, bez okvira koji dodaju USB i radio.
+            {BAJTOVI_SU_ILUSTRATIVNI ? ' Okvir i checksum serijskog paketa su pravi, a vrijednosti komande su ilustrativne dok se ne potvrde.' : ''}
+          </Napomena>
+        </>
+      }
+    />
   );
 }
 
-function SerijskiPaket({ istaknut }: { istaknut: boolean }) {
-  const X = 960;
-  const Y = 150;
-  const CELIJA = 52;
+/* ------------------------------------------------------------------ blokovi i veze */
 
-  /* Indeksi: 0-1 zaglavlje, 2 dužina, 3 komanda, 4 adresa, pa podaci, checksum, rep. */
-  const uloga = (i: number) => {
-    if (i < 2) return 'zaglavlje';
-    if (i === 2) return 'dužina';
-    if (i === 3) return 'komanda';
-    if (i === 4) return 'adresa';
-    if (i >= SERIJSKI.length - 2) return 'rep';
-    if (i === SERIJSKI.length - 3) return 'checksum';
-    return 'podaci';
-  };
+const KLASA_ULOGE: Record<string, string> = { osjeti: km.blokOsjeti, odluci: km.blokOdluci, djeluj: km.blokDjeluj };
 
-  /* Puni naziv ne staje ispod ćelije od 52 piksela, pa ide skraćeno. */
-  const kratko = (i: number) =>
-    ({ zaglavlje: 'zagl', dužina: 'duž', komanda: 'kom', adresa: 'adr', podaci: 'pod', checksum: 'chk', rep: 'rep' })[
-      uloga(i)
-    ];
-  const boja = (i: number) => {
-    const u = uloga(i);
-    if (u === 'zaglavlje' || u === 'rep') return 'var(--silkscreen-tih)';
-    if (u === 'checksum') return 'var(--osjeti)';
-    return 'var(--bakar-struja)';
-  };
-
-  return (
-    <g opacity={istaknut ? 1 : 0.42}>
-      <SilkTekst x={X} y={Y - 26} velicina={20} boja="var(--silkscreen)">
-        serijski paket
-      </SilkTekst>
-
-      {SERIJSKI.map((bajt, i) => (
-        <g key={i}>
-          <rect x={X + i * CELIJA} y={Y} width={CELIJA - 5} height={46} rx={4}
-            fill="var(--maska-svijetla)" stroke={boja(i)} strokeWidth={2.5} />
-          <text
-            x={X + i * CELIJA + (CELIJA - 5) / 2}
-            y={Y + 31}
-            textAnchor="middle"
-            fontSize={17}
-            fontWeight={700}
-            fill={boja(i)}
-            style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-          >
-            {uHeks(bajt)}
-          </text>
-          <text
-            x={X + i * CELIJA + (CELIJA - 5) / 2}
-            y={Y + 66}
-            textAnchor="middle"
-            fontSize={12}
-            fill="var(--silkscreen-tih)"
-            style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-          >
-            {kratko(i)}
-          </text>
-        </g>
-      ))}
-
-      {/* račun checksuma */}
-      <SilkTekst x={X} y={Y + 128} velicina={19} boja="var(--osjeti)">
-        checksum
-      </SilkTekst>
-      <text
-        x={X}
-        y={Y + 164}
-        fontSize={19}
-        fill="var(--silkscreen-tih)"
-        style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-      >
-        {RACUN.sabirci.map((s) => s.vrijednost).join(' + ')} = {RACUN.zbir}
-      </text>
-      <text
-        x={X}
-        y={Y + 194}
-        fontSize={19}
-        fill="var(--silkscreen-tih)"
-        style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-      >
-        najniži bajt: {uHeks(RACUN.najniziBajt)}
-      </text>
-      <text
-        x={X}
-        y={Y + 226}
-        fontSize={21}
-        fontWeight={700}
-        fill="var(--osjeti)"
-        style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-      >
-        invertovano: {uHeks(RACUN.checksum)}
-      </text>
-      <SilkTekst x={X} y={Y + 256} velicina={15} boja="var(--silkscreen-tih)" debljina={400}>
-        zbir + checksum uvijek daju 0xFF
-      </SilkTekst>
-    </g>
-  );
-}
-
-/** Tri sloja koji zaustave psa i kad AI, laptop ili radio zakažu. */
-function SigurnosniSlojevi() {
-  const slojevi = [
-    { tekst: `pas staje ako ${XGO_SIGURNOST.pasStajeBezKomande} ms nema komande`, x: 210 },
-    { tekst: `most šalje stop ako laptop ćuti ${XGO_SIGURNOST.mostSaljeStopAkoLaptopCuti / 1000} s`, x: 640 },
-    { tekst: 'fizički taster za stop, mimo AI-ja', x: 1060 },
-  ];
-
+function BlokCrtez({
+  blok,
+  x,
+  y,
+  dosla,
+  ispod,
+}: {
+  blok: Blok;
+  x: number;
+  y: number;
+  dosla: boolean;
+  ispod: { tekst: string; klasa: string } | null;
+}) {
   return (
     <g>
-      <SilkTekst x={60} y={604} velicina={19} boja="var(--alarm)">
-        tri kočnice
-      </SilkTekst>
-      {slojevi.map((s) => (
-        <g key={s.tekst}>
-          <rect x={s.x} y={590} width={16} height={16} rx={3} fill="none" stroke="var(--alarm)" strokeWidth={3} />
-          <SilkTekst x={s.x + 28} y={604} velicina={16} boja="var(--silkscreen-tih)" debljina={400}>
-            {s.tekst}
-          </SilkTekst>
-        </g>
-      ))}
+      <rect
+        x={x}
+        y={y - VISINA / 2}
+        width={SIRINA}
+        height={VISINA}
+        rx={4}
+        className={`${blok.uloga ? KLASA_ULOGE[blok.uloga] : stil.blok} ${dosla ? km.blokDosla : ''}`}
+      />
+      <text x={x + SIRINA / 2} y={y + 2} textAnchor="middle" className={stil.tekstVeliki}>
+        {blok.naziv}
+      </text>
+      <text x={x + SIRINA / 2} y={y + 22} textAnchor="middle" className={stil.tih}>
+        {blok.oznaka}
+      </text>
+      {ispod && (
+        <text x={x + SIRINA / 2} y={y + VISINA / 2 + 26} textAnchor="middle" className={ispod.klasa}>
+          {ispod.tekst}
+        </text>
+      )}
     </g>
+  );
+}
+
+const CELIJA = 34;
+const RAZMAK = 3;
+
+/** Mjesto reda bajtova za svaku vezu: lijeva ivica i y gornje ivice ćelija. */
+function mjestoBajtova(i: number, broj: number): T {
+  const [a, b] = krajeviVeze(i);
+  const sirina = broj * CELIJA + (broj - 1) * RAZMAK;
+  if (a.y === b.y) return { x: (a.x + b.x) / 2 - sirina / 2, y: a.y + 18 };
+  /* Radio veza je uspravna: bajtovi stoje lijevo od nje. */
+  return { x: a.x - 26 - sirina, y: (a.y + b.y) / 2 - 6 };
+}
+
+function VezaCrtez({ i, st, stanje }: { i: number; st: StanjeKomande; stanje: 'aktivna' | 'prosla' | 'ceka' }) {
+  const v = VEZE[i];
+  const [a, b] = krajeviVeze(i);
+  const uspravna = a.x === b.x;
+  const radio = i === 2;
+  const zicaKlasa = stanje === 'aktivna' ? km.zicaAktivna : stanje === 'prosla' ? stil.zica : km.zicaCeka;
+
+  /* Smetnja se vidi tek kad paket krene serijskom vezom. */
+  const bajtovi = i === 3 && stanje !== 'ceka' ? primljeniPaket(st) : v.bajtovi;
+  const m = bajtovi ? mjestoBajtova(i, bajtovi.length) : null;
+
+  return (
+    <g className={stanje === 'ceka' ? km.ceka : undefined}>
+      {radio ? (
+        <>
+          <Antena x={a.x} y={a.y} dolje />
+          <Antena x={b.x} y={b.y} />
+          <line x1={a.x} y1={a.y + 44} x2={b.x} y2={b.y - 44} className={km.vazduh} />
+        </>
+      ) : (
+        <>
+          <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} className={zicaKlasa} />
+          <polygon
+            points="0,0 -11,-5.5 -11,5.5"
+            transform={`translate(${b.x} ${b.y}) rotate(${uspravna ? 90 : b.x > a.x ? 0 : 180})`}
+            className={km.strelica}
+          />
+        </>
+      )}
+
+      {/* ime veze iznad žice, ili iznad bajtova kod radija */}
+      <text
+        x={m && uspravna ? m.x : (a.x + b.x) / 2}
+        y={m && uspravna ? m.y - 14 : a.y - 12}
+        textAnchor={uspravna ? 'start' : 'middle'}
+        className={km.imeVeze}
+      >
+        {v.naziv}
+      </text>
+
+      {bajtovi && m ? (
+        bajtovi.map((bajt, j) => {
+          const pokvaren = i === 3 && bajt !== PAKET[j];
+          const x = m.x + j * (CELIJA + RAZMAK);
+          return (
+            <g key={j}>
+              <rect x={x} y={m.y} width={CELIJA} height={CELIJA} rx={3} className={pokvaren ? km.celijaGreska : km.celija} />
+              <text x={x + CELIJA / 2} y={m.y + 23} textAnchor="middle" className={pokvaren ? km.heksSvijetao : km.heks}>
+                {bajt.toString(16).toUpperCase().padStart(2, '0')}
+              </text>
+              <text x={x + CELIJA / 2} y={m.y + CELIJA + 18} textAnchor="middle" className={pokvaren ? stil.greska : km.ispod}>
+                {v.ispod[j]}
+              </text>
+              {pokvaren && j === MJESTO_KOMANDE && (
+                <text x={x + CELIJA / 2} y={m.y + CELIJA + 38} textAnchor="middle" className={km.bilo}>
+                  bilo {PAKET[j].toString(16).toUpperCase()}
+                </text>
+              )}
+            </g>
+          );
+        })
+      ) : (
+        <text x={(a.x + b.x) / 2} y={a.y + 30} textAnchor="middle" className={km.ispod}>
+          {v.opis}
+        </text>
+      )}
+
+      {bajtovi && m && !uspravna && (
+        <text x={(a.x + b.x) / 2} y={m.y + CELIJA + (i === 3 && st.pokvaren && stanje !== 'ceka' ? 60 : 42)} textAnchor="middle" className={km.opisVeze}>
+          heks; {v.opis}
+        </text>
+      )}
+      {bajtovi && m && uspravna && (
+        <text x={m.x} y={m.y + CELIJA + 42} className={km.opisVeze}>
+          heks; {v.opis}
+        </text>
+      )}
+    </g>
+  );
+}
+
+/** Simbol antene: stub i trougao, kao na šemi. */
+function Antena({ x, y, dolje = false }: { x: number; y: number; dolje?: boolean }) {
+  const s = dolje ? 1 : -1;
+  return (
+    <g>
+      <line x1={x} y1={y} x2={x} y2={y + s * 44} className={stil.zica} />
+      <polyline points={`${x - 14},${y + s * 44} ${x},${y + s * 26} ${x + 14},${y + s * 44}`} className={stil.zica} />
+    </g>
+  );
+}
+
+/* ------------------------------------------------------------------ checksum */
+
+function Checksum({ st }: { st: StanjeKomande }) {
+  const p = PAKET;
+  const poslati = racunChecksuma(p[2], p[3], p[4], p.slice(5, p.length - 3));
+  const r = primljeniPaket(st);
+  const primljeni = racunChecksuma(r[2], r[3], r[4], r.slice(5, r.length - 3));
+  const stigao = st.poslata && st.napredak >= 4;
+  const slaze = primljeni.checksum === r[r.length - 3];
+  const zbir = (racun: typeof poslati) => racun.sabirci.map((s) => uHeks(s.vrijednost)).join(' + ');
+
+  return (
+    <section className={`${instrumentStil.panel} ${km.checksum}`}>
+      <p className={km.naslovRacuna}>Checksum serijskog paketa: invertovan najniži bajt zbira</p>
+      <p className={km.red}>
+        <span className={km.ko}>micro:bit šalje</span>
+        <span>
+          {zbir(poslati)} = {uHeks(poslati.najniziBajt)}, invertovano <b>{uHeks(poslati.checksum)}</b>
+        </span>
+      </p>
+      <p className={km.red}>
+        <span className={km.ko}>ESP32 računa</span>
+        {stigao ? (
+          <span className={slaze ? undefined : km.neSlaze}>
+            {zbir(primljeni)} = {uHeks(primljeni.najniziBajt)}, invertovano <b>{uHeks(primljeni.checksum)}</b>
+            {slaze ? `, slaže se sa ${uHeks(r[r.length - 3])}` : `, a stiglo je ${uHeks(r[r.length - 3])}`}
+          </span>
+        ) : (
+          <span className={km.ceka}>čeka paket</span>
+        )}
+      </p>
+    </section>
   );
 }

@@ -1,42 +1,70 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Komponenta, SilkTekst, Strelica, Vod } from '@/components/ploca/primitivi';
-import { Pas } from '@/components/ilustracije/oblici';
 import { useAnimacija } from '@/lib/animacija';
-import { Klizac, OkvirDemonstracije, PrekidacRezima } from './OkvirDemonstracije';
-import stil from './demo.module.css';
+import { broj } from '@/lib/format';
+import {
+  greska,
+  izmjereni,
+  K_MAX,
+  K_MIN,
+  korakRavnoteze,
+  MAX_NAGIB,
+  MAX_ZELJENI,
+  pao,
+  POCETNO_RAVNOTEZA,
+  porukaRavnoteze,
+  preskok,
+  zeta,
+  type StanjeRavnoteze,
+} from '@/lib/ravnoteza';
+import {
+  Klizac,
+  Napomena,
+  Ocitavanja,
+  Ocitavanje,
+  Okvir,
+  PanelKontrola,
+  Rezimi,
+  StatusLinija,
+  Taster,
+} from '@/components/instrument/Okvir';
+import { Oscilloskop, Snimak, type Kanal } from '@/components/instrument/Oscilloskop';
+import stil from './sema.module.css';
+import rv from './ravnoteza.module.css';
 
 /*
-  Povratna sprega: izmjeri, izračunaj ispravku, pomjeri, pa opet izmjeri.
-
-  Noge se ne pomjere trenutno — imaju masu. Zbog te inercije premalo
-  pojačanje ispravlja sporo, a preveliko pretjera pa se vrati pa opet
-  pretjera. To je ono što se na grafiku vidi kao oscilacija.
+  Povratna sprega na XGO psu, sa dvije strane: lijevo pas na nagnutoj
+  platformi (bočni pogled), desno ista stvar kao blok dijagram, sa
+  vrijednošću na svakoj žici. Fizika je u lib/ravnoteza.ts.
 */
 
-const PLATFORMA_X = 390;
-const PLATFORMA_Y = 300;
-const PLATFORMA_POLA = 250;
+/** Koliko sekundi stane na ekran osciloskopa. */
+const PROZOR = 6;
 
-const MAX_NAGIB = 26;
-/** Preko ovoga pas pada. */
-const UGAO_PADA = 21;
+const KANALI: readonly Kanal[] = [
+  { boja: 'odluci', natpis: 'CH1 željeni nagib r, 10°/pod.', skala: 10, nula: 1.5 },
+  { boja: 'osjeti', natpis: 'CH2 izmjereni nagib y, 10°/pod.', skala: 10, nula: 1.5 },
+  { boja: 'ch1', natpis: 'CH3 greška e, 10°/pod.', skala: 10, nula: -2.5 },
+];
 
-/** Prigušenje u nogama. Sa njim malo pojačanje znači sporo, a veliko oscilaciju. */
-const PRIGUSENJE = 3.2;
+const REZIMI = [
+  { id: 'sprega', natpis: 'Sa povratnom spregom' },
+  { id: 'bez', natpis: 'Bez sprege' },
+] as const;
 
-const GRAFIK_X = 850;
-const GRAFIK_Y = 400;
-const GRAFIK_S = 560;
-const GRAFIK_V = 150;
-const UZORAKA = 190;
+const ugao = (v: number) => `${broj(v, 1)}°`;
 
 /** useSyncExternalStore traži stabilnu referencu, a ovdje nema šta da se mijenja. */
 function prazanUpis() {
   return () => {};
 }
 
+/*
+  Dugme za nagib uređaja ne smije da se pojavi na TV-u ni na laptopu.
+  Sama provjera dozvole nije dovoljna: Chrome na desktopu takođe ima
+  requestPermission, pa se traži i da uređaj bude na dodir.
+*/
 function imaSenzorZaNagib() {
   const dogadjaj = window.DeviceOrientationEvent as typeof window.DeviceOrientationEvent & {
     requestPermission?: () => Promise<string>;
@@ -46,90 +74,57 @@ function imaSenzorZaNagib() {
 }
 
 export function Ravnoteza() {
-  const [nagibPlatforme, postaviNagib] = useState(0);
-  const [spregaUkljucena, postaviSpregu] = useState(true);
-  const [pojacanje, postaviPojacanje] = useState(8);
-  const [pao, postaviPao] = useState(false);
+  const stanje = useRef<StanjeRavnoteze>(POCETNO_RAVNOTEZA);
+  const [st, postavi] = useState<StanjeRavnoteze>(POCETNO_RAVNOTEZA);
+  const [snimak] = useState(() => new Snimak(PROZOR));
+  const vrijeme = useRef(0);
+  const kadar = useRef(0);
+
   const [senzorUkljucen, postaviSenzorUkljucen] = useState(false);
-
   const [senzorCuti, postaviSenzorCuti] = useState(false);
-
-  /*
-    Dugme za nagib uređaja ne smije da se pojavi na TV-u ni na laptopu.
-    Sama provjera dozvole nije dovoljna: Chrome na desktopu takođe ima
-    requestPermission, pa se traži i da uređaj bude na dodir.
-  */
   const senzorMoguc = useSyncExternalStore(prazanUpis, imaSenzorZaNagib, () => false);
-
   const stigloSaSenzora = useRef(false);
-  const ispravka = useRef(0);
-  const brzinaIspravke = useRef(0);
-  const istorija = useRef<{ izmjereni: number }[]>(
-    Array.from({ length: UZORAKA }, () => ({ izmjereni: 0 })),
-  );
 
-  const pasRef = useRef<SVGGElement | null>(null);
-  const grafikRef = useRef<SVGPolygonElement | null>(null);
-  const linijaRef = useRef<SVGPolylineElement | null>(null);
-  const greskaTekstRef = useRef<SVGTextElement | null>(null);
-
-  const nagibRef = useRef(nagibPlatforme);
-  const spregaRef = useRef(spregaUkljucena);
-  const pojacanjeRef = useRef(pojacanje);
-  const paoRef = useRef(pao);
-  useEffect(() => {
-    nagibRef.current = nagibPlatforme;
-    spregaRef.current = spregaUkljucena;
-    pojacanjeRef.current = pojacanje;
-    paoRef.current = pao;
-  }, [nagibPlatforme, spregaUkljucena, pojacanje, pao]);
+  function promijeni(novo: (s: StanjeRavnoteze) => StanjeRavnoteze) {
+    stanje.current = novo(stanje.current);
+    postavi(stanje.current);
+  }
 
   useAnimacija((dt) => {
-    const platforma = nagibRef.current;
-
-    if (spregaRef.current) {
-      /*
-        Izmjereni nagib tijela je ono što IMU vidi. P regulator iz njega
-        pravi komandu, a noge je izvršavaju sa zakašnjenjem.
-      */
-      const izmjereni = platforma - ispravka.current;
-      const komanda = pojacanjeRef.current * izmjereni;
-      brzinaIspravke.current += (komanda - PRIGUSENJE * brzinaIspravke.current) * dt;
-      ispravka.current += brzinaIspravke.current * dt;
-    } else {
-      ispravka.current = 0;
-      brzinaIspravke.current = 0;
-    }
-
-    const tijelo = spregaRef.current ? platforma - ispravka.current : platforma;
-
-    if (!spregaRef.current && Math.abs(tijelo) > UGAO_PADA && !paoRef.current) postaviPao(true);
-    if ((spregaRef.current || Math.abs(tijelo) <= UGAO_PADA) && paoRef.current) postaviPao(false);
-
-    istorija.current.push({ izmjereni: tijelo });
-    if (istorija.current.length > UZORAKA) istorija.current.shift();
-
-    const prikazaniNagib = paoRef.current ? Math.sign(tijelo) * 74 : tijelo;
-    pasRef.current?.setAttribute(
-      'transform',
-      `rotate(${prikazaniNagib} ${PLATFORMA_X} ${PLATFORMA_Y})`,
-    );
-
-    const tacke = istorija.current.map((u, i) => {
-      const x = GRAFIK_X + (i / (UZORAKA - 1)) * GRAFIK_S;
-      const y = GRAFIK_Y - (Math.max(-MAX_NAGIB, Math.min(MAX_NAGIB, u.izmjereni)) / MAX_NAGIB) * GRAFIK_V;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    });
-    linijaRef.current?.setAttribute('points', tacke.join(' '));
-    /* Razmak do željene nule je greška — zato je osjenčena. */
-    grafikRef.current?.setAttribute(
-      'points',
-      `${tacke.join(' ')} ${GRAFIK_X + GRAFIK_S},${GRAFIK_Y} ${GRAFIK_X},${GRAFIK_Y}`,
-    );
-    if (greskaTekstRef.current) {
-      greskaTekstRef.current.textContent = `${tijelo >= 0 ? '' : '−'}${Math.abs(tijelo).toFixed(1)}°`;
-    }
+    let s = stanje.current;
+    /* Četiri manja koraka, da i najveće pojačanje ostane stabilno kad kadar potraje. */
+    for (let i = 0; i < 4; i++) s = korakRavnoteze(s, dt / 4);
+    stanje.current = s;
+    vrijeme.current += dt;
+    snimak.dodaj(vrijeme.current, [s.zeljeni, izmjereni(s), greska(s)], pao(s));
+    if (++kadar.current % 5 === 0 || pao(s) !== pao(st)) postavi(s);
   });
+
+  useEffect(() => {
+    const naTaster = (e: KeyboardEvent) => {
+      const cilj = e.target as HTMLElement | null;
+      if (cilj?.tagName === 'INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      const ogranici = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+      if (k === 'arrowright') promijeni((s) => ({ ...s, platforma: ogranici(s.platforma + 2, -MAX_NAGIB, MAX_NAGIB) }));
+      else if (k === 'arrowleft') promijeni((s) => ({ ...s, platforma: ogranici(s.platforma - 2, -MAX_NAGIB, MAX_NAGIB) }));
+      else if (k === 'arrowup') promijeni((s) => ({ ...s, K: ogranici(s.K + 1, K_MIN, K_MAX) }));
+      else if (k === 'arrowdown') promijeni((s) => ({ ...s, K: ogranici(s.K - 1, K_MIN, K_MAX) }));
+      else if (k === 'm') promijeni((s) => ({ ...s, sprega: !s.sprega }));
+      else if (k === 'r') naResetuj();
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', naTaster);
+    return () => window.removeEventListener('keydown', naTaster);
+    // Stanje se čita kroz ref, pa se slušalac postavlja jednom.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function naResetuj() {
+    promijeni(() => POCETNO_RAVNOTEZA);
+    snimak.ocisti();
+  }
 
   /* Nagib iPada: dozvola se mora tražiti iz dodira, ne iz efekta. */
   async function ukljuciSenzor() {
@@ -142,7 +137,6 @@ export function Ravnoteza() {
     } catch {
       return;
     }
-
     window.addEventListener('deviceorientation', naOrijentaciju);
     postaviSenzorUkljucen(true);
     postaviSenzorCuti(false);
@@ -162,221 +156,401 @@ export function Ravnoteza() {
     const { beta, gamma } = dogadjaj;
     if (beta === null || gamma === null) return;
     stigloSaSenzora.current = true;
-
     /*
       beta i gamma su vezani za uređaj, ne za ekran. U landscape-u se
       nagib koji korisnik vidi kao lijevo-desno nalazi u beta, sa znakom
       koji zavisi od toga na koju je stranu ekran okrenut.
     */
     const ugaoEkrana = window.screen.orientation?.angle ?? 0;
-    const nagib =
-      ugaoEkrana === 90 ? beta : ugaoEkrana === 270 ? -beta : ugaoEkrana === 180 ? -gamma : gamma;
-
-    postaviNagib(Math.max(-MAX_NAGIB, Math.min(MAX_NAGIB, nagib)));
+    const nagib = ugaoEkrana === 90 ? beta : ugaoEkrana === 270 ? -beta : ugaoEkrana === 180 ? -gamma : gamma;
+    promijeni((s) => ({ ...s, platforma: Math.max(-MAX_NAGIB, Math.min(MAX_NAGIB, nagib)) }));
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => window.removeEventListener('deviceorientation', naOrijentaciju), []);
 
-  function resetuj() {
-    postaviNagib(0);
-    postaviSpregu(true);
-    postaviPojacanje(8);
-    postaviPao(false);
-    ispravka.current = 0;
-    brzinaIspravke.current = 0;
-    istorija.current = Array.from({ length: UZORAKA }, () => ({ izmjereni: 0 }));
-  }
-
-  const poruka = !spregaUkljucena
-    ? pao
-      ? 'Bez povratne sprege tijelo ide zajedno sa platformom — i pas je pao.'
-      : 'Povratna sprega je isključena. Tijelo se naginje koliko i platforma.'
-    : pojacanje < 4
-      ? 'Premalo pojačanje: pas ispravlja, ali sporo stiže do vodoravnog.'
-      : pojacanje > 20
-        ? 'Preveliko pojačanje: pas pretjera, vrati se, pa opet pretjera — oscilira.'
-        : 'Izmjeri, izračunaj ispravku, pomjeri, pa opet izmjeri. Noge drže tijelo vodoravno.';
+  const poruka = porukaRavnoteze(st);
+  const y = izmjereni(st);
+  const e = greska(st);
+  const prevrnut = pao(st);
 
   return (
-    <OkvirDemonstracije
+    <Okvir
+      nazad={{ naziv: 'XGO psi', putanja: '/xgo' }}
       naslov="Povratna sprega"
-      oznaka="XGO · izmjeri, ispravi, pa opet"
-      nazadPutanja="/xgo"
-      nazadNaziv="XGO psi"
-      poruka={poruka}
-      alarm={pao}
-      napomena={
-        senzorCuti
-          ? 'Senzor nagiba se ne javlja na ovom uređaju — koristi klizač. Pravi pas koristi složeniji regulator, ali ideja je ista.'
-          : senzorUkljucen
-            ? 'Nagib dolazi sa uređaja. Pravi pas koristi složeniji regulator, ali ideja je ista.'
-            : 'Pravi pas koristi složeniji regulator, ali ideja je ista.'
+      uvod="IMU mjeri nagib tijela, regulator računa grešku, a noge je ispravljaju."
+      rezimi={
+        <Rezimi
+          opis="Povratna sprega"
+          opcije={REZIMI}
+          izabran={st.sprega ? 'sprega' : 'bez'}
+          onIzbor={(id) => promijeni((s) => ({ ...s, sprega: id === 'sprega' }))}
+        />
       }
-      onResetuj={resetuj}
-      kontrole={
+      onResetuj={naResetuj}
+      status={<StatusLinija sta={poruka.sta} zasto={poruka.zasto} greska={poruka.greska} />}
+      osciloskop={
+        <Oscilloskop
+          kanali={KANALI}
+          snimak={snimak}
+          desno={`${PROZOR} s na ekranu, ${broj(PROZOR / 10, 1)} s/pod.`}
+          opis="Osciloskop: željeni nagib, izmjereni nagib i greška kroz vrijeme"
+        />
+      }
+      sema={
+        <svg viewBox="0 0 1000 540" role="img" aria-label="Pas na nagnutoj platformi i blok dijagram povratne sprege">
+          <Pas stanje={stanje} />
+          <Dijagram st={st} />
+        </svg>
+      }
+      strana={
         <>
-          <Klizac
-            natpis="Nagib"
-            vrijednost={Math.round(nagibPlatforme)}
-            prikaz={`${Math.round(nagibPlatforme)}°`}
-            min={-MAX_NAGIB}
-            max={MAX_NAGIB}
-            onPromjena={postaviNagib}
-          />
-          <Klizac
-            natpis="Pojačanje"
-            vrijednost={pojacanje}
-            prikaz={`${pojacanje}`}
-            min={1}
-            max={30}
-            onPromjena={postaviPojacanje}
-          />
-          <PrekidacRezima ukljucen={spregaUkljucena} onPromjena={postaviSpregu}>
-            Povratna sprega
-          </PrekidacRezima>
-          {senzorMoguc && !senzorUkljucen && !senzorCuti && (
-            <button className={stil.dugme} onClick={ukljuciSenzor}>
-              Koristi nagib iPada
-            </button>
-          )}
+          <Ocitavanja>
+            <Ocitavanje natpis="Izmjereni nagib y" vrijednost={broj(y, 1)} jedinica="°" pod={`želi se ${ugao(st.zeljeni)}`} />
+            <Ocitavanje natpis="Greška e" vrijednost={broj(e, 1)} jedinica="°" pod="e = r − y" />
+            <Ocitavanje
+              natpis="Pojačanje K"
+              vrijednost={String(Math.round(st.K))}
+              jedinica="1/s²"
+              pod={`ζ = ${broj(zeta(st.K), 2)}, preskok ${Math.round(preskok(st.K) * 100)} %`}
+            />
+            <Ocitavanje
+              natpis="Nagib platforme p"
+              vrijednost={broj(st.platforma, 1)}
+              jedinica="°"
+              pod={prevrnut ? 'pas se prevrnuo' : senzorUkljucen ? 'sa nagiba iPada' : ''}
+              vruce={prevrnut}
+            />
+          </Ocitavanja>
+
+          <PanelKontrola>
+            <Klizac
+              id="nagib-platforme"
+              natpis="Nagib platforme p"
+              vrijednost={Math.round(st.platforma)}
+              prikaz={ugao(st.platforma)}
+              min={-MAX_NAGIB}
+              max={MAX_NAGIB}
+              boja="text"
+              onPromjena={(v) => promijeni((s) => ({ ...s, platforma: v }))}
+            />
+            <Klizac
+              id="zeljeni-nagib"
+              natpis="Željeni nagib r"
+              vrijednost={st.zeljeni}
+              prikaz={ugao(st.zeljeni)}
+              min={-MAX_ZELJENI}
+              max={MAX_ZELJENI}
+              boja="odluci"
+              onPromjena={(v) => promijeni((s) => ({ ...s, zeljeni: v }))}
+            />
+            <Klizac
+              id="pojacanje"
+              natpis="Pojačanje K"
+              vrijednost={st.K}
+              prikaz={`${Math.round(st.K)} 1/s²`}
+              min={K_MIN}
+              max={K_MAX}
+              boja="odluci"
+              onPromjena={(v) => promijeni((s) => ({ ...s, K: v }))}
+            />
+            {senzorMoguc && !senzorUkljucen && !senzorCuti && <Taster onClick={ukljuciSenzor}>Koristi nagib iPada</Taster>}
+          </PanelKontrola>
+
+          <Napomena>
+            {senzorCuti ? 'Senzor nagiba se ne javlja na ovom uređaju, pa koristi klizač. ' : ''}
+            Model je ilustrativan: pravi pas ima složeniji regulator, a granica prevrtanja je izabrana za prikaz.
+          </Napomena>
         </>
       }
-    >
-      <svg viewBox="0 0 1480 640" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        {/* --- platforma i pas --- */}
-        <g transform={`rotate(${nagibPlatforme} ${PLATFORMA_X} ${PLATFORMA_Y})`}>
-          <rect
-            x={PLATFORMA_X - PLATFORMA_POLA}
-            y={PLATFORMA_Y}
-            width={PLATFORMA_POLA * 2}
-            height={18}
-            rx={5}
-            fill="var(--maska-svijetla)"
-            stroke="var(--bakar)"
-            strokeWidth={4}
-          />
-        </g>
-
-        <g ref={pasRef}>
-          <Pas x={PLATFORMA_X} y={PLATFORMA_Y - 98} skala={0.92} boja={pao ? 'var(--alarm)' : 'var(--silkscreen)'} />
-        </g>
-
-        {/* oslonac platforme */}
-        <polygon
-          points={`${PLATFORMA_X},${PLATFORMA_Y + 16} ${PLATFORMA_X - 34},${PLATFORMA_Y + 82} ${PLATFORMA_X + 34},${PLATFORMA_Y + 82}`}
-          fill="var(--maska-svijetla)"
-          stroke="var(--bakar)"
-          strokeWidth={4}
-        />
-        <Vod tacke={`${PLATFORMA_X - 260},${PLATFORMA_Y + 82} ${PLATFORMA_X + 260},${PLATFORMA_Y + 82}`} debljina={5} />
-
-        {pao && (
-          <SilkTekst x={PLATFORMA_X + 280} y={PLATFORMA_Y - 150} velicina={28} boja="var(--alarm)">
-            pao je
-          </SilkTekst>
-        )}
-
-        {/* --- petlja u tri boje --- */}
-        <Petlja spregaUkljucena={spregaUkljucena} />
-
-        {/* --- grafik --- */}
-        <SilkTekst x={GRAFIK_X} y={GRAFIK_Y - GRAFIK_V - 46} velicina={22} boja="var(--silkscreen)">
-          nagib tijela kroz vrijeme
-        </SilkTekst>
-
-        {/* željeni nagib je nula — sve iznad i ispod je greška */}
-        <line x1={GRAFIK_X} y1={GRAFIK_Y} x2={GRAFIK_X + GRAFIK_S} y2={GRAFIK_Y}
-          stroke="var(--odluci)" strokeWidth={3} strokeDasharray="12 8" />
-        <SilkTekst x={GRAFIK_X + GRAFIK_S} y={GRAFIK_Y - 12} desno velicina={17} boja="var(--odluci)">
-          željeno 0°
-        </SilkTekst>
-
-        <polygon ref={grafikRef} points="" fill="var(--alarm)" opacity={0.2} />
-        <polyline ref={linijaRef} points="" fill="none" stroke="var(--osjeti)" strokeWidth={4}
-          strokeLinejoin="round" strokeLinecap="round" />
-
-        {[MAX_NAGIB, -MAX_NAGIB].map((v) => (
-          <g key={v}>
-            <line x1={GRAFIK_X} y1={GRAFIK_Y - (v / MAX_NAGIB) * GRAFIK_V} x2={GRAFIK_X + GRAFIK_S}
-              y2={GRAFIK_Y - (v / MAX_NAGIB) * GRAFIK_V} stroke="var(--ivica)" strokeWidth={2} strokeDasharray="4 8" />
-            <SilkTekst x={GRAFIK_X - 14} y={GRAFIK_Y - (v / MAX_NAGIB) * GRAFIK_V + 6} desno velicina={15}
-              boja="var(--silkscreen-tih)" debljina={400}>
-              {v > 0 ? `+${v}°` : `${v}°`}
-            </SilkTekst>
-          </g>
-        ))}
-
-        <SilkTekst x={GRAFIK_X} y={GRAFIK_Y - GRAFIK_V - 16} velicina={17} boja="var(--osjeti)" debljina={400}>
-          izmjereni nagib
-        </SilkTekst>
-        <SilkTekst x={GRAFIK_X + 200} y={GRAFIK_Y - GRAFIK_V - 16} velicina={17} boja="var(--alarm)" debljina={400}>
-          osjenčeno = greška
-        </SilkTekst>
-
-        <text
-          ref={greskaTekstRef}
-          x={GRAFIK_X + GRAFIK_S}
-          y={GRAFIK_Y - GRAFIK_V - 12}
-          textAnchor="end"
-          fontSize={30}
-          fontWeight={700}
-          fill="var(--osjeti)"
-          style={{ fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-        />
-      </svg>
-    </OkvirDemonstracije>
+    />
   );
 }
 
-/** Ista petlja kao na slajdovima, u tri boje, sa oznakama uloga. */
-function Petlja({ spregaUkljucena }: { spregaUkljucena: boolean }) {
-  /* Petlja stoji ispod platforme, da se ne sudara sa psom. */
-  const y = 476;
-  const pola = 84;
-  const visina = 72;
-  const vrh = y - visina / 2;
-  const dno = y + visina / 2;
+/* ------------------------------------------------------------------ pas na platformi */
 
-  const stanice = [
-    { x: 140, boja: 'osjeti', natpis: 'IMU', uloga: 'osjeti' },
-    { x: 400, boja: 'odluci', natpis: 'PROCESOR', uloga: 'odluči' },
-    { x: 660, boja: 'djeluj', natpis: 'MOTORI', uloga: 'djeluj' },
-  ];
+const OSLONAC = { x: 220, y: 430 };
+const POLA_PLATFORME = 190;
+const TIJELO = { x: 220, y: 262, pola: 150, visina: 40 };
+/** Kukovi i stopala su ovoliko od sredine, duž tijela i duž platforme. */
+const RASKORAK = 110;
+/** Dužina natkoljenice i potkoljenice. */
+const SEGMENT = 96;
+
+type T = { x: number; y: number };
+
+const rad = (st: number) => (st * Math.PI) / 180;
+/** Pravac duž nagnute linije i normala nadolje (SVG: y raste nadolje, pozitivan ugao je u smjeru kazaljke). */
+const duz = (ug: number): T => ({ x: Math.cos(rad(ug)), y: Math.sin(rad(ug)) });
+const dolje = (ug: number): T => ({ x: -Math.sin(rad(ug)), y: Math.cos(rad(ug)) });
+
+/** Koljeno dvodjelne noge: presjek dva kruga, uvijek na stražnjoj strani. */
+function koljeno(kuk: T, stopalo: T): T {
+  const dx = stopalo.x - kuk.x;
+  const dy = stopalo.y - kuk.y;
+  const d = Math.hypot(dx, dy) || 1;
+  const pola = Math.min(d / 2, SEGMENT);
+  const h = Math.sqrt(Math.max(0, SEGMENT * SEGMENT - pola * pola));
+  const s = { x: kuk.x + (dx / d) * pola, y: kuk.y + (dy / d) * pola };
+  return { x: s.x + (-dy / d) * h, y: s.y + (dx / d) * h };
+}
+
+/** Pas se crta u svakom kadru, jer se tijelo pomjera glatko. */
+function Pas({ stanje }: { stanje: React.RefObject<StanjeRavnoteze> }) {
+  const [st, postavi] = useState<StanjeRavnoteze>(POCETNO_RAVNOTEZA);
+  useAnimacija(() => postavi(stanje.current));
+
+  const p = st.platforma;
+  const prevrnut = pao(st);
+  /* Prevrnut pas stoji koliko i platforma; crta se oboren preko nižeg stopala. */
+  const y = izmjereni(st);
+  const up = duz(p);
+  const ut = duz(y);
+  const nt = dolje(y);
+  const stopala = [-1, 1].map((s) => ({ x: OSLONAC.x + s * RASKORAK * up.x, y: OSLONAC.y + s * RASKORAK * up.y }));
+  const kukovi = [-1, 1].map((s) => ({
+    x: TIJELO.x + s * RASKORAK * ut.x + (TIJELO.visina / 2) * nt.x,
+    y: TIJELO.y + s * RASKORAK * ut.y + (TIJELO.visina / 2) * nt.y,
+  }));
+  const koljena = kukovi.map((k, i) => koljeno(k, stopala[i]));
+  const niza = stopala[p >= 0 ? 1 : 0];
+  const obaranje = prevrnut ? `rotate(${Math.sign(p) * 58} ${niza.x} ${niza.y})` : undefined;
 
   return (
-    <g opacity={spregaUkljucena ? 1 : 0.32}>
-      {stanice.slice(0, -1).map((s, i) => (
-        <g key={s.natpis}>
-          <Vod
-            tacke={`${s.x + pola},${y} ${stanice[i + 1].x - pola},${y}`}
-            debljina={5}
-            struja={spregaUkljucena ? 'naprijed' : false}
-            brzina={0.7}
+    <g>
+      <text x={24} y={40} className={stil.tekst}>
+        bočni pogled
+      </text>
+
+      {/* tlo i oslonac platforme */}
+      <line x1={60} y1={500} x2={380} y2={500} className={stil.zica} />
+      {Array.from({ length: 16 }, (_, i) => (
+        <line key={i} x1={72 + i * 20} y1={502} x2={60 + i * 20} y2={514} className={stil.zicaTanka} />
+      ))}
+      <polygon points={`${OSLONAC.x},${OSLONAC.y + 8} ${OSLONAC.x - 34},500 ${OSLONAC.x + 34},500`} className={stil.blok} />
+
+      {/* vodoravne pomoćne linije i lukovi uglova */}
+      <line x1={OSLONAC.x - POLA_PLATFORME - 16} y1={OSLONAC.y} x2={OSLONAC.x + POLA_PLATFORME + 16} y2={OSLONAC.y} className={rv.pomocna} />
+      <Luk x={OSLONAC.x} y={OSLONAC.y} r={POLA_PLATFORME + 6} ugao={p} oznaka="p" />
+
+      <g transform={`rotate(${p} ${OSLONAC.x} ${OSLONAC.y})`}>
+        <rect x={OSLONAC.x - POLA_PLATFORME} y={OSLONAC.y} width={POLA_PLATFORME * 2} height={14} rx={2} className={rv.platforma} />
+      </g>
+      <circle cx={OSLONAC.x} cy={OSLONAC.y + 7} r={4} className={stil.cvor} />
+
+      {!prevrnut && (
+        <>
+          <line x1={TIJELO.x - TIJELO.pola - 20} y1={TIJELO.y} x2={TIJELO.x + TIJELO.pola + 20} y2={TIJELO.y} className={rv.pomocna} />
+          <Luk x={TIJELO.x} y={TIJELO.y} r={TIJELO.pola + 12} ugao={y} oznaka="y" />
+        </>
+      )}
+
+      <g transform={obaranje}>
+        {kukovi.map((k, i) => (
+          <g key={i}>
+            <polyline points={`${k.x},${k.y} ${koljena[i].x},${koljena[i].y} ${stopala[i].x},${stopala[i].y}`} className={rv.noga} />
+            <circle cx={k.x} cy={k.y} r={4.5} className={stil.cvor} />
+            <circle cx={koljena[i].x} cy={koljena[i].y} r={4.5} className={stil.cvor} />
+            <circle cx={stopala[i].x} cy={stopala[i].y} r={4.5} className={stil.cvor} />
+          </g>
+        ))}
+        <g transform={`rotate(${y} ${TIJELO.x} ${TIJELO.y})`}>
+          <rect
+            x={TIJELO.x - TIJELO.pola}
+            y={TIJELO.y - TIJELO.visina / 2}
+            width={TIJELO.pola * 2}
+            height={TIJELO.visina}
+            rx={4}
+            className={prevrnut ? rv.tijeloPalo : rv.tijelo}
           />
-          <Strelica x={(s.x + pola + stanice[i + 1].x - pola) / 2} y={y} />
+          <rect x={TIJELO.x - 26} y={TIJELO.y - 12} width={52} height={24} rx={2} className={rv.imu} />
+          <text x={TIJELO.x} y={TIJELO.y + 5} textAnchor="middle" className={rv.imuTekst}>
+            IMU
+          </text>
         </g>
-      ))}
+      </g>
 
-      {/* povratak: motor pomjeri tijelo, senzor to odmah izmjeri */}
-      <Vod
-        tacke={`660,${dno} 660,${dno + 36} 628,${dno + 60} 172,${dno + 60} 140,${dno + 36} 140,${dno}`}
-        debljina={5}
-        struja={spregaUkljucena ? 'naprijed' : false}
-        brzina={1.1}
+      {prevrnut && (
+        <text x={p > 0 ? 40 : 400} y={150} textAnchor={p > 0 ? 'start' : 'end'} className={stil.greska}>
+          prevrnuo se
+        </text>
+      )}
+    </g>
+  );
+}
+
+/** Luk ugla od vodoravne pomoćne linije do nagnute, na desnom kraju. */
+function Luk({ x, y, r, ugao: u, oznaka }: { x: number; y: number; r: number; ugao: number; oznaka: string }) {
+  if (Math.abs(u) < 0.3) return null;
+  const kraj = { x: x + r * Math.cos(rad(u)), y: y + r * Math.sin(rad(u)) };
+  return (
+    <g>
+      <path d={`M${x + r},${y} A${r},${r} 0 0 ${u > 0 ? 1 : 0} ${kraj.x},${kraj.y}`} className={rv.luk} />
+      <text x={x + r + 10} y={y + (u > 0 ? 22 : -10)} className={rv.natpisUgla}>
+        {oznaka}
+      </text>
+    </g>
+  );
+}
+
+/* ------------------------------------------------------------------ blok dijagram */
+
+const RED = 170;
+const S1 = { x: 500, y: RED };
+const S2 = { x: 960, y: RED };
+const R_ZBIRA = 16;
+const REGULATOR = { x: 590, w: 110 };
+const NOGE = { x: 790, w: 80 };
+const BLOK_V = 64;
+const IMU_BLOK = { x: 690, w: 110, y: 330 };
+
+/** Vrh strelice na kraju žice, u pravcu kretanja signala. */
+function Strelica({ x, y, smjer }: { x: number; y: number; smjer: 'desno' | 'lijevo' | 'gore' | 'dolje' }) {
+  const ug = { desno: 0, dolje: 90, lijevo: 180, gore: 270 }[smjer];
+  return <polygon points="0,0 -11,-5.5 -11,5.5" transform={`translate(${x} ${y}) rotate(${ug})`} className={rv.strelica} />;
+}
+
+function Blok({ x, w, y, naslov, uloga, klasa, klasaUloge }: { x: number; w: number; y: number; naslov: string; uloga: string; klasa: string; klasaUloge: string }) {
+  return (
+    <g>
+      <text x={x + w / 2} y={y - BLOK_V / 2 - 10} textAnchor="middle" className={klasaUloge}>
+        {uloga}
+      </text>
+      <rect x={x} y={y - BLOK_V / 2} width={w} height={BLOK_V} rx={4} className={klasa} />
+      <text x={x + w / 2} y={y + 7} textAnchor="middle" className={stil.tekstVeliki}>
+        {naslov}
+      </text>
+    </g>
+  );
+}
+
+/** Natpis žice: simbol iznad, vrijednost ispod. */
+function Natpis({ x, y, simbol, vrijednost }: { x: number; y: number; simbol: string; vrijednost: string }) {
+  return (
+    <g>
+      <text x={x} y={y - 10} textAnchor="middle" className={rv.simbol}>
+        {simbol}
+      </text>
+      <text x={x} y={y + 24} textAnchor="middle" className={rv.vrijednost}>
+        {vrijednost}
+      </text>
+    </g>
+  );
+}
+
+function Dijagram({ st }: { st: StanjeRavnoteze }) {
+  const y = izmjereni(st);
+  const e = greska(st);
+  const komanda = st.sprega ? st.K * e : 0;
+  const zatvoreno = st.sprega;
+  const zica = zatvoreno ? stil.zica : rv.iskljuceno;
+  const yDno = IMU_BLOK.y;
+
+  return (
+    <g>
+      <text x={470} y={40} className={stil.tekst}>
+        blok dijagram
+      </text>
+
+      {/* ulaz r */}
+      <line x1={S1.x} y1={70} x2={S1.x} y2={S1.y - R_ZBIRA} className={stil.zica} />
+      <Strelica x={S1.x} y={S1.y - R_ZBIRA} smjer="dolje" />
+      <text x={S1.x + 12} y={86} className={rv.simbolOdluci}>
+        r, željeni
+      </text>
+      <text x={S1.x + 12} y={110} className={rv.vrijednost}>
+        {ugao(st.zeljeni)}
+      </text>
+
+      {/* sabirač 1 */}
+      <circle cx={S1.x} cy={S1.y} r={R_ZBIRA} className={rv.zbir} />
+      <text x={S1.x - 26} y={S1.y - 16} className={rv.znak}>
+        +
+      </text>
+      <text x={S1.x - 26} y={S1.y + 36} className={rv.znak}>
+        −
+      </text>
+
+      {/* e → regulator */}
+      <line x1={S1.x + R_ZBIRA} y1={RED} x2={REGULATOR.x} y2={RED} className={zica} />
+      <Strelica x={REGULATOR.x} y={RED} smjer="desno" />
+      <Natpis x={(S1.x + R_ZBIRA + REGULATOR.x) / 2} y={RED} simbol="e" vrijednost={zatvoreno ? ugao(e) : ''} />
+      <Blok x={REGULATOR.x} w={REGULATOR.w} y={RED} naslov="K · e" uloga="odluči" klasa={rv.regulator} klasaUloge={rv.ulogaOdluci} />
+
+      {/* regulator → noge */}
+      <line x1={REGULATOR.x + REGULATOR.w} y1={RED} x2={NOGE.x} y2={RED} className={zica} />
+      <Strelica x={NOGE.x} y={RED} smjer="desno" />
+      <Natpis
+        x={(REGULATOR.x + REGULATOR.w + NOGE.x) / 2}
+        y={RED}
+        simbol="komanda"
+        vrijednost={zatvoreno ? `${broj(komanda, 0)} °/s²` : '0 °/s²'}
       />
-      <Strelica x={400} y={dno + 60} ugao={180} />
-      <SilkTekst x={400} y={dno + 90} sredina velicina={16} boja="var(--silkscreen-tih)" debljina={400}>
-        pa opet izmjeri
-      </SilkTekst>
+      <Blok x={NOGE.x} w={NOGE.w} y={RED} naslov="noge" uloga="djeluj" klasa={rv.noge} klasaUloge={rv.ulogaDjeluj} />
 
-      {stanice.map((s) => (
-        <g key={s.natpis}>
-          <Komponenta x={s.x - pola} y={vrh} w={pola * 2} h={visina} natpis={s.natpis} boja={`var(--${s.boja})`} noge={2} />
-          <SilkTekst x={s.x} y={vrh - 16} sredina velicina={17} boja={`var(--${s.boja})`}>
-            {s.uloga}
-          </SilkTekst>
-        </g>
-      ))}
+      {/* noge → sabirač 2 */}
+      <line x1={NOGE.x + NOGE.w} y1={RED} x2={S2.x - R_ZBIRA} y2={RED} className={stil.zica} />
+      <Strelica x={S2.x - R_ZBIRA} y={RED} smjer="desno" />
+      <Natpis x={(NOGE.x + NOGE.w + S2.x - R_ZBIRA) / 2} y={RED} simbol="ispravka" vrijednost={ugao(st.ispravka)} />
+
+      {/* ulaz p */}
+      <line x1={S2.x} y1={70} x2={S2.x} y2={S2.y - R_ZBIRA} className={stil.zica} />
+      <Strelica x={S2.x} y={S2.y - R_ZBIRA} smjer="dolje" />
+      <text x={S2.x - 12} y={86} textAnchor="end" className={rv.simbol}>
+        p, platforma
+      </text>
+      <text x={S2.x - 12} y={110} textAnchor="end" className={rv.vrijednost}>
+        {ugao(st.platforma)}
+      </text>
+
+      {/* sabirač 2: y = p − ispravka */}
+      <circle cx={S2.x} cy={S2.y} r={R_ZBIRA} className={rv.zbir} />
+      <text x={S2.x + 12} y={S2.y - 22} className={rv.znak}>
+        +
+      </text>
+      <text x={S2.x - 32} y={S2.y + 36} className={rv.znak}>
+        −
+      </text>
+
+      {/* izlaz y, dolje do IMU-a */}
+      <line x1={S2.x} y1={S2.y + R_ZBIRA} x2={S2.x} y2={yDno} className={stil.zica} />
+      <line x1={S2.x} y1={yDno} x2={IMU_BLOK.x + IMU_BLOK.w} y2={yDno} className={stil.zica} />
+      <Strelica x={IMU_BLOK.x + IMU_BLOK.w} y={yDno} smjer="lijevo" />
+      <text x={S2.x - 12} y={250} textAnchor="end" className={rv.simbolOsjeti}>
+        y, tijelo
+      </text>
+      <text x={S2.x - 12} y={274} textAnchor="end" className={rv.vrijednost}>
+        {ugao(y)}
+      </text>
+      <Blok x={IMU_BLOK.x} w={IMU_BLOK.w} y={yDno} naslov="IMU" uloga="osjeti" klasa={rv.imuBlok} klasaUloge={rv.ulogaOsjeti} />
+
+      {/* povratak: IMU → prekidač → sabirač 1 */}
+      <line x1={IMU_BLOK.x} y1={yDno} x2={640} y2={yDno} className={stil.zica} />
+      <Prekidac x1={640} x2={590} y={yDno} zatvoren={zatvoreno} />
+      <line x1={590} y1={yDno} x2={S1.x} y2={yDno} className={zica} />
+      <line x1={S1.x} y1={yDno} x2={S1.x} y2={S1.y + R_ZBIRA} className={zica} />
+      <Strelica x={S1.x} y={S1.y + R_ZBIRA} smjer="gore" />
+      <text x={615} y={yDno + 40} textAnchor="middle" className={zatvoreno ? rv.simbol : stil.greska}>
+        {zatvoreno ? 'sprega zatvorena' : 'sprega otvorena'}
+      </text>
+
+      <text x={470} y={450} className={stil.tih}>
+        e = r − y, a y = p − ispravka.
+      </text>
+      <text x={470} y={476} className={stil.tih}>
+        Noge imaju masu, pa ispravka kasni za komandom.
+      </text>
+    </g>
+  );
+}
+
+/** Prekidač u povratnoj grani, kao na šemi: dvije tačke i poluga. */
+function Prekidac({ x1, x2, y, zatvoren }: { x1: number; x2: number; y: number; zatvoren: boolean }) {
+  return (
+    <g>
+      <circle cx={x1} cy={y} r={4} className={stil.cvor} />
+      <circle cx={x2} cy={y} r={4} className={stil.cvor} />
+      <line x1={x1} y1={y} x2={zatvoren ? x2 : x2 + 8} y2={zatvoren ? y : y - 26} className={zatvoren ? stil.zica : rv.polugaOtvorena} />
     </g>
   );
 }

@@ -1,0 +1,122 @@
+/* Noga kao tehnički crtež: kote, lukovi uglova i šrafirana zona dometa. */
+
+.zona {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 8 6;
+}
+
+.srafura {
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+.segment {
+  stroke: var(--djeluj);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.zglob {
+  fill: var(--panel);
+  stroke: var(--djeluj);
+  stroke-width: 3;
+}
+
+.stopalo {
+  fill: var(--text);
+}
+
+.stopaloGreska {
+  fill: var(--fault);
+}
+
+.meta {
+  cursor: grab;
+}
+
+.pomocna {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+}
+
+.kota,
+.pomocnaKote {
+  stroke: var(--text);
+  stroke-width: 1.25;
+}
+
+.pomocnaKote {
+  stroke: var(--muted);
+}
+
+.kotaD {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  stroke-dasharray: 9 5;
+}
+
+.vrhKote {
+  fill: var(--text);
+}
+
+.natpisKote {
+  fill: var(--text);
+  font-size: 17px;
+  font-weight: 650;
+  font-style: italic;
+}
+
+.natpisD {
+  fill: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.luk {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.75;
+}
+
+.natpisUgla {
+  fill: var(--djeluj);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.vanDometa {
+  stroke: var(--fault);
+  stroke-width: 2;
+  stroke-dasharray: 7 6;
+}
+
+.cilj {
+  fill: none;
+  stroke: var(--fault);
+  stroke-width: 2.5;
+}
+
+/* ------------------------------------------------------------ račun */
+
+.formula {
+  fill: var(--muted);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.racun {
+  fill: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rezultat {
+  fill: var(--djeluj);
+  font-size: 26px;
+  font-weight: 720;
+  font-stretch: 78%;
+  font-variant-numeric: tabular-nums;
+}

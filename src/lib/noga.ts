@@ -7,6 +7,8 @@
   Koordinate: kuk je u nuli, x je naprijed, y nadolje.
 */
 
+import { broj } from '@/lib/format';
+
 /** Dužine segmenata. Ilustrativne — prava noga ima svoje mjere. */
 export const BEDRO = 135;
 export const POTKOLJENICA = 135;
@@ -107,4 +109,47 @@ export function inverzno(cilj: Tacka): Rjesenje {
     stopalo: { x, y },
     uDometu,
   };
+}
+
+/*
+  Dužine su ilustrativne, pa se na ekranu mjere u dužinama bedra:
+  „d = 1,64 a" je tačno bez obzira na to kolika je prava noga.
+*/
+export function uDuzinamaBedra(v: number) {
+  return v / BEDRO;
+}
+
+export type PorukaNoge = { sta: string; zasto: string; greska?: boolean };
+
+export function porukaNoge(inverzni: boolean, uglovi: Uglovi, stopalo: Tacka, uDometu: boolean): PorukaNoge {
+  const d = broj(uDuzinamaBedra(Math.hypot(stopalo.x, stopalo.y)), 2);
+  if (!inverzni) {
+    return {
+      sta: `Kuk ${broj(uglovi.kuk, 0)}° i koljeno ${broj(uglovi.koljeno, 0)}° stavljaju stopalo na d = ${d} a od kuka.`,
+      zasto: 'Direktno je lako: iz uglova se dobija tačka. Inverzno je teže, jer se iz tačke traže uglovi.',
+    };
+  }
+  if (!uDometu) {
+    return {
+      sta: 'Cilj je van dometa: noga je ispružena do kraja i stopalo staje na ivici zone.',
+      zasto: 'Dalje od a + b ne dohvata nijedan par uglova, pa inverzna kinematika nema rješenje.',
+      greska: true,
+    };
+  }
+  return {
+    sta: `Stopalo je na d = ${d} a od kuka, pa koljeno mora biti savijeno na ${broj(uglovi.koljeno, 0)}°.`,
+    zasto: 'Zakon kosinusa daje ugao koljena iz tri dužine a, b i d; kuk onda samo usmjeri nogu.',
+  };
+}
+
+/**
+  Ugao kuka razložen za prikaz: pravac φ od kuka ka stopalu (od nadolje)
+  i ugao α između tog pravca i bedra. Kuk je φ + α.
+*/
+export function razlozenKuk(stopalo: Tacka) {
+  const d = Math.hypot(stopalo.x, stopalo.y);
+  const pravac = uStepene(Math.atan2(stopalo.x, stopalo.y));
+  if (d < 1e-6) return { pravac: 0, alfa: 0 };
+  const cosAlfa = Math.max(-1, Math.min(1, (BEDRO * BEDRO + d * d - POTKOLJENICA * POTKOLJENICA) / (2 * BEDRO * d)));
+  return { pravac, alfa: uStepene(Math.acos(cosAlfa)) };
 }

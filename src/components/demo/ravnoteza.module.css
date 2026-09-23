@@ -1,0 +1,151 @@
+/* Povratna sprega: bočni pogled na psa i blok dijagram. */
+
+.platforma {
+  fill: var(--panel-2);
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.tijelo {
+  fill: var(--panel);
+  stroke: var(--text);
+  stroke-width: 2.5;
+  transition: stroke var(--prelaz);
+}
+
+.tijeloPalo {
+  fill: var(--panel);
+  stroke: var(--fault);
+  stroke-width: 2.5;
+  transition: stroke var(--prelaz);
+}
+
+.noga {
+  fill: none;
+  stroke: var(--djeluj);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.imu {
+  fill: var(--panel);
+  stroke: var(--osjeti);
+  stroke-width: 2;
+}
+
+.imuTekst {
+  fill: var(--osjeti);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pomocna {
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.luk {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.natpisUgla {
+  fill: var(--text);
+  font-size: 18px;
+  font-weight: 650;
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------ dijagram */
+
+.zbir {
+  fill: var(--panel);
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+
+.znak {
+  fill: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.strelica {
+  fill: var(--line);
+}
+
+.regulator {
+  fill: var(--panel);
+  stroke: var(--odluci);
+  stroke-width: 2.5;
+}
+
+.noge {
+  fill: var(--panel);
+  stroke: var(--djeluj);
+  stroke-width: 2.5;
+}
+
+.imuBlok {
+  fill: var(--panel);
+  stroke: var(--osjeti);
+  stroke-width: 2.5;
+}
+
+.ulogaOdluci,
+.ulogaDjeluj,
+.ulogaOsjeti {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.ulogaOdluci {
+  fill: var(--odluci);
+}
+
+.ulogaDjeluj {
+  fill: var(--djeluj);
+}
+
+.ulogaOsjeti {
+  fill: var(--osjeti);
+}
+
+.simbol,
+.simbolOdluci,
+.simbolOsjeti {
+  fill: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.simbolOdluci {
+  fill: var(--odluci);
+}
+
+.simbolOsjeti {
+  fill: var(--osjeti);
+}
+
+.vrijednost {
+  fill: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.iskljuceno {
+  stroke: var(--line-soft);
+  stroke-width: 2;
+  stroke-dasharray: 7 6;
+  fill: none;
+}
+
+.polugaOtvorena {
+  stroke: var(--fault);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}

@@ -1,11 +1,7 @@
-import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { prevedi } from './prevedi.mjs';
 
 /*
-  Dvije stvari se ovdje provjeravaju:
+  Tri stvari se ovdje provjeravaju:
 
   1. Inverzna kinematika noge. Jedini pošten test je povratni: uzmi tačku,
      izračunaj uglove, pa iz tih uglova vrati stopalo i vidi je li stiglo
@@ -14,31 +10,24 @@ import { pathToFileURL } from 'node:url';
   2. Serijski paket za XGO. Checksum je invertovan najniži bajt zbira —
      pravilo koje je lako pogrešno napisati, pa se provjerava na cijelom
      prostoru vrijednosti.
+
+  3. Put komande: poruka prođe svih pet veza samo kad je paket ispravan;
+     pokvaren bit u komandi staje na ESP32-u, a pas ne radi ništa.
 */
 
-const radni = mkdtempSync(join(tmpdir(), 'xgo-'));
-
-writeFileSync(
-  join(radni, 'cinjenice.ts'),
-  `export const XGO_BAJTOVI_SJEDI = null;
-   export const XGO_BAJTOVI_SJEDI_ILUSTRATIVNI = { komanda: 0x3e, adresa: 0x01, podaci: [0x02] };`,
+const modul = await prevedi(
+  ['src/lib/noga.ts', 'src/lib/xgo-paket.ts', 'src/lib/komanda.ts', 'src/lib/format.ts', 'src/config/cinjenice.ts'],
+  'xgo-',
 );
-for (const ime of ['noga', 'xgo-paket']) {
-  const izvor = readFileSync(`src/lib/${ime}.ts`, 'utf8').replace('@/config/cinjenice', './cinjenice.js');
-  writeFileSync(join(radni, `${ime}.ts`), izvor);
-}
-
-execFileSync(process.execPath, [
-  join(process.cwd(), 'node_modules', 'typescript', 'bin', 'tsc'),
-  join(radni, 'noga.ts'), join(radni, 'xgo-paket.ts'), join(radni, 'cinjenice.ts'),
-  '--outDir', radni, '--module', 'esnext', '--target', 'es2022', '--moduleResolution', 'bundler',
-], { stdio: 'inherit' });
-
-const noga = await import(pathToFileURL(join(radni, 'noga.js')).href);
-const paket = await import(pathToFileURL(join(radni, 'xgo-paket.js')).href);
+const noga = await modul.uvezi('src/lib/noga.ts');
+const paket = await modul.uvezi('src/lib/xgo-paket.ts');
+const komanda = await modul.uvezi('src/lib/komanda.ts');
+modul.pocisti();
 
 const greske = [];
+let ukupno = 0;
 const provjeri = (uslov, opis) => {
+  ukupno++;
   if (!uslov) greske.push(opis);
 };
 
@@ -107,13 +96,75 @@ for (let komanda = 0; komanda < 256; komanda += 3) {
 const racun = paket.racunChecksuma(5, 0x3e, 0x01, [0x02]);
 provjeri(racun.checksum === ((~(5 + 0x3e + 0x01 + 0x02)) & 0xff), 'razloženi račun ne daje isti checksum');
 
-rmSync(radni, { recursive: true, force: true });
+/* --- 1b. poruke noge: broj sa zarezom, greška tačno van dometa --- */
+let poruka = 0;
+for (let x = -340; x <= 340; x += 20) {
+  for (let y = -340; y <= 340; y += 20) {
+    const r = noga.inverzno({ x, y });
+    const inv = noga.porukaNoge(true, r.uglovi, r.stopalo, r.uDometu);
+    provjeri(!!inv.greska === !r.uDometu, `poruka noge za (${x}, ${y}): boja greške ne prati domet`);
+    const dir = noga.porukaNoge(false, r.uglovi, noga.direktno(r.uglovi), true);
+    provjeri(!dir.greska, 'direktni režim nikad nije greška');
+    /* Razlaganje na ekranu (θ1 = φ + α) mora dati isti ugao kao inverzna kinematika. */
+    const { pravac, alfa } = noga.razlozenKuk(r.stopalo);
+    if (Math.hypot(r.stopalo.x, r.stopalo.y) > 1e-6) {
+      provjeri(Math.abs(pravac + alfa - r.uglovi.kuk) < 1e-4, `φ + α ≠ θ1 za (${x}, ${y})`);
+    }
+    for (const tekst of [inv.sta, inv.zasto, dir.sta, dir.zasto]) {
+      provjeri(!/\d\.\d/.test(tekst) && !/-\d/.test(tekst), `decimalna tačka ili crtica umjesto minusa: „${tekst}"`);
+    }
+    poruka++;
+  }
+}
+provjeri(noga.uDuzinamaBedra(noga.NAJDALJE) === 2, 'domet mora biti tačno 2 a kad su segmenti jednaki');
+
+/* --- 3. put komande --- */
+const DT = 1 / 60;
+const pusti = (st) => {
+  let s = komanda.posalji(st);
+  const vidjene = new Set();
+  for (let i = 0; i < 60 * 20 && s.ide; i++) {
+    const a = komanda.aktivnaVeza(s);
+    if (a !== null) vidjene.add(a);
+    const p = komanda.porukaKomande(s);
+    provjeri(!p.greska, `dok poruka putuje nema greške (veza ${a})`);
+    s = komanda.korakKomande(s, DT);
+  }
+  return { s, vidjene };
+};
+
+const ispravno = pusti(komanda.POCETNO_KOMANDA);
+provjeri(!ispravno.s.ide, 'poruka mora stići do kraja');
+provjeri(komanda.sjeo(ispravno.s) && !komanda.odbacen(ispravno.s), 'ispravan paket: pas mora sjesti');
+provjeri(ispravno.vidjene.size === komanda.VEZE.length, `ispravan paket prolazi ${ispravno.vidjene.size} od ${komanda.VEZE.length} veza`);
+provjeri(komanda.porukaKomande(ispravno.s).sta.startsWith('Pas je sjeo'), 'poruka kad pas sjedne');
+
+const pokvareno = pusti({ ...komanda.POCETNO_KOMANDA, pokvaren: true });
+provjeri(komanda.odbacen(pokvareno.s) && !komanda.sjeo(pokvareno.s), 'pokvaren paket: ESP32 ga mora odbaciti');
+provjeri(!pokvareno.vidjene.has(komanda.VEZE.length - 1), 'pokvaren paket ne smije stići do servoa');
+provjeri(komanda.porukaKomande(pokvareno.s).greska === true, 'odbačen paket se prikazuje kao greška');
+provjeri(!paket.serijskiPaketJeIspravan(komanda.POKVAREN_PAKET), 'pokvaren paket mora pasti na checksumu');
+provjeri(paket.serijskiPaketJeIspravan(komanda.PAKET), 'pravi paket mora proći checksum');
+
+/* Pokvaren je tačno jedan bit, i to u bajtu komande. */
+const razlika = komanda.PAKET.map((b, i) => b ^ komanda.POKVAREN_PAKET[i]);
+provjeri(razlika.filter((r) => r).length === 1 && razlika[komanda.MJESTO_KOMANDE] === 1, 'smetnja mora promijeniti jedan bit komande');
+provjeri(komanda.PAKET[komanda.MJESTO_KOMANDE] === paket.BAJTOVI_SJEDI.komanda, 'MJESTO_KOMANDE ne pokazuje na komandu');
+
+/* Tekst na prve tri veze je riječ, slovo po bajt. */
+provjeri(String.fromCharCode(...komanda.TEKST) === komanda.RIJEC, 'bajtovi teksta ne daju riječ');
+for (const v of komanda.VEZE) {
+  if (v.bajtovi) provjeri(v.ispod.length === v.bajtovi.length, `veza „${v.naziv}": natpisa ispod nije koliko bajtova`);
+}
+provjeri(komanda.VEZE.length === komanda.BLOKOVI.length - 1, 'veza mora biti jedna manje od blokova');
 
 for (const g of greske.slice(0, 8)) console.log(`  PAD  ${g}`);
 if (greske.length === 0) {
   console.log(`  OK   ${uDometu} tačaka u dometu — povratak pogađa (najveće odstupanje ${najvecaGreska.toFixed(4)} px)`);
   console.log(`  OK   ${vanDometa} tačaka van dometa — stopalo staje tačno na ivici`);
   console.log(`  OK   ${paketa} serijskih paketa — checksum i okvir tačni, pokvaren bajt uvijek odbačen`);
+  console.log(`  OK   ${poruka} poruka noge — zarez, pravi minus, greška tačno van dometa`);
+  console.log(`  OK   put komande: ispravan paket stiže do servoa, pokvaren bit staje na ESP32`);
 }
-console.log(`\n  XGO: ${uDometu + vanDometa + paketa} slučajeva, ${greske.length} grešaka\n`);
+console.log(`\n  XGO: ${ukupno} provjera, ${greske.length} grešaka\n`);
 process.exit(greske.length ? 1 : 0);
