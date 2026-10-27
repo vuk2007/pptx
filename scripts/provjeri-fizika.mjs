@@ -24,6 +24,7 @@ const prevod = await prevedi(
     'src/lib/fizika/gustine.ts',
     'src/lib/fizika/elektrostatika.ts',
     'src/lib/fizika/prsten.ts',
+    'src/lib/fizika/duz.ts',
     'src/lib/fizika/probni.ts',
   ],
   'fizika-',
@@ -39,6 +40,7 @@ const Z = await prevod.uvezi('src/lib/fizika/predznaci.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 const EL = await prevod.uvezi('src/lib/fizika/elektrostatika.ts');
 const PR = await prevod.uvezi('src/lib/fizika/prsten.ts');
+const DZ = await prevod.uvezi('src/lib/fizika/duz.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 prevod.pocisti();
 
@@ -456,6 +458,31 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(Math.abs(najz - PR.maksimumNaOsi(a)) < 2e-4, `maksimum na osi u ${najz}, a ne u a/√2`);
 }
 
+/* ------------------------------------------------------------ §8 duž */
+
+{
+  const q = 2e-9;
+  const r = slucajno(61);
+  for (let k = 0; k < 300; k++) {
+    const l = 0.02 + r() * 0.3;
+    const rho = 0.01 + r() * 0.3;
+    const z = (r() - 0.5) * 0.8;
+    const tacno = DZ.duzPolje(q, l, rho, z);
+    const zbirno = DZ.duzKomadi(q, l, rho, z, 4000).ukupno;
+    const mjera = Math.hypot(tacno.rho, tacno.z);
+    provjeri(Math.abs(zbirno.rho - tacno.rho) < 2e-3 * mjera && Math.abs(zbirno.z - tacno.z) < 2e-3 * mjera, `duž: zbir komada ≠ formula (l=${l.toFixed(3)}, ρ=${rho.toFixed(3)}, z=${z.toFixed(3)})`);
+  }
+  for (const [l, rho] of [[0.1, 0.05], [0.5, 0.2], [2, 0.01]]) {
+    const e = DZ.duzPolje(q, l, rho, 0);
+    provjeri(Math.abs(e.z) < 1e-9 * Math.abs(e.rho), 'na simetrali duži ima komponente duž ose');
+    provjeri(blizu(e.rho, (DZ.pravaPolje(q, rho) * l) / Math.hypot(l, rho), 1e-9), 'na simetrali: E ≠ q/(2πε₀ρ)·l/√(l²+ρ²)');
+  }
+  provjeri(blizu(DZ.duzPolje(q, 1e4, 0.1, 0).rho, DZ.pravaPolje(q, 0.1), 1e-6), 'za l → ∞ duž nije prava');
+  const daleko = DZ.duzPolje(q, 0.01, 2, 0).rho;
+  provjeri(Math.abs(daleko / ((EL.K * 2 * 0.01 * q) / 4) - 1) < 1e-3, 'daleko od duži nije kao tačka sa 2lq');
+  provjeri(blizu(DZ.pravaPolje(1e-9, 0.1), 2 * EL.K * 1e-9 / 0.1, 1e-12), 'q/(2πε₀ρ) = 2Kq/ρ');
+}
+
 /* ------------------------------------------------------------ §8 probni naboj */
 
 {
@@ -487,6 +514,7 @@ console.log('  OK   §3 nosioci: elektroni ulijevo i ioni udesno daju istu struj
 console.log('  OK   §5 predznaci: normala mijenja samo predznak, uloga i promjena ne');
 console.log('  OK   §7 Coulomb: F₁ + F₂ = 0, K|Q₁Q₂|/R², dipol i linije polja');
 console.log('  OK   §8 prsten: E_z za svaki broj komada, poprečno se poništava, nula u centru, maksimum u a/√2');
+console.log('  OK   §8 duž: zbir komada = formula, za l → ∞ prava q/(2πε₀ρ)');
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
