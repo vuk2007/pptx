@@ -15,14 +15,14 @@ import stil from './ulaz.module.css';
 
 const PROJEKTI = [
   {
-    putanja: '/robotika',
+    putanja: '/sajam/robotika',
     naziv: 'Robotika',
     opis: 'Tri robota i elektronika iza njih: senzor, mozak i motor.',
     mentor: 'Praktikum elektronike',
     crtez: <Sema kljuc="petlja-siroka" />,
   },
   {
-    putanja: '/simulator',
+    putanja: '/sajam/simulator',
     naziv: 'Simulator letenja',
     opis: 'Komande helikoptera izbliza, u tri dimenzije.',
     mentor: 'Drugi mentor',

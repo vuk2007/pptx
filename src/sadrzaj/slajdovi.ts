@@ -54,7 +54,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Ovo je Jarvis. Reci „Jarvis” i pitaj ga šta god hoćeš.',
         ilustracija: 'jarvis-ko-je',
         biljeska: [],
-        demo: { putanja: '/jarvis/glas', naziv: 'Vidi svoj glas' },
+        demo: { putanja: '/sajam/jarvis/glas', naziv: 'Vidi svoj glas' },
       },
       {
         id: 'jarvis-talasi',
@@ -65,7 +65,7 @@ export const BLOKOVI: Blok[] = [
           'Kad pričaš, ti zapravo praviš talase u vazduhu.',
           'Mikrofon te talase pretvara u električni signal, tu počinje elektronika.',
         ],
-        demo: { putanja: '/jarvis/glas', naziv: 'Vidi svoj glas' },
+        demo: { putanja: '/sajam/jarvis/glas', naziv: 'Vidi svoj glas' },
       },
       {
         id: 'jarvis-budjenje',
@@ -73,7 +73,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Prvi program čeka samo riječ „Jarvis”.',
         ilustracija: 'jarvis-budjenje',
         biljeska: ['Prvi program sluša samo jednu riječ, „Jarvis”, i tek tada se budi.'],
-        demo: { putanja: '/jarvis/pipeline', naziv: 'Cio put od glasa do odgovora' },
+        demo: { putanja: '/sajam/jarvis/pipeline', naziv: 'Cio put od glasa do odgovora' },
       },
       {
         id: 'jarvis-glas-u-tekst',
@@ -81,7 +81,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Drugi program pretvara glas u tekst.',
         ilustracija: 'jarvis-glas-u-tekst',
         biljeska: ['Onda drugi program, koji radi ovdje na laptopu, pretvara tvoj glas u tekst.'],
-        demo: { putanja: '/jarvis/glas', naziv: 'Vidi svoj spektrogram' },
+        demo: { putanja: '/sajam/jarvis/glas', naziv: 'Vidi svoj spektrogram' },
       },
       {
         id: 'jarvis-mozak',
@@ -89,7 +89,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Mozak smišlja odgovor.',
         ilustracija: 'jarvis-mozak',
         biljeska: ['Taj tekst ide jezičkom modelu, to je mozak, koji smisli odgovor.'],
-        demo: { putanja: '/jarvis/pipeline', naziv: 'Gdje mozak troši vrijeme' },
+        demo: { putanja: '/sajam/jarvis/pipeline', naziv: 'Gdje mozak troši vrijeme' },
       },
       {
         id: 'jarvis-tekst-u-glas',
@@ -99,7 +99,7 @@ export const BLOKOVI: Blok[] = [
         biljeska: [
           'Na kraju treći program pretvara tekst nazad u glas, i to u glas koji smo sami dizajnirali da zvuči kao filmski Jarvis.',
         ],
-        demo: { putanja: '/jarvis/pipeline', naziv: 'Cio put od glasa do odgovora' },
+        demo: { putanja: '/sajam/jarvis/pipeline', naziv: 'Cio put od glasa do odgovora' },
       },
       {
         id: 'jarvis-streaming',
@@ -110,7 +110,7 @@ export const BLOKOVI: Blok[] = [
           'Cijela fora je u tome da se ništa ne čeka: čim mozak smisli prvu rečenicu, ona već ide u zvučnik dok on smišlja drugu. Zato odgovara za dvije sekunde, a ne za deset.',
           'Znači, Jarvis je jedan veliki prevodilac: zvuk u signal, signal u tekst, tekst u odluku, i sve to nazad u zvuk.',
         ],
-        demo: { putanja: '/jarvis/pipeline', naziv: 'Uporedi čekanje i streaming' },
+        demo: { putanja: '/sajam/jarvis/pipeline', naziv: 'Uporedi čekanje i streaming' },
       },
     ],
   },
@@ -126,7 +126,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Ovo je robot pas. Probaj ga lagano gurnuti.',
         ilustracija: 'xgo-pas',
         biljeska: [],
-        demo: { putanja: '/xgo/ravnoteza', naziv: 'Gurni ga i ti' },
+        demo: { putanja: '/sajam/xgo/ravnoteza', naziv: 'Gurni ga i ti' },
       },
       {
         id: 'xgo-imu',
@@ -137,7 +137,7 @@ export const BLOKOVI: Blok[] = [
           'Unutra je senzor koji se zove IMU. To je isto što ti imaš u uhu za ravnotežu, i isto što ima tvoj telefon kad okreneš ekran.',
           'On stalno mjeri koliko je pas nagnut.',
         ],
-        demo: { putanja: '/xgo/ravnoteza', naziv: 'Nagni platformu' },
+        demo: { putanja: '/sajam/xgo/ravnoteza', naziv: 'Nagni platformu' },
       },
       {
         id: 'xgo-petlja',
@@ -148,7 +148,7 @@ export const BLOKOVI: Blok[] = [
           'Kad ga gurneš, senzor to osjeti, procesor izračuna koliko svaka noga treba da se pomjeri, i motori to izvrše. To se ponavlja mnogo puta u sekundi, zato izgleda kao da pas sam razmišlja.',
           'Ta petlja, mjeri, ispravi, pa opet mjeri, zove se povratna sprega.',
         ],
-        demo: { putanja: '/xgo/ravnoteza', naziv: 'Isključi povratnu spregu' },
+        demo: { putanja: '/sajam/xgo/ravnoteza', naziv: 'Isključi povratnu spregu' },
       },
       {
         id: 'xgo-svugdje',
@@ -156,7 +156,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Na istom principu rade dronovi, rakete i autopilot.',
         ilustracija: 'xgo-svugdje',
         biljeska: ['Na njoj rade dronovi, rakete, autopilot u avionu, čak i klima u kući.'],
-        demo: { putanja: '/xgo/ravnoteza', naziv: 'Probaj regulator' },
+        demo: { putanja: '/sajam/xgo/ravnoteza', naziv: 'Probaj regulator' },
       },
       {
         id: 'xgo-motori',
@@ -164,7 +164,7 @@ export const BLOKOVI: Blok[] = [
         recenica: '15 motora: 12 u nogama, 3 u ruci.',
         ilustracija: 'xgo-motori',
         biljeska: ['Pas ima 15 motora, 12 u nogama i 3 u ruci na leđima kojom može da uhvati predmet.'],
-        demo: { putanja: '/xgo/noga', naziv: 'Pomjeri nogu' },
+        demo: { putanja: '/sajam/xgo/noga', naziv: 'Pomjeri nogu' },
       },
       {
         id: 'xgo-komanda',
@@ -175,7 +175,7 @@ export const BLOKOVI: Blok[] = [
           'A kad kažeš Jarvisu da psi zaplešu, tvoj glas postane komanda, komanda ode radiom do malog računara u psu, micro:bita, i pas se pomjeri.',
           'Znači, prošao si cijeli krug: glas, mozak, radio, pokret.',
         ],
-        demo: { putanja: '/xgo/komanda', naziv: 'Pošalji komandu' },
+        demo: { putanja: '/sajam/xgo/komanda', naziv: 'Pošalji komandu' },
       },
     ],
   },
@@ -191,7 +191,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Rover kao oni na Marsu. Nije kupljen, napravili smo ga sami.',
         ilustracija: 'perjanik-rover',
         biljeska: [],
-        demo: { putanja: '/perjanik/h-most', naziv: 'Okreni motor' },
+        demo: { putanja: '/sajam/perjanik/h-most', naziv: 'Okreni motor' },
       },
       {
         id: 'perjanik-stampa',
@@ -201,7 +201,7 @@ export const BLOKOVI: Blok[] = [
         biljeska: [
           'Skoro sve što vidiš je odštampano na 3D štampaču. Crtali smo dijelove na računaru i štampali ih sloj po sloj.',
         ],
-        demo: { putanja: '/perjanik/servo', naziv: 'Rame robotske ruke' },
+        demo: { putanja: '/sajam/perjanik/servo', naziv: 'Rame robotske ruke' },
       },
       {
         id: 'perjanik-suspenzija',
@@ -212,7 +212,7 @@ export const BLOKOVI: Blok[] = [
           'Točkovi su okačeni na pojednostavljenu verziju sistema koji NASA koristi na Marsu. Sa svake strane je poluga sa dva točka koja može da se klati gore-dolje, a između lijeve i desne strane je diferencijal, mehanizam koji drži tijelo rovera u sredini kad jedna strana pređe preko kamena.',
           'Tako sva četiri točka ostaju na zemlji i guraju. NASA ima po tri točka sa svake strane, ali za naš rover i naš budžet četiri su bila pametniji izbor.',
         ],
-        demo: { putanja: '/perjanik/suspenzija', naziv: 'Provuci kamen ispod' },
+        demo: { putanja: '/sajam/perjanik/suspenzija', naziv: 'Provuci kamen ispod' },
       },
       {
         id: 'perjanik-arduino',
@@ -220,7 +220,7 @@ export const BLOKOVI: Blok[] = [
         recenica: 'Mozak je Arduino, računar koji košta koliko jedna igrica.',
         ilustracija: 'perjanik-arduino',
         biljeska: ['Mozak je Arduino, mali računar koji košta koliko jedna igrica.'],
-        demo: { putanja: '/perjanik/pwm', naziv: 'Podesi brzinu motora' },
+        demo: { putanja: '/sajam/perjanik/pwm', naziv: 'Podesi brzinu motora' },
       },
       {
         id: 'perjanik-radio',
@@ -231,7 +231,7 @@ export const BLOKOVI: Blok[] = [
           'Palica šalje komande radiom, Arduino ih provjerava da nisu pokvarene usput, i onda govori motorima koliko brzo da se okreću.',
           'Na prednjoj strani je kamera koja šalje sliku bežično, a na vrhu robotska ruka.',
         ],
-        demo: { putanja: '/jarvis/frekvencije', naziv: 'Tri radija na štandu' },
+        demo: { putanja: '/sajam/jarvis/frekvencije', naziv: 'Tri radija na štandu' },
       },
       {
         id: 'perjanik-failsafe',
@@ -242,7 +242,7 @@ export const BLOKOVI: Blok[] = [
           `I jedan detalj koji je meni najdraži: ako rover izgubi signal, recimo ode predaleko, on sam stane za ${FAILSAFE_MS} milisekundi. Ne nastavi da juri u zid.`,
           'Tako razmišlja inženjer: ne samo kako da radi, nego i šta ako nešto krene po zlu.',
         ],
-        demo: { putanja: '/perjanik/radio', naziv: 'Prekini signal' },
+        demo: { putanja: '/sajam/perjanik/radio', naziv: 'Prekini signal' },
       },
     ],
   },
@@ -259,7 +259,7 @@ export const BLOKOVI: Blok[] = [
         biljeska: [
           'Ništa od ovoga nije počelo kao rover ili robot pas. Počelo je sa jednom pločicom, nekoliko žica i jednom LED diodom koja se upalila kad treba.',
         ],
-        demo: { putanja: '/pocni', naziv: 'Kako da počneš' },
+        demo: { putanja: '/sajam/pocni', naziv: 'Kako da počneš' },
       },
     ],
   },

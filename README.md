@@ -1,10 +1,23 @@
-# Praktikum elektronike
+# Faks i sajam
 
-Sajt koji na sajmu nauke zamjenjuje PowerPoint. Tri eksponata — Perjanik (rover),
-XGO psi i Jarvis — kroz petlju **osjeti → odluči → djeluj**.
+Jedan statički sajt sa dvije cjeline:
 
-Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora raditi
-**potpuno offline** poslije prvog učitavanja.
+| Adresa | Šta je |
+| --- | --- |
+| `/` | Početna: izbor između Faksa i Sajma |
+| `/faks` | Interaktivni eksperimenti za prvu godinu elektrotehnike, po predmetima |
+| `/faks/oe1` | Osnove elektrotehnike I, eksperimenti po poglavljima (§2, §3, …) |
+| `/faks/oe1/<slug>` | Jedan eksperiment |
+| `/sajam/...` | Praktikum elektronike za sajam nauke |
+
+**Sajam** zamjenjuje PowerPoint na štandu. Tri eksponata — Perjanik (rover),
+XGO psi i Jarvis — kroz petlju **osjeti → odluči → djeluj**. Radi na TV-u
+(1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora raditi
+**potpuno offline** poslije prvog učitavanja. Stare adrese (`/izlog`, `/xgo`, …)
+preusmjerava `vercel.json` na `/sajam/...`.
+
+**Faks** radi na laptopu, iPadu, telefonu i TV-u, takođe offline, bez naloga
+i bez ikakvog praćenja. Opis je u sekciji [Faks](#faks).
 
 ## Komande
 
@@ -21,6 +34,7 @@ Radi na TV-u (1920×1080, klikerom ili tastaturom) i na iPadu (dodir), i mora ra
 | `npm run provjeri-pipeline` | Provjerava raspored faza i tvrdnju o uštedi koju streaming donosi |
 | `npm run provjeri-talasi` | Mjeri brjegove nacrtanih talasa i poredi ih sa λ = c / f |
 | `npm run provjeri-glas` | Paleta spektrograma i ilustrativni govor kroz 30 000 kadrova |
+| `npm run provjeri-fizika` | Fizika eksperimenata za faks: formule naspram brojanja, kadar po kadar |
 | `npm run provjeri-raspored` | Otvara svaku rutu u četiri veličine i mjeri viri li išta van ekrana |
 | `npm run provjeri-vercel` | Provjerava da `vercel.json` ima samo ključeve koje Vercel priznaje |
 | `npm run provjeri-analitiku` | Provjerava da se analitika javlja samo na pravoj adresi |
@@ -63,6 +77,74 @@ sindromi — i pada ako round-trip ne vrati polazni tekst. Build ga pokreće.
 
 Kod se pravi samo kad `QR_URL` nije prazan. Dok jeste, `/pocni` ide bez koda.
 
+## Faks
+
+Svaka strana eksperimenta ima isti raspored, istim redom: naslov i poglavlje,
+**predvidi prije nego što pomjeriš**, interaktivni dio, šta gledaš, veza s
+formulom i česta greška. Raspored je u
+[`src/components/faks/Eksperiment.tsx`](src/components/faks/Eksperiment.tsx);
+eksperiment donosi samo sadržaj.
+
+Predviđanje nije ukras: dok se ne izabere odgovor, interaktivni dio je
+zaključan (`inert`), a tačan odgovor se otkriva tek na poseban klik, kad je
+već bilo vremena da se proba. „Preskoči predviđanje" otključa bez odgovora.
+
+Oznake prate udžbenik (Humar, Bulić, Sinigoj, *Osnove elektrotehnike I*):
+`Q`, `ρ`, `σ`, `q`, `a` za površinu, `i` i `I`, `J`, `w` za brzinu nosilaca,
+`Q_not` i `Q_zun`, `E`, `T` i `T'`, `R`; vektori podebljani. Tekst, slike i
+zadaci iz knjige se **ne kopiraju**; sva objašnjenja su naša.
+
+Formule slaže KaTeX **pri buildu**, u server komponenti
+([`Formula.tsx`](src/components/faks/Formula.tsx)): u pregledač ide gotov HTML,
+bez KaTeX-ovog JavaScripta. Pogrešan TeX obara build. KaTeX stilove pravi
+[`scripts/pripremi-katex.mjs`](scripts/pripremi-katex.mjs) iz `node_modules`, samo
+sa woff2 fontovima, pa ih service worker kešira kao i sve ostalo.
+
+Boje na crtežima nose fizičko značenje: `--naboj-plus` i `--naboj-minus` samo
+predznak, `--normala`, `--brzina`, `--polje`, a struja ide kroz `--current`.
+Mjesto (unutra, vani) se crta oblikom, ne bojom.
+
+Simulacije sa nabojima ne koriste `Math.random`, nego
+[`slucajno.ts`](src/lib/fizika/slucajno.ts) sa sjemenom: isto sjeme daje isto
+kretanje, pa provjera može brojati naboje. Sa `prefers-reduced-motion`
+simulacije počinju zaustavljene i pokreću se dugmetom.
+
+Analitika postoji samo pod `/sajam`
+([`src/app/sajam/layout.tsx`](src/app/sajam/layout.tsx)); faks i početna se ne
+broje, što `npm run provjeri-analitiku` i provjerava.
+
+### Kako dodati eksperiment
+
+1. **Fizika.** Ako eksperiment nešto računa, čista funkcija ide u
+   `src/lib/fizika/<tema>.ts`, bez ijednog pomena crtanja. Test ide u
+   [`scripts/provjeri-fizika.mjs`](scripts/provjeri-fizika.mjs): najbolje
+   nezavisnim putem do istog broja (formula naspram brojanja, analitički
+   naspram numeričkog), ne samo „funkcija vrati ono što vrati". Provjeri test
+   tako što namjerno pokvariš funkciju i vidiš da pada.
+2. **Folder** `src/eksperimenti/<predmet>/<slug>/` sa dva fajla:
+   - `Simulacija.tsx` — klijentska komponenta (`'use client'`) bez propsa.
+     Slaže se kroz `Laboratorija` (crtež, kontrole, očitavanja, statusna
+     linija), sa `Klizac`, `Taster` i `Ocitavanje` iz `components/instrument`.
+     Animacija ide kroz `useAnimacija`, brojevi kroz `broj()` iz `lib/format`
+     (decimalni zarez, pravi minus), uvijek sa jedinicom.
+   - `sadrzaj.tsx` — server modul koji izvozi `SadrzajEksperimenta`
+     ([`tipovi.ts`](src/components/faks/tipovi.ts)): pitanje sa opcijama i
+     objašnjenjem, 2–4 stavke „Šta gledaš", formulu u TeX-u sa vezama
+     simbol → kontrola, i jednu rečenicu o čestoj grešci. Formula u rečenici
+     ide kroz `<M tex="..." />`.
+3. **Jedan red** u [`src/sadrzaj/eksperimenti.ts`](src/sadrzaj/eksperimenti.ts):
+   `slug`, `predmet`, `poglavlje` (npr. `'§4'`), `naslov`, `opis` (jedna
+   rečenica), `status: 'gotovo'` i
+   `ucitaj: () => import('@/eksperimenti/<predmet>/<slug>/sadrzaj')`.
+   Ako red već postoji sa `'u izradi'`, samo mu promijeni status i dodaj `ucitaj`.
+4. Ruta u [`provjeri-raspored.mjs`](scripts/provjeri-raspored.mjs) i
+   [`provjeri-offline.mjs`](scripts/provjeri-offline.mjs), pa `npm run build`,
+   `npm run provjeri-raspored` i `npm run provjeri-offline`.
+
+Lista na `/faks/<predmet>` i strelice „prethodni / sljedeći" prave se same iz
+registra. Nov predmet je red u `PREDMETI` i spisak u `POGLAVLJA`; njegova
+strana nastane čim ima prvi gotov eksperiment.
+
 ## Demonstracije
 
 Logika koja nosi objašnjenje stoji odvojeno od crteža, da se može provjeriti sama
@@ -104,7 +186,7 @@ poziva, tako da tvrdnja „ništa se ne snima" stoji u kodu, ne samo na ekranu.
 ## Tri dimenzije i granica sa bibliotekama
 
 Sajt nema nijednu biblioteku za crtanje — sve je SVG i `requestAnimationFrame`.
-Jedan izuzetak je [`/simulator`](src/components/simulator/Simulator.tsx), gdje
+Jedan izuzetak je [`/sajam/simulator`](src/components/simulator/Simulator.tsx), gdje
 se prikazuje GLB model Ka-50 kolektiva: GLB se ne može prikazati bez 3D motora.
 Tu stoji Googleov `<model-viewer>`, instaliran preko npm-a i serviran iz našeg
 izvoza, bez CDN-a. Uvozi se tek u browseru, jer se pri uvozu registruje kao
@@ -148,7 +230,7 @@ Sajt inače ne pravi nijedan mrežni poziv u runtime-u — sve ide iz keša
 service workera. Vercel Analytics je **jedini izuzetak** i uveden je svjesno:
 dovlači `/_vercel/insights/script.js` i za svaku posjetu šalje jedan signal.
 
-Zato je ograničen na pravu adresu ([`src/components/Analitika.tsx`](src/components/Analitika.tsx)).
+Zato je ograničen na pravu adresu i na sajam ([`src/components/Analitika.tsx`](src/components/Analitika.tsx)).
 Lokalno te putanje nema, pa bi se svaka strana javljala greškom u konzoli i
 oborila provjeru koja traži nula grešaka — a ta provjera je jedino što čuva
 pravilo da sajt ništa ne vuče sa mreže. `npm run provjeri-analitiku` drži oba
@@ -166,8 +248,9 @@ build-a. `npm run provjeri-vercel` to hvata lokalno i ide prvi u build lancu,
 prije svega skupog.
 
 Raspored se provjerava mjerenjem, ne gledanjem. `npm run provjeri-raspored`
-otvori svaku rutu na 1080p, 4K i u dvije veličine iPada, pa izmjeri svaki
-natpis: mora cio da stoji na ekranu, i mora da stane u viewBox svog SVG-a.
+otvori svaku rutu na 1080p, 4K i u dvije veličine iPada, a faks i na širini
+telefona, pa izmjeri svaki natpis: mora cio da stoji na ekranu (na faksu, koji
+se skroluje, bar po širini), i mora da stane u viewBox svog SVG-a.
 Ono što je nacrtano izvan viewBox-a preživi na širokom ekranu, a na uskom ga
 ivica ploče odsiječe — zato se to na 16:9 ne primijeti.
 

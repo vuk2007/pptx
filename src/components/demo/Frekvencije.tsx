@@ -124,7 +124,7 @@ export function Frekvencije() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Jarvis', putanja: '/jarvis' }}
+      nazad={{ naziv: 'Jarvis', putanja: '/sajam/jarvis' }}
       naslov="Tri radija na štandu"
       uvod="Tri radio veze nacrtane istim lenjirom: razlikuje se samo dužina talasa."
       rezimi={<Rezimi opis="Prepreka" opcije={REZIMI} izabran={zid ? 'zid' : 'slobodno'} onIzbor={(id) => postaviZid(id === 'zid')} />}

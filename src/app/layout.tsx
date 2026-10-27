@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, JetBrains_Mono } from 'next/font/google';
 import { RegistracijaServiceWorkera } from '@/components/RegistracijaServiceWorkera';
-import { Analitika } from '@/components/Analitika';
 import './globals.css';
 
 /*
@@ -55,7 +54,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <RegistracijaServiceWorkera />
-        <Analitika />
       </body>
     </html>
   );

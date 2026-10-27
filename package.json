@@ -6,8 +6,8 @@
     "node": "24.x"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "node scripts/provjeri-vercel.mjs && node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-pwm.mjs && node scripts/provjeri-radio.mjs && node scripts/provjeri-suspenzija.mjs && node scripts/provjeri-servo.mjs && node scripts/provjeri-ravnoteza.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
+    "dev": "node scripts/pripremi-katex.mjs && next dev",
+    "build": "node scripts/provjeri-vercel.mjs && node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-pwm.mjs && node scripts/provjeri-radio.mjs && node scripts/provjeri-suspenzija.mjs && node scripts/provjeri-servo.mjs && node scripts/provjeri-ravnoteza.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/pripremi-katex.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
     "start": "node scripts/serve.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -34,11 +34,13 @@
   "dependencies": {
     "@google/model-viewer": "^4.3.1",
     "@vercel/analytics": "^2.0.1",
+    "katex": "^0.19.1",
     "next": "^16.3.5",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },
   "devDependencies": {
+    "@types/katex": "^0.16.8",
     "@types/node": "22.15.3",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",

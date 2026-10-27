@@ -16,25 +16,25 @@ const PORT = 4179;
 const OSNOVA = `http://localhost:${PORT}`;
 
 const RUTE = [
-  ['/', 'ulaz'],
-  ['/robotika/', 'robotika'],
-  ['/simulator/', 'simulator'],
-  ['/izlog/', 'izlog'],
-  ['/perjanik/', 'perjanik'],
-  ['/xgo/', 'xgo'],
-  ['/jarvis/', 'jarvis'],
-  ['/pocni/', 'pocni'],
-  ['/perjanik/h-most/', 'demo-h-most'],
-  ['/perjanik/pwm/', 'demo-pwm'],
-  ['/perjanik/radio/', 'demo-radio'],
-  ['/perjanik/suspenzija/', 'demo-suspenzija'],
-  ['/perjanik/servo/', 'demo-servo'],
-  ['/xgo/ravnoteza/', 'demo-ravnoteza'],
-  ['/xgo/noga/', 'demo-noga'],
-  ['/xgo/komanda/', 'demo-komanda'],
-  ['/jarvis/pipeline/', 'demo-pipeline'],
-  ['/jarvis/frekvencije/', 'demo-frekvencije'],
-  ['/jarvis/glas/', 'demo-glas'],
+  ['/sajam/', 'ulaz'],
+  ['/sajam/robotika/', 'robotika'],
+  ['/sajam/simulator/', 'simulator'],
+  ['/sajam/izlog/', 'izlog'],
+  ['/sajam/perjanik/', 'perjanik'],
+  ['/sajam/xgo/', 'xgo'],
+  ['/sajam/jarvis/', 'jarvis'],
+  ['/sajam/pocni/', 'pocni'],
+  ['/sajam/perjanik/h-most/', 'demo-h-most'],
+  ['/sajam/perjanik/pwm/', 'demo-pwm'],
+  ['/sajam/perjanik/radio/', 'demo-radio'],
+  ['/sajam/perjanik/suspenzija/', 'demo-suspenzija'],
+  ['/sajam/perjanik/servo/', 'demo-servo'],
+  ['/sajam/xgo/ravnoteza/', 'demo-ravnoteza'],
+  ['/sajam/xgo/noga/', 'demo-noga'],
+  ['/sajam/xgo/komanda/', 'demo-komanda'],
+  ['/sajam/jarvis/pipeline/', 'demo-pipeline'],
+  ['/sajam/jarvis/frekvencije/', 'demo-frekvencije'],
+  ['/sajam/jarvis/glas/', 'demo-glas'],
 ];
 
 /* Slajdovi izloga koje snimamo pojedinačno, po rednom broju u punom izlogu. */
@@ -62,7 +62,7 @@ try {
   }
 
   /* Izlog: prelazak kroz slajdove strelicom, pa snimak svakog zanimljivog. */
-  await otvori('/izlog/');
+  await otvori('/sajam/izlog/');
   let trenutni = 0;
   for (const cilj of SLAJDOVI) {
     while (trenutni < cilj) {

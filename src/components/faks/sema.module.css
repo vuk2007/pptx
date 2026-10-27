@@ -1,0 +1,76 @@
+/*
+  SVG crteži na faksu. Boja nosi značenje i dolazi iz tokena, pa crtež
+  radi u obje teme bez ijedne zakucane boje.
+*/
+
+.tekst {
+  fill: var(--text);
+  font-family: var(--font-tekst), system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 560;
+}
+
+.tih {
+  fill: var(--muted);
+  font-family: var(--font-tekst), system-ui, sans-serif;
+  font-size: 22px;
+}
+
+.simbol {
+  font-family: var(--font-tekst), system-ui, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.linija {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.tanka {
+  fill: none;
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+.isprekidana {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+}
+
+.okvir {
+  fill: none;
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+/* Boje sa značenjem: na liniji (stroke) i na tekstu ili vrhu strelice (fill). */
+.plus { stroke: var(--naboj-plus); fill: var(--naboj-plus); color: var(--naboj-plus); }
+.minus { stroke: var(--naboj-minus); fill: var(--naboj-minus); color: var(--naboj-minus); }
+.normala { stroke: var(--normala); fill: var(--normala); color: var(--normala); }
+.brzina { stroke: var(--brzina); fill: var(--brzina); color: var(--brzina); }
+.struja { stroke: var(--current); fill: var(--current); color: var(--current); }
+.polje { stroke: var(--polje); fill: var(--polje); color: var(--polje); }
+.neutralno { stroke: var(--line); fill: var(--line); color: var(--line); }
+
+.strelica line,
+.strelica path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.strelica polygon {
+  stroke: none;
+}
+
+/* Na telefonu je crtež širok 360 px, pa natpisi moraju biti krupniji u jedinicama crteža. */
+@media (max-width: 600px) {
+  .tekst { font-size: 40px; }
+  .tih { font-size: 34px; }
+  .simbol { font-size: 44px; }
+}

@@ -13,7 +13,7 @@ import { pokreniChrome, otvoriKarticu, uStranici, cekaj } from './cdp.mjs';
 
 const PORT_SERVERA = 4173;
 const OSNOVA = `http://localhost:${PORT_SERVERA}`;
-const RUTE = ['/', '/robotika/', '/simulator/', '/izlog/', '/perjanik/', '/perjanik/h-most/', '/xgo/ravnoteza/', '/jarvis/glas/', '/pocni/'];
+const RUTE = ['/', '/sajam/', '/sajam/robotika/', '/sajam/simulator/', '/sajam/izlog/', '/sajam/perjanik/', '/sajam/perjanik/h-most/', '/sajam/xgo/ravnoteza/', '/sajam/jarvis/glas/', '/sajam/pocni/', '/faks/'];
 const SNIMCI = 'C:/Users/Vuk/AppData/Local/Temp/claude/c--Users-Vuk-Desktop-pptx/snimci';
 
 const greske = [];
@@ -75,7 +75,7 @@ try {
   await cekaj(2000);
 
   const naslovOffline = await uStranici(kartica, `document.querySelector('h1')?.textContent ?? ''`);
-  provjeri(naslovOffline.includes('Praktikum'), `Offline osvježavanje početne daje naslov: "${naslovOffline}"`);
+  provjeri(naslovOffline.includes('Faks i sajam'), `Offline osvježavanje početne daje naslov: "${naslovOffline}"`);
 
   /*
     document.fonts.check() vraća true i za ime koje ne postoji, pa se ovdje
@@ -116,7 +116,7 @@ try {
   );
 
   // ---- 5. Duboka ruta sa demonstracijom, i dalje bez mreže ----
-  await kartica.posalji('Page.navigate', { url: OSNOVA + '/perjanik/h-most/' });
+  await kartica.posalji('Page.navigate', { url: OSNOVA + '/sajam/perjanik/h-most/' });
   await cekaj(900);
   await snimi(kartica, `${SNIMCI}/03-offline-duboka-ruta.png`);
 

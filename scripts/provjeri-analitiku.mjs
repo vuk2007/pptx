@@ -37,13 +37,18 @@ const ISPITAJ = `(() => ({
 }))()`;
 
 let pao = false;
+let SLUCAJEVI = [];
 try {
   await kartica.posalji('Page.enable');
-  for (const [ime, osnova, ocekujem] of [
-    ['lokalno', `http://localhost:${PORT}`, false],
-    ['prava adresa', LAZNI, true],
-  ]) {
-    await kartica.posalji('Page.navigate', { url: `${osnova}/` });
+  /* Analitika živi samo u sajmu. Faks i zajednička početna se ne broje ni na pravoj adresi. */
+  SLUCAJEVI = [
+    ['lokalno', `http://localhost:${PORT}/sajam/`, false],
+    ['sajam', `${LAZNI}/sajam/`, true],
+    ['početna', `${LAZNI}/`, false],
+    ['faks', `${LAZNI}/faks/`, false],
+  ];
+  for (const [ime, adresa, ocekujem] of SLUCAJEVI) {
+    await kartica.posalji('Page.navigate', { url: adresa });
     await cekaj(1500);
     const r = await uStranici(kartica, ISPITAJ);
     const dobro = r.skripta === ocekujem;
@@ -57,7 +62,7 @@ try {
 }
 
 console.log('');
-console.log(`  Analitika: 2 slučaja, ${pao ? 1 : 0} problema`);
+console.log(`  Analitika: ${SLUCAJEVI.length} slučaja, ${pao ? 'ima' : 'nema'} problema`);
 console.log('');
 
 process.exit(pao ? 1 : 0);

@@ -135,7 +135,7 @@ export function Servo() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Perjanik', putanja: '/perjanik' }}
+      nazad={{ naziv: 'Perjanik', putanja: '/sajam/perjanik' }}
       naslov="Dvostruki servo"
       uvod="Dva servoa okreću jednu osovinu ramena, okrenuti jedan prema drugom."
       rezimi={

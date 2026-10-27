@@ -17,14 +17,14 @@ export default function Robotika() {
     <main className={stil.strana}>
       <header className={stil.zaglavlje}>
         <div>
-          <Link href="/" className={stil.putanja}>
+          <Link href="/sajam" className={stil.putanja}>
             <span aria-hidden="true">←</span>
             Prona
           </Link>
           <h1 className={stil.naslov}>Robotika</h1>
           <p className={stil.uvod}>Svaki robot radi tri stvari: osjeti, odluči i djeluje.</p>
         </div>
-        <Link href="/izlog" className={stil.dugme}>
+        <Link href="/sajam/izlog" className={stil.dugme}>
           Pokreni izlog
         </Link>
       </header>
@@ -35,7 +35,7 @@ export default function Robotika() {
 
       <nav className={stil.eksponati} aria-label="Eksponati">
         {eksponati.map((e) => (
-          <Link key={e.id} href={`/${e.id}`} className={stil.eksponat} style={{ ['--boja' as string]: `var(--${e.naglasak})` }}>
+          <Link key={e.id} href={`/sajam/${e.id}`} className={stil.eksponat} style={{ ['--boja' as string]: `var(--${e.naglasak})` }}>
             <span className={stil.uloga}>{RIJEC[e.naglasak]}</span>
             <span className={stil.ime}>{e.naziv}</span>
             <span className={stil.opis}>{e.podnaslov}</span>
@@ -47,11 +47,11 @@ export default function Robotika() {
       </nav>
 
       <footer className={stil.podnozje}>
-        <Link href="/pocni">Kako da počneš i ti</Link>
-        <Link href="/jarvis/frekvencije">Tri radija na štandu</Link>
-        <Link href="/izlog/perjanik">Izlog samo za rover</Link>
-        <Link href="/izlog/xgo">Izlog samo za pse</Link>
-        <Link href="/izlog/jarvis">Izlog samo za Jarvisa</Link>
+        <Link href="/sajam/pocni">Kako da počneš i ti</Link>
+        <Link href="/sajam/jarvis/frekvencije">Tri radija na štandu</Link>
+        <Link href="/sajam/izlog/perjanik">Izlog samo za rover</Link>
+        <Link href="/sajam/izlog/xgo">Izlog samo za pse</Link>
+        <Link href="/sajam/izlog/jarvis">Izlog samo za Jarvisa</Link>
       </footer>
     </main>
   );

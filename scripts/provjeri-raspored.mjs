@@ -19,36 +19,59 @@ const OSNOVA = `http://localhost:${PORT}`;
 
 const RUTE = [
   '/',
-  '/robotika/',
-  '/simulator/',
-  '/izlog/',
-  '/izlog/jarvis/',
-  '/izlog/xgo/',
-  '/izlog/perjanik/',
-  '/perjanik/',
-  '/perjanik/h-most/',
+  '/sajam/',
+  '/sajam/robotika/',
+  '/sajam/simulator/',
+  '/sajam/izlog/',
+  '/sajam/izlog/jarvis/',
+  '/sajam/izlog/xgo/',
+  '/sajam/izlog/perjanik/',
+  '/sajam/perjanik/',
+  '/sajam/perjanik/h-most/',
   /* Režim L298N dodaje cijeli panel na stranu; mora stati i on. */
   {
-    ruta: '/perjanik/h-most/',
+    ruta: '/sajam/perjanik/h-most/',
     stanje: 'L298N',
     pripremi: `(() => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
       return true;
     })()`,
   },
-  '/perjanik/pwm/',
-  '/perjanik/radio/',
-  '/perjanik/suspenzija/',
-  '/perjanik/servo/',
-  '/xgo/',
-  '/xgo/ravnoteza/',
-  '/xgo/noga/',
-  '/xgo/komanda/',
-  '/jarvis/',
-  '/jarvis/glas/',
-  '/jarvis/pipeline/',
-  '/jarvis/frekvencije/',
-  '/pocni/',
+  '/sajam/perjanik/pwm/',
+  '/sajam/perjanik/radio/',
+  '/sajam/perjanik/suspenzija/',
+  '/sajam/perjanik/servo/',
+  '/sajam/xgo/',
+  '/sajam/xgo/ravnoteza/',
+  '/sajam/xgo/noga/',
+  '/sajam/xgo/komanda/',
+  '/sajam/jarvis/',
+  '/sajam/jarvis/glas/',
+  '/sajam/jarvis/pipeline/',
+  '/sajam/jarvis/frekvencije/',
+  '/sajam/pocni/',
+
+  /*
+    Faks se skroluje, pa se tamo mjeri samo širina: ništa ne smije da viri
+    lijevo ili desno, a ispod donje ivice ekrana sadržaj sme da se nastavi.
+  */
+  { ruta: '/faks/', skrol: true },
+  ...[].flatMap((slug) => [
+    { ruta: `/faks/oe1/${slug}/`, skrol: true },
+    /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */
+    {
+      ruta: `/faks/oe1/${slug}/`,
+      skrol: true,
+      stanje: 'otkriveno',
+      pripremi: `(() => {
+        document.querySelector('[aria-label="Tvoje predviđanje"] button')?.click();
+        return new Promise((r) => setTimeout(() => {
+          [...document.querySelectorAll('button')].find((b) => b.textContent.includes('Otkrij odgovor'))?.click();
+          r(true);
+        }, 100));
+      })()`,
+    },
+  ]),
 ];
 
 const VELICINE = [
@@ -56,13 +79,16 @@ const VELICINE = [
   { naziv: 'TV 4K', sirina: 3840, visina: 2160 },
   { naziv: 'iPad 11"', sirina: 1180, visina: 820 },
   { naziv: 'iPad 9,7"', sirina: 1024, visina: 768 },
+  /* Telefon je meta samo za faks; štand nema telefon. */
+  { naziv: 'Telefon', sirina: 390, visina: 844, mobilni: true, samoSkrol: true },
 ];
 
 /* Koliko piksela smije da viri preko ivice prije nego što se broji kao greška. */
 const DOZVOLJENO = 2;
 
-const MJERA = `(() => {
+const mjera = (skrol) => `(() => {
   const dozvoljeno = ${DOZVOLJENO};
+  const skrol = ${skrol};
   const s = window.innerWidth;
   const v = window.innerHeight;
   const problemi = [];
@@ -88,11 +114,14 @@ const MJERA = `(() => {
     if (!(el.textContent ?? '').trim()) continue;
     /* Namjerno sakriven naslov za čitače ekrana stoji izvan ekrana. */
     if (el.classList.contains('samo-za-citace') || el.closest('.samo-za-citace')) continue;
+    /* KaTeX uz vidljivu formulu nosi i MathML za čitače, sakriven izrezivanjem. */
+    if (el.closest('.katex-mathml')) continue;
 
     const r = el.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) continue;
 
-    if (r.left < -dozvoljeno || r.top < -dozvoljeno || r.right > s + dozvoljeno || r.bottom > v + dozvoljeno) {
+    const vertikalno = skrol ? false : r.top < -dozvoljeno || r.bottom > v + dozvoljeno;
+    if (r.left < -dozvoljeno || r.right > s + dozvoljeno || vertikalno) {
       problemi.push({
         vrsta: 'izvan ekrana',
         sta: opis(el),
@@ -172,13 +201,13 @@ try {
       width: velicina.sirina,
       height: velicina.visina,
       deviceScaleFactor: 1,
-      mobile: false,
+      mobile: Boolean(velicina.mobilni),
     });
 
     let palihUVelicini = 0;
+    const rute = RUTE.map((u) => (typeof u === 'string' ? { ruta: u } : u)).filter((u) => !velicina.samoSkrol || u.skrol);
 
-    for (const unos of RUTE) {
-      const { ruta, stanje, pripremi } = typeof unos === 'string' ? { ruta: unos } : unos;
+    for (const { ruta, stanje, pripremi, skrol = false } of rute) {
       await kartica.posalji('Page.navigate', { url: OSNOVA + ruta });
       await cekaj(500);
       await uStranici(kartica, 'document.fonts.ready.then(() => true)');
@@ -189,7 +218,7 @@ try {
       }
       provjereno++;
 
-      const sirovi = await uStranici(kartica, MJERA);
+      const sirovi = await uStranici(kartica, mjera(skrol));
       /* Isti natpis se u istoj ruti zna ponoviti; broji se jednom. */
       const vidjeno = new Set();
       const problemi = sirovi.filter((p) => {
@@ -206,7 +235,7 @@ try {
 
     const oznaka = palihUVelicini === 0 ? 'OK  ' : 'PALO';
     console.log(
-      `  ${oznaka} ${velicina.naziv.padEnd(10)} ${velicina.sirina}×${velicina.visina} — ${RUTE.length} ruta, ${palihUVelicini} problema`,
+      `  ${oznaka} ${velicina.naziv.padEnd(10)} ${velicina.sirina}×${velicina.visina} — ${rute.length} ruta, ${palihUVelicini} problema`,
     );
   }
 } finally {

@@ -135,7 +135,7 @@ export function Suspenzija() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Perjanik', putanja: '/perjanik' }}
+      nazad={{ naziv: 'Perjanik', putanja: '/sajam/perjanik' }}
       naslov="Suspenzija"
       uvod="Dvije poluge i diferencijal drže sva četiri točka na tlu."
       rezimi={<Rezimi opis="Suspenzija" opcije={REZIMI} izabran={kruto ? 'kruto' : 'diferencijal'} onIzbor={(id) => postaviKruto(id === 'kruto')} />}

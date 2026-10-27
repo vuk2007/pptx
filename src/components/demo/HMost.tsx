@@ -222,7 +222,7 @@ export function HMost() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Perjanik', putanja: '/perjanik' }}
+      nazad={{ naziv: 'Perjanik', putanja: '/sajam/perjanik' }}
       naslov="H-most"
       uvod="Četiri prekidača odlučuju u kom smjeru struja teče kroz motor."
       rezimi={

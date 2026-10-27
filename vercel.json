@@ -4,6 +4,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "out",
   "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/:stara(izlog|jarvis|perjanik|pocni|robotika|simulator|xgo)/:put*",
+      "destination": "/sajam/:stara/:put*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/sw.js",

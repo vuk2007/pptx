@@ -1,0 +1,83 @@
+/* Zajednička početna: Faks i Sajam, jedno pored drugog. */
+
+.strana {
+  height: 100svh;
+  overflow-y: auto;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 64px) clamp(16px, 4vw, 64px);
+  display: grid;
+  align-content: center;
+}
+
+@media (min-width: 2560px) and (min-height: 1400px) {
+  .strana {
+    zoom: 2;
+    height: 50svh;
+  }
+}
+
+.cjeline {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+}
+
+.cjelina {
+  padding: clamp(20px, 4vw, 56px);
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: clamp(220px, 44vh, 480px);
+  border-left: 1.5px solid var(--line-soft);
+  transition: background-color var(--prelaz);
+}
+
+.cjelina:first-child {
+  border-left: 0;
+}
+
+.cjelina:hover,
+.cjelina:focus-visible {
+  background: var(--panel-2);
+}
+
+.cjelina:focus-visible {
+  outline-offset: -4px;
+}
+
+.ime {
+  font-stretch: 72%;
+  font-weight: 760;
+  font-size: clamp(56px, 8vw, 132px);
+  line-height: 0.9;
+}
+
+.opis {
+  font-size: clamp(18px, 1.7vw, 26px);
+  max-width: 28ch;
+}
+
+.detalj {
+  margin-top: auto;
+  padding-top: 24px;
+  color: var(--muted);
+  font-size: clamp(15px, 1.1vw, 18px);
+}
+
+@media (max-width: 700px) {
+  .cjeline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cjelina {
+    border-left: 0;
+    min-height: 0;
+  }
+
+  .cjelina + .cjelina {
+    border-top: 1.5px solid var(--line-soft);
+  }
+}

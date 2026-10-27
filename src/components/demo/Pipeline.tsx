@@ -119,7 +119,7 @@ export function Pipeline() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Jarvis', putanja: '/jarvis' }}
+      nazad={{ naziv: 'Jarvis', putanja: '/sajam/jarvis' }}
       naslov="Pipeline i brzina"
       uvod="Jarvis ne čeka cio odgovor: počne da govori čim je gotova prva rečenica."
       onResetuj={naResetuj}

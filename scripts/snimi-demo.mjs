@@ -32,7 +32,7 @@ try {
   });
 
   // --- H-most ---
-  await otvori('/perjanik/h-most/');
+  await otvori('/sajam/perjanik/h-most/');
   await snimi('h-most-1-prazno');
 
   await klikni('Prekidač S1');
@@ -62,7 +62,7 @@ try {
   await snimi('h-most-8-l298n-kocenje');
 
   // --- PWM ---
-  await otvori('/perjanik/pwm/');
+  await otvori('/sajam/perjanik/pwm/');
   await cekaj(800);
   await snimi('pwm-1-pocetno');
 
@@ -80,7 +80,7 @@ try {
   await snimi('pwm-4-sa-rampom');
 
   // --- Radio paket ---
-  await otvori('/perjanik/radio/');
+  await otvori('/sajam/perjanik/radio/');
   await cekaj(600);
   await snimi('radio-1-u-letu');
 
@@ -100,7 +100,7 @@ try {
   await snimi('radio-5-rover-stao');
 
   // --- Suspenzija ---
-  await otvori('/perjanik/suspenzija/');
+  await otvori('/sajam/perjanik/suspenzija/');
   await cekaj(500);
   await snimi('suspenzija-1-kamen');
   await postaviKlizacTastaturom('Položaj kamena', 'ArrowLeft', 13);
@@ -111,7 +111,7 @@ try {
   await snimi('suspenzija-3-kruto');
 
   // --- Dvostruki servo ---
-  await otvori('/perjanik/servo/');
+  await otvori('/sajam/perjanik/servo/');
   await cekaj(500);
   await postaviKlizac('Ugao A', 150);
   await cekaj(900);
@@ -123,7 +123,7 @@ try {
   await snimi('servo-3-dim');
 
   // --- XGO: povratna sprega ---
-  await otvori('/xgo/ravnoteza/');
+  await otvori('/sajam/xgo/ravnoteza/');
   await postaviKlizac('Nagib', 18);
   await cekaj(1600);
   await snimi('ravnoteza-1-drzi-se');
@@ -141,7 +141,7 @@ try {
   await snimi('ravnoteza-3-pao');
 
   // --- XGO: noga ---
-  await otvori('/xgo/noga/');
+  await otvori('/sajam/xgo/noga/');
   await cekaj(400);
   await snimi('noga-1-inverzno');
   await postaviKlizacTastaturom('Položaj stopala', 'ArrowRight', 16);
@@ -154,7 +154,7 @@ try {
   await snimi('noga-3-direktno');
 
   // --- XGO: put komande ---
-  await otvori('/xgo/komanda/');
+  await otvori('/sajam/xgo/komanda/');
   await cekaj(400);
   await snimi('komanda-1-mirno');
   await klikniTekst('Pošalji');
@@ -164,7 +164,7 @@ try {
   await snimi('komanda-3-kraj');
 
   // --- Jarvis: pipeline ---
-  await otvori('/jarvis/pipeline/');
+  await otvori('/sajam/jarvis/pipeline/');
   await cekaj(400);
   await snimi('pipeline-1-prije');
   await klikniTekst('Pokreni');
@@ -174,7 +174,7 @@ try {
   await snimi('pipeline-3-kraj');
 
   // --- Jarvis: frekvencije ---
-  await otvori('/jarvis/frekvencije/');
+  await otvori('/sajam/jarvis/frekvencije/');
   await cekaj(600);
   await snimi('frekvencije-1-u-razmjeri');
   await klikniTekst('Zid');
@@ -182,7 +182,7 @@ try {
   await snimi('frekvencije-2-zid');
 
   // --- Jarvis: glas ---
-  await otvori('/jarvis/glas/');
+  await otvori('/sajam/jarvis/glas/');
   await cekaj(1400);
   await snimi('glas-1-ilustracija');
 } finally {

@@ -40,14 +40,14 @@ export default function Pocni() {
     <main className={stil.strana}>
       <header className={stil.zaglavlje}>
         <div>
-          <Link href="/robotika" className={stil.putanja}>
+          <Link href="/sajam/robotika" className={stil.putanja}>
             <span aria-hidden="true">←</span>
             Praktikum elektronike
           </Link>
           <h1 className={stil.naslov}>Kako da počneš</h1>
           <p className={stil.uvod}>Sve ovo je počelo sa jednim micro:bitom ili Arduinom i nekoliko žica.</p>
         </div>
-        <Link href="/izlog" className={stil.dugme}>
+        <Link href="/sajam/izlog" className={stil.dugme}>
           Nazad na izlog
         </Link>
       </header>

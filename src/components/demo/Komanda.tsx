@@ -131,7 +131,7 @@ export function Komanda() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'XGO psi', putanja: '/xgo' }}
+      nazad={{ naziv: 'XGO psi', putanja: '/sajam/xgo' }}
       naslov="Put komande"
       uvod={`Na svakoj od pet veza riječ „${RIJEC}” ima drugi oblik, dok ne postane pokret.`}
       rezimi={

@@ -81,7 +81,7 @@ export function Izlog({ slajdovi, putanja }: { slajdovi: SlajdUIzlogu[]; putanja
           postaviBiljeske((b) => !b);
           break;
         case 'Escape':
-          router.push('/robotika');
+          router.push('/sajam/robotika');
           break;
       }
     }

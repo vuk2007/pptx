@@ -163,7 +163,7 @@ export function Pwm() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Perjanik', putanja: '/perjanik' }}
+      nazad={{ naziv: 'Perjanik', putanja: '/sajam/perjanik' }}
       naslov="PWM"
       uvod="Motor se ne prigušuje: most se pali i gasi, a popuna određuje srednji napon."
       rezimi={

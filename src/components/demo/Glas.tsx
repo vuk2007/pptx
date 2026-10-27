@@ -303,7 +303,7 @@ export function Glas() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Jarvis', putanja: '/jarvis' }}
+      nazad={{ naziv: 'Jarvis', putanja: '/sajam/jarvis' }}
       naslov="Tvoj glas uživo"
       uvod="Zvuk je talas, a talas je zbir tonova: spektrogram pokazuje koliko je koji ton jak."
       onResetuj={naResetuj}

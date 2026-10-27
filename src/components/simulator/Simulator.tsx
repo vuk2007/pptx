@@ -263,7 +263,7 @@ export function Simulator() {
     <OkvirDemonstracije
       naslov="Simulator letenja"
       oznaka="PRONA · komande helikoptera izbliza"
-      nazadPutanja="/"
+      nazadPutanja="/sajam"
       nazadNaziv="Prona"
       poruka={poruka}
       alarm={stanje === 'greska'}

@@ -1,0 +1,573 @@
+/*
+  Faks: isti instrument kao sajam (tokeni, Archivo, tanke linije), ali
+  za čitanje, ne za TV. Strana se skroluje, tekst ima mjeru za čitanje,
+  a mreža u pozadini se gasi da ostane bjelina.
+*/
+
+/* Tijelo sajta se ne skroluje (TV, iPad na štandu), pa faks skroluje svoj okvir. */
+.svitak {
+  height: 100svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+}
+
+@media (min-width: 2560px) and (min-height: 1400px) {
+  .svitak {
+    zoom: 2;
+    height: 50svh;
+  }
+}
+
+.strana {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 44px) clamp(16px, 3vw, 40px) 96px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------ zaglavlje */
+
+.putanja {
+  display: flex;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.putanja a {
+  display: inline-block;
+  padding: 6px 0;
+}
+
+.putanja a:hover,
+.putanja a:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.zaglavlje {
+  margin: clamp(16px, 3vh, 32px) 0 clamp(20px, 3vh, 36px);
+  max-width: 62rem;
+}
+
+.poglavlje {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+.paragraf {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 700;
+  color: var(--text);
+  margin-right: 0.6em;
+}
+
+.naslov {
+  margin: 4px 0 0;
+  font-stretch: 76%;
+  font-weight: 760;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.005em;
+}
+
+.opis {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: clamp(18px, 1.5vw, 21px);
+  max-width: 44rem;
+}
+
+.oznakaSekcije {
+  margin: 0 0 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------ predvidi */
+
+.predvidi {
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+  padding: clamp(16px, 2vw, 24px);
+  margin-bottom: 20px;
+}
+
+.pitanje {
+  margin: 0 0 14px;
+  font-size: clamp(19px, 1.6vw, 22px);
+  font-weight: 600;
+  max-width: 48rem;
+}
+
+.opcije {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.opcija {
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+  text-align: left;
+  transition: border-color var(--prelaz), background-color var(--prelaz);
+}
+
+.opcija:hover:not(:disabled) {
+  border-color: var(--line);
+}
+
+.opcija[aria-pressed='true'] {
+  border-color: var(--text);
+  background: var(--panel-2);
+  font-weight: 650;
+}
+
+.opcija:disabled {
+  cursor: default;
+  color: var(--muted);
+}
+
+.opcija[data-tacna] {
+  border-color: var(--djeluj);
+  color: var(--text);
+}
+
+.opcija[data-tacna]::after {
+  content: ' · tačno';
+  color: var(--djeluj);
+  font-weight: 650;
+}
+
+.tiho {
+  margin-top: 12px;
+  min-height: 40px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tiho:hover {
+  color: var(--text);
+}
+
+.dalje {
+  margin: 14px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  color: var(--muted);
+}
+
+.dugme {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1.5px solid var(--text);
+  border-radius: 6px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.dugme:hover {
+  background: var(--panel-2);
+}
+
+.odgovor {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--line-soft);
+  max-width: 52rem;
+}
+
+.odgovor p {
+  margin: 0;
+}
+
+.odgovorNaslov {
+  font-weight: 650;
+  margin-bottom: 4px !important;
+}
+
+.zakljucavanje {
+  position: relative;
+}
+
+.natpisZakljucano {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.sadrzajLaboratorije {
+  transition: opacity var(--prelaz);
+}
+
+.zakljucavanje[data-zakljucano] .sadrzajLaboratorije {
+  opacity: 0.38;
+}
+
+/* ------------------------------------------------------------ laboratorija */
+
+.laboratorija {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 1000px) {
+  .laboratorija {
+    grid-template-columns: minmax(0, 1.75fr) minmax(300px, 1fr);
+    align-items: start;
+  }
+
+  .statusLab {
+    grid-column: 1 / -1;
+  }
+}
+
+.crtez {
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.crtez svg,
+.crtez canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.platno {
+  position: relative;
+  width: 100%;
+}
+
+.platno canvas,
+.crtez .platno svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Kosa prizma: naboj koji će proći kroz prozorčić. Boja struje, jer to i jeste struja. */
+.prizma {
+  fill: var(--current);
+  fill-opacity: 0.1;
+  stroke: var(--current);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+}
+
+/* Natpis preko tačaka: obrub u boji panela da se čita kroz gužvu. */
+/* Dvije klase jače od klase boje, da obrub ostane u boji panela. */
+.crtez .naCrtezu {
+  paint-order: stroke;
+  stroke: var(--panel);
+  stroke-width: 8px;
+  stroke-linejoin: round;
+}
+
+.prozor {
+  stroke: var(--text);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.naboji circle {
+  fill: var(--naboj-plus);
+  stroke: var(--naboj-plus);
+  stroke-width: 1.5;
+}
+
+/* Vani: prazan kružić. Mjesto se crta oblikom, boja ostaje predznaku. */
+.naboji circle[data-unutra='0'] {
+  fill: var(--panel);
+}
+
+.oznakaPodrucja {
+  fill: var(--muted);
+  font-family: var(--font-tekst), system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 650;
+  font-style: italic;
+}
+
+.jednacina {
+  margin: 0;
+  padding: 10px 16px 12px;
+  border-top: 1.5px solid var(--line-soft);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.zica {
+  stroke: var(--line-soft);
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+/* Tačkice struje: stvarni smjer pozitivnog naboja, u boji struje. */
+.tokStruje {
+  stroke: var(--current);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 0 22;
+}
+
+.tokStruje[data-miruje] {
+  opacity: 0;
+}
+
+.jezgro {
+  fill-opacity: 0.85;
+  stroke: none;
+  transition: r var(--prelaz);
+}
+
+.grana {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.grana button {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.bocno {
+  display: grid;
+  gap: 16px;
+}
+
+.kontrole {
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.redDugmadi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------ tekst */
+
+.tekst {
+  margin-top: clamp(28px, 5vh, 48px);
+  display: grid;
+  /* Bez ovoga široka formula razvuče cijelu kolonu preko ivice telefona. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 4vh, 40px);
+  max-width: 48rem;
+}
+
+.tekst section > p {
+  margin: 0;
+}
+
+.stavke {
+  margin: 0;
+  padding-left: 1.1em;
+  display: grid;
+  gap: 8px;
+}
+
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2.4em;
+  font-size: 1.3em;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+}
+
+.formula :global(.katex-display) {
+  margin: 0.4em 0 0.8em;
+  text-align: left;
+}
+
+.formula :global(.katex-display > .katex) {
+  text-align: left;
+}
+
+.m {
+  white-space: nowrap;
+}
+
+.veze {
+  margin: 0;
+  display: grid;
+  border-top: 1.5px solid var(--line-soft);
+}
+
+.veze > div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1.5px solid var(--line-soft);
+}
+
+.veze dt {
+  font-size: 1.1em;
+}
+
+.veze dd {
+  margin: 0;
+}
+
+.greska {
+  border-left: 3px solid var(--line);
+  padding-left: 16px;
+}
+
+/* ------------------------------------------------------------ susjedi */
+
+.susjedi {
+  margin-top: 56px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1.5px solid var(--line-soft);
+  padding-top: 16px;
+}
+
+.susjed {
+  display: grid;
+  gap: 2px;
+  font-weight: 650;
+  padding: 4px 0;
+}
+
+.susjed span {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.susjed:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.desno {
+  text-align: right;
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------ liste */
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--panel);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 6px;
+}
+
+.lista > li + li {
+  border-top: 1.5px solid var(--line-soft);
+}
+
+.stavka {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  padding: 14px 18px;
+  min-height: 64px;
+  align-items: center;
+}
+
+a.stavka {
+  transition: background-color var(--prelaz);
+}
+
+a.stavka:hover,
+a.stavka:focus-visible {
+  background: var(--panel-2);
+}
+
+a.stavka:focus-visible {
+  outline-offset: -4px;
+}
+
+.stavkaNaslov {
+  font-weight: 650;
+  font-size: 19px;
+}
+
+.stavkaOpis {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.stanje {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  font-size: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.uIzradi .stavkaNaslov {
+  color: var(--muted);
+  font-weight: 560;
+}
+
+.grupa {
+  margin-top: 32px;
+}
+
+.grupaNaslov {
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 650;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  align-items: baseline;
+}
+
+.grupaNaslov i {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+@media (max-width: 560px) {
+  .stavka {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stanje {
+    grid-row: auto;
+    grid-column: 1;
+  }
+
+  .veze > div {
+    grid-template-columns: 4.2rem minmax(0, 1fr);
+  }
+}

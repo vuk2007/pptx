@@ -176,7 +176,7 @@ export function Ravnoteza() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'XGO psi', putanja: '/xgo' }}
+      nazad={{ naziv: 'XGO psi', putanja: '/sajam/xgo' }}
       naslov="Povratna sprega"
       uvod="IMU mjeri nagib tijela, regulator računa grešku, a noge je ispravljaju."
       rezimi={

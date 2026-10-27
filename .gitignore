@@ -13,3 +13,6 @@ public/qr/
 # samo neredukovan: 780 000 naspram 100 000 tjemena. Ostaje lokalno kao izvor,
 # na sajt ide lakša verzija.
 prona_controler.glb
+
+# Pravi se iz node_modules/katex pri svakom buildu (scripts/pripremi-katex.mjs).
+src/app/faks/katex.css

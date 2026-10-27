@@ -133,7 +133,7 @@ export function Radio() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'Perjanik', putanja: '/perjanik' }}
+      nazad={{ naziv: 'Perjanik', putanja: '/sajam/perjanik' }}
       naslov="Radio paket"
       uvod="Svaki paket nosi provjeru: prijemnik računa XOR i baca paket koji se ne slaže."
       rezimi={<Rezimi opis="Vrsta smetnje" opcije={REZIMI} izabran={dvije ? 'dvije' : 'jedna'} onIzbor={(id) => postaviDvije(id === 'dvije')} />}

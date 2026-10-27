@@ -29,7 +29,7 @@ export function Okvir({
   osciloskop,
   strana,
 }: {
-  /** Kuda vodi putanja gore lijevo, npr. { naziv: 'Perjanik', putanja: '/perjanik' }. */
+  /** Kuda vodi putanja gore lijevo, npr. { naziv: 'Perjanik', putanja: '/sajam/perjanik' }. */
   nazad: { naziv: string; putanja: string };
   naslov: string;
   /** Jedna rečenica ispod naslova. */
@@ -119,7 +119,8 @@ export function Ocitavanje({
   pod,
   vruce = false,
 }: {
-  natpis: string;
+  /** Tekst, ili tekst sa indeksom (<sub>) kad je natpis simbol. */
+  natpis: ReactNode;
   vrijednost: string;
   jedinica: string;
   /** Sitna linija ispod vrijednosti. Prazna linija i dalje drži mjesto. */

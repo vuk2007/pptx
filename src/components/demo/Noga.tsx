@@ -124,7 +124,7 @@ export function Noga() {
 
   return (
     <Okvir
-      nazad={{ naziv: 'XGO psi', putanja: '/xgo' }}
+      nazad={{ naziv: 'XGO psi', putanja: '/sajam/xgo' }}
       naslov="Noga"
       uvod="Znaš gdje hoćeš stopalo, a tražiš uglove kuka i koljena: to je inverzna kinematika."
       rezimi={<Rezimi opis="Smjer računa" opcije={REZIMI} izabran={rezim} onIzbor={postaviRezim} />}

@@ -38,7 +38,7 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
           pomjeri(-1);
           break;
         case 'Escape':
-          router.push('/robotika');
+          router.push('/sajam/robotika');
           break;
       }
     }
@@ -73,7 +73,7 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
     <main className={stil.strana} onPointerDown={naPritisak} onPointerUp={naOtpustanje}>
       <header className={stil.zaglavlje}>
         <div>
-          <Link href="/robotika" className={stil.putanja}>
+          <Link href="/sajam/robotika" className={stil.putanja}>
             <span aria-hidden="true">←</span>
             Praktikum elektronike
           </Link>
@@ -82,7 +82,7 @@ export function StranaEksponata({ id }: { id: EksponatId }) {
             {podaci.podnaslov}. <span style={{ color: `var(--${podaci.naglasak})` }}>Naglasak: {uloga}.</span>
           </p>
         </div>
-        <Link href={`/izlog/${id}`} className={stil.dugme}>
+        <Link href={`/sajam/izlog/${id}`} className={stil.dugme}>
           Pusti u petlji
         </Link>
       </header>
