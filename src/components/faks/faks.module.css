@@ -632,6 +632,87 @@
   stroke: var(--naboj-minus);
 }
 
+/* --- Gauss, grupa D --- */
+
+/* Linija polja koja prolazi kroz komadić: puna, da se prebroji. */
+.linijaKroz {
+  stroke: var(--polje);
+  stroke-width: 2.5;
+}
+
+.konus {
+  fill: var(--polje);
+  fill-opacity: 0.08;
+  stroke: none;
+}
+
+.komadic {
+  stroke: var(--text);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.gaussUnutra {
+  fill: var(--polje);
+  fill-opacity: 0.05;
+  stroke: none;
+}
+
+/* Obod Gaussove površine: pun gdje polje izlazi, isprekidan gdje ulazi. */
+.obodVan {
+  fill: none;
+  stroke: var(--polje);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.obodUnutra {
+  fill: none;
+  stroke: var(--polje);
+  stroke-width: 5;
+  stroke-dasharray: 1 13;
+  stroke-linecap: round;
+}
+
+.oblak {
+  fill: var(--naboj-plus);
+  fill-opacity: 0.08;
+  stroke: none;
+}
+
+.gaussSfera {
+  fill: none;
+  stroke: var(--polje);
+  stroke-width: 2.5;
+  stroke-dasharray: 9 7;
+}
+
+.osnovica {
+  fill: var(--panel-2);
+  fill-opacity: 0.75;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.gaussKocka {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 2.5;
+  stroke-dasharray: 9 7;
+}
+
+.trakaEn {
+  fill: var(--polje);
+  fill-opacity: 0.55;
+}
+
+.ravanPlus {
+  fill: var(--naboj-plus);
+  fill-opacity: 0.12;
+  stroke: var(--naboj-plus);
+  stroke-width: 2;
+}
+
 .bocno {
   display: grid;
   gap: 16px;

@@ -28,6 +28,7 @@ const prevod = await prevedi(
     'src/lib/fizika/ravan.ts',
     'src/lib/fizika/cijev.ts',
     'src/lib/fizika/probni.ts',
+    'src/lib/fizika/fluks.ts',
   ],
   'fizika-',
 );
@@ -46,6 +47,7 @@ const DZ = await prevod.uvezi('src/lib/fizika/duz.ts');
 const RV = await prevod.uvezi('src/lib/fizika/ravan.ts');
 const CJ = await prevod.uvezi('src/lib/fizika/cijev.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
+const FL = await prevod.uvezi('src/lib/fizika/fluks.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -568,6 +570,59 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   }
 }
 
+/* ------------------------------------------------------------ §9 fluks i prostorni ugao */
+
+{
+  const Q = 2e-9;
+  for (const [a, b, d] of [[0.1, 0.1, 0.2], [0.05, 0.2, 0.1], [0.3, 0.3, 0.05], [0.02, 0.04, 0.5]]) {
+    const brojcano = FL.fluksKrozKomadic(Q, a, b, d, 0, 160);
+    const tacno = FL.fluksKrozUgao(Q, FL.prostorniUgao(a, b, d));
+    provjeri(Math.abs(brojcano - tacno) < 2e-4 * tacno, `komadić ${a}×${b} na ${d}: ∫E·da ≠ K·Q·Ω`);
+    /* Dvostruko dalje i dvostruko veće: isti prostorni ugao, isti fluks. */
+    for (const k of [0.5, 2, 7]) {
+      provjeri(blizu(FL.prostorniUgao(a * k, b * k, d * k), FL.prostorniUgao(a, b, d), 1e-12), `Ω zavisi od razmjere (k=${k})`);
+      provjeri(Math.abs(FL.fluksKrozKomadic(Q, a * k, b * k, d * k, 0, 160) - brojcano) < 2e-4 * brojcano, 'fluks zavisi od udaljenosti kad Ω ostaje');
+    }
+    /* Isti komadić dvostruko dalje: fluks pada, ali ne mora tačno 4 puta (osim za mali komadić). */
+    provjeri(FL.fluksKrozKomadic(Q, a, b, 2 * d, 0, 160) < brojcano, 'dalji komadić iste veličine ne daje manji fluks');
+  }
+  provjeri(Math.abs(FL.fluksKrozKomadic(Q, 0.1, 0.1, 0.3, Math.PI / 2, 160)) < 1e-6 * FL.fluksSfere(Q), 'komadić okrenut bokom ima fluks');
+  for (const th of [0.3, 0.7, 1.1]) {
+    const mali = FL.fluksKrozKomadic(Q, 0.002, 0.002, 0.3, th, 40);
+    const priblizno = FL.fluksKrozUgao(Q, FL.prostorniUgaoMali(0.002 * 0.002, 0.3, th));
+    provjeri(Math.abs(mali - priblizno) < 1e-3 * priblizno, `mali nagnut komadić: Ω ≠ da·cos θ/r² (θ=${th})`);
+  }
+  /*
+    Veliki nagnut komadić: prostorni ugao iz njegova četiri ugla, preko
+    formule za trougao (Van Oosterom i Strackee), nezavisno od mreže.
+  */
+  const ugaoTrougla = (p1, p2, p3) => {
+    const d3 = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+    const x3 = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const n = (u) => Math.sqrt(d3(u, u));
+    const brojilac = d3(p1, x3(p2, p3));
+    const imenilac = n(p1) * n(p2) * n(p3) + d3(p1, p2) * n(p3) + d3(p1, p3) * n(p2) + d3(p2, p3) * n(p1);
+    return 2 * Math.atan2(brojilac, imenilac);
+  };
+  for (const th of [0.4, 0.9, 1.3]) {
+    const [a, b, dd] = [0.12, 0.08, 0.15];
+    const u = [-Math.sin(th), 0, Math.cos(th)];
+    const ugao = (s, t2) => [dd + s * u[0], t2, s * u[2]];
+    const A = ugao(-a / 2, -b / 2);
+    const B = ugao(a / 2, -b / 2);
+    const C = ugao(a / 2, b / 2);
+    const D = ugao(-a / 2, b / 2);
+    const omega = Math.abs(ugaoTrougla(A, B, C) + ugaoTrougla(A, C, D));
+    const brojcano = FL.fluksKrozKomadic(Q, a, b, dd, th, 200);
+    provjeri(Math.abs(brojcano - FL.fluksKrozUgao(Q, omega)) < 1e-3 * FL.fluksKrozUgao(Q, omega), `nagnut komadić θ=${th}: fluks ≠ K·Q·Ω iz uglova`);
+  }
+
+  /* Kocka oko naboja: šest strana, svaka pod 4π/6, ukupno Q/ε₀. */
+  const d = 0.1;
+  provjeri(blizu(FL.prostorniUgao(2 * d, 2 * d, d), (4 * Math.PI) / 6, 1e-12), 'strana kocke nije 4π/6');
+  provjeri(Math.abs(6 * FL.fluksKrozKomadic(Q, 2 * d, 2 * d, d, 0, 200) - FL.fluksSfere(Q)) < 1e-3 * FL.fluksSfere(Q), 'kocka oko naboja ne daje Q/ε₀');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -582,6 +637,7 @@ console.log('  OK   §8 duž: zbir komada = formula, za l → ∞ prava q/(2πε
 console.log('  OK   §8 ravan: traka kao niz pravih, σ/(2ε₀), kondenzator σ/ε₀ između i nula vani');
 console.log('  OK   §8 cijev: unutra nula, vani kao prava, koaks samo između plašteva');
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
+console.log('  OK   §9 fluks: ∫E·da = K·Q·Ω, isti Ω daje isti fluks, kocka oko naboja Q/ε₀');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
