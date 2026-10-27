@@ -20,6 +20,7 @@ const prevod = await prevedi(
     'src/lib/fizika/kirchhoff.ts',
     'src/lib/fizika/racun.ts',
     'src/lib/fizika/nosioci.ts',
+    'src/lib/fizika/predznaci.ts',
     'src/lib/fizika/gustine.ts',
   ],
   'fizika-',
@@ -31,6 +32,7 @@ const H = await prevod.uvezi('src/lib/fizika/kirchhoff.ts');
 const O = await prevod.uvezi('src/lib/osa.ts');
 const R = await prevod.uvezi('src/lib/fizika/racun.ts');
 const N3 = await prevod.uvezi('src/lib/fizika/nosioci.ts');
+const Z = await prevod.uvezi('src/lib/fizika/predznaci.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 prevod.pocisti();
 
@@ -335,6 +337,28 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(N3.brzina(-1, 1, 5) === -5 && N3.brzina(1, 1, 5) === 5, 'smjer brzine nosilaca');
 }
 
+/* ------------------------------------------------------------ §5 predznaci */
+
+{
+  const r = slucajno(23);
+  for (let k = 0; k < 2000; k++) {
+    const grane = Array.from({ length: 1 + Math.floor(r() * 3) }, () => g(Math.round(r() * 12) / 2, r() < 0.5 ? 'u' : 'iz'));
+    const van = Z.strujaKrozPovrsinu(grane, 1);
+    provjeri(Z.strujaKrozPovrsinu(grane, -1) === -van, 'okretanje normale ne okreće samo predznak');
+    const u = Z.uloga(grane);
+    provjeri(u === (van > 0 ? 'izvor' : van < 0 ? 'ponor' : 'nista'), `uloga ${u} za struju van ${van}`);
+    const p = Z.promjena(grane);
+    provjeri(p === (van > 0 ? 'opada' : van < 0 ? 'raste' : 'stalno'), `promjena ${p} za struju van ${van}`);
+    provjeri(Z.nabojUnutra(0, 10, grane) === 10, 'Q_not(0) nije početni naboj');
+    const nagib = Z.nabojUnutra(2, 10, grane) - Z.nabojUnutra(1, 10, grane);
+    provjeri(blizu(nagib, -van, 1e-9), 'nagib Q_not(t) nije −i_van');
+  }
+  const primjer = [g(3, 'iz'), g(5, 'u')];
+  provjeri(Z.strujaKrozPovrsinu(primjer, 1) === -2, '3 A van i 5 A unutra: struja van −2 A');
+  provjeri(Z.uloga(primjer) === 'ponor' && Z.promjena(primjer) === 'raste', '3 A van i 5 A unutra: ponor, naboj raste');
+  provjeri(Z.nabojUnutra(4, 10, primjer) === 18, 'Q_not(4 s) = 10 C + 2 A · 4 s');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -342,6 +366,7 @@ console.log('  OK   osa: podioci 1, 2, 5 · 10ⁿ, ravnomjerni, sa nulom');
 console.log('  OK   §2 gustine: σ, q i Q ostaju dok ρ raste kao 1/s, 1/s², 1/s³');
 console.log('  OK   §3 izvod i integral: sječica → tangenta, ∫ i dt = ΔQ, konstanta ne mijenja struju');
 console.log('  OK   §3 nosioci: elektroni ulijevo i ioni udesno daju istu struju, N·w/L prelaza u sekundi');
+console.log('  OK   §5 predznaci: normala mijenja samo predznak, uloga i promjena ne');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

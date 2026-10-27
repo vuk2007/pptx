@@ -83,7 +83,7 @@ export const EKSPERIMENTI: Eksperiment[] = [
   /* --- grupa B --- */
   { slug: 'q-i-izvod-integral', predmet: 'oe1', poglavlje: '§3', naslov: 'Q(t), izvod i integral', opis: 'Sječica se okreće u tangentu: iz Q izvodom dobiješ i, a iz i integralom ΔQ.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/q-i-izvod-integral/sadrzaj') },
   { slug: 'smjer-struje-elektroni', predmet: 'oe1', poglavlje: '§3', naslov: 'Smjer struje i elektroni', opis: 'Elektroni ulijevo i pozitivni ioni udesno daju istu struju.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/smjer-struje-elektroni/sadrzaj') },
-  { slug: 'predznaci-5-koraka', predmet: 'oe1', poglavlje: '§5', naslov: 'Predznaci u pet koraka', opis: 'Od strelice na žici do Q(t), korak po korak, sa normalom koja mijenja samo predznake.', status: 'u izradi' },
+  { slug: 'predznaci-5-koraka', predmet: 'oe1', poglavlje: '§5', naslov: 'Predznaci u pet koraka', opis: 'Od strelice na žici do Q(t), korak po korak, sa normalom koja mijenja samo predznake.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/predznaci-5-koraka/sadrzaj') },
   { slug: 'gustine-naboja', predmet: 'oe1', poglavlje: '§2', naslov: 'Gustine naboja', opis: 'Isto tijelo kao zapremina, ploča, žica i tačka: ρ, σ, q i Q.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/gustine-naboja/sadrzaj') },
 
   /* --- grupa C --- */

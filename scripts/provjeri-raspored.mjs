@@ -63,6 +63,7 @@ const RUTE = [
     'smjer-struje-elektroni',
     'prizma-gustina-struje',
     'kontinuitet-q-noter-zunaj',
+    'predznaci-5-koraka',
     'kirchhoff-cvor',
   ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
