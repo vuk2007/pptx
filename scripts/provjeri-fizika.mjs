@@ -29,6 +29,7 @@ const prevod = await prevedi(
     'src/lib/fizika/cijev.ts',
     'src/lib/fizika/probni.ts',
     'src/lib/fizika/fluks.ts',
+    'src/lib/fizika/gaussPovrsina.ts',
   ],
   'fizika-',
 );
@@ -48,6 +49,7 @@ const RV = await prevod.uvezi('src/lib/fizika/ravan.ts');
 const CJ = await prevod.uvezi('src/lib/fizika/cijev.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 const FL = await prevod.uvezi('src/lib/fizika/fluks.ts');
+const GP = await prevod.uvezi('src/lib/fizika/gaussPovrsina.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -623,6 +625,40 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(Math.abs(6 * FL.fluksKrozKomadic(Q, 2 * d, 2 * d, d, 0, 200) - FL.fluksSfere(Q)) < 1e-3 * FL.fluksSfere(Q), 'kocka oko naboja ne daje Q/ε₀');
 }
 
+/* ------------------------------------------------------------ §9 zatvorena površina */
+
+{
+  const e = { cx: 0, cy: 0, rx: 0.12, ry: 0.08 };
+  const r = slucajno(91);
+  let unutra = 0;
+  let vani = 0;
+  for (let k = 0; k < 60; k++) {
+    const Q = (r() - 0.5) * 2e-8 || 1e-9;
+    const u = r() * 2 * Math.PI;
+    const s = r() < 0.5 ? r() * 0.8 : 1.25 + r() * 1.5;
+    const n = { Q, x: e.cx + s * e.rx * Math.cos(u), y: e.cy + s * e.ry * Math.sin(u) };
+    const F = GP.fluksNaboja(n, e);
+    const Q0 = Math.abs(Q) / EL.EPS0;
+    if (s < 1) {
+      unutra++;
+      provjeri(GP.jeUnutra(n, e), 'naboj unutra nije prepoznat');
+      provjeri(Math.abs(F - Q / EL.EPS0) < 5e-3 * Q0, `naboj unutra (s=${s.toFixed(2)}): fluks ${F} ≠ Q/ε₀`);
+    } else {
+      vani++;
+      provjeri(!GP.jeUnutra(n, e), 'naboj vani prepoznat kao unutra');
+      provjeri(Math.abs(F) < 5e-3 * Q0, `naboj vani (s=${s.toFixed(2)}): fluks ${F} nije nula`);
+      /* Vani: dio oboda gdje polje izlazi i dio gdje ulazi. */
+      const obod = GP.fluksNaObodu([n], e);
+      provjeri(obod.some((t) => t.En > 0) && obod.some((t) => t.En < 0), 'naboj vani: na obodu nema oba predznaka');
+    }
+  }
+  provjeri(unutra > 10 && vani > 10, 'premalo slučajeva unutra ili vani');
+  const tri = [{ Q: 3e-9, x: 0.02, y: 0 }, { Q: -1e-9, x: -0.05, y: 0.02 }, { Q: 5e-9, x: 0.3, y: 0 }];
+  provjeri(Math.abs(GP.fluks(tri, e) - 2e-9 / EL.EPS0) < 5e-3 * (2e-9 / EL.EPS0), 'tri naboja: fluks ≠ (3 − 1) nC/ε₀');
+  const centar = GP.fluksNaObodu([{ Q: 1e-9, x: 0, y: 0 }], e);
+  provjeri(centar.every((t) => t.En > 0), 'pozitivan naboj u centru: polje negdje ulazi');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -638,6 +674,7 @@ console.log('  OK   §8 ravan: traka kao niz pravih, σ/(2ε₀), kondenzator σ
 console.log('  OK   §8 cijev: unutra nula, vani kao prava, koaks samo između plašteva');
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §9 fluks: ∫E·da = K·Q·Ω, isti Ω daje isti fluks, kocka oko naboja Q/ε₀');
+console.log('  OK   §9 zatvorena površina: unutra Q/ε₀, vani nula, na obodu oba predznaka');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
