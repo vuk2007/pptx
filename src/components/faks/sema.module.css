@@ -68,9 +68,62 @@
   stroke: none;
 }
 
+/* Naboj koji se može prevlačiti. */
+.nabojKrug {
+  stroke: var(--panel);
+  stroke-width: 3;
+}
+
+.nabojZnak {
+  stroke: var(--panel);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+
+.natpisNaboja {
+  fill: var(--text);
+  stroke: none;
+  font-family: var(--font-tekst), system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 650;
+  paint-order: stroke;
+}
+
+.rucka {
+  outline: none;
+}
+
+.rucka:focus-visible .nabojKrug {
+  stroke: var(--odluci);
+  stroke-width: 5;
+}
+
+/* Crtež po kojem se prevlači: prst vuče tačku, ne skroluje stranu. */
+.dodir {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Sila: nije polje ni struja, pa je neutralna. */
+.sila {
+  stroke: var(--text);
+  fill: var(--text);
+  color: var(--text);
+}
+
+/* Linija polja: tanka, tiha, da ne prekrije strelice. */
+.linijaPolja {
+  fill: none;
+  stroke: var(--polje);
+  stroke-opacity: 0.45;
+  stroke-width: 1.6;
+}
+
 /* Na telefonu je crtež širok 360 px, pa natpisi moraju biti krupniji u jedinicama crteža. */
 @media (max-width: 600px) {
   .tekst { font-size: 40px; }
   .tih { font-size: 34px; }
   .simbol { font-size: 44px; }
+  .natpisNaboja { font-size: 34px; }
 }

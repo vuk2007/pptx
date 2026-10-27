@@ -87,10 +87,10 @@ export const EKSPERIMENTI: Eksperiment[] = [
   { slug: 'gustine-naboja', predmet: 'oe1', poglavlje: '§2', naslov: 'Gustine naboja', opis: 'Isto tijelo kao zapremina, ploča, žica i tačka: ρ, σ, q i Q.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/gustine-naboja/sadrzaj') },
 
   /* --- grupa C --- */
-  { slug: 'coulomb-sila', predmet: 'oe1', poglavlje: '§7', naslov: 'Coulombova sila', opis: 'Dva naboja koja prevlačiš, sile jednake po iznosu i suprotne po smjeru.', status: 'u izradi' },
+  { slug: 'coulomb-sila', predmet: 'oe1', poglavlje: '§7', naslov: 'Coulombova sila', opis: 'Dva naboja koja prevlačiš, sile jednake po iznosu i suprotne po smjeru.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/coulomb-sila/sadrzaj') },
   { slug: 'polje-tackastih-naboja', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje tačkastih naboja', opis: 'Do četiri naboja, linije polja i doprinos svakog naboja posebno.', status: 'u izradi' },
   { slug: 'probni-naboj-mali', predmet: 'oe1', poglavlje: '§8', naslov: 'Zašto probni naboj mora biti mali', opis: 'Veliki probni naboj pomjera naboje koje mjeri.', status: 'u izradi' },
-  { slug: 'prsten-polje-na-osi', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje prstena na osi', opis: 'Poprečne komponente se poništavaju u parovima, ostaje E_z(z).', status: 'u izradi' },
+  { slug: 'prsten-polje-na-osi', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje prstena na osi', opis: 'Poprečne komponente se poništavaju u parovima, ostaje samo komponenta duž ose.', status: 'u izradi' },
   { slug: 'duz-u-pravu', predmet: 'oe1', poglavlje: '§8', naslov: 'Od duži do prave', opis: 'Kad duž postane beskonačna, polje prelazi u q/(2πε₀ρ).', status: 'u izradi' },
   { slug: 'ravan-i-kondenzator', predmet: 'oe1', poglavlje: '§8', naslov: 'Ravan i kondenzator', opis: 'Ravan daje σ/(2ε₀), dvije suprotne ravni σ/ε₀ između i nulu van.', status: 'u izradi' },
   { slug: 'cijev-koaks', predmet: 'oe1', poglavlje: '§8', naslov: 'Cijev i koaksijalni kabel', opis: 'Unutra nula, vani kao prava u osi.', status: 'u izradi' },

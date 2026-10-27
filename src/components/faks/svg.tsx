@@ -1,4 +1,4 @@
-import type { Ref } from 'react';
+import type { Ref, SVGProps } from 'react';
 import s from './sema.module.css';
 
 /*
@@ -45,6 +45,33 @@ export function Strelica({
     <g className={`${s.strelica} ${s[boja]}`}>
       <line ref={linijaRef} x1={x1} y1={y1} x2={kx} y2={ky} style={debljina ? { strokeWidth: debljina } : undefined} />
       <polygon ref={vrhRef} points={vrhStrelice(x1, y1, x2, y2, velicina)} />
+    </g>
+  );
+}
+
+/**
+  Naboj kao krug u boji predznaka, sa znakom + ili − unutra. Ostali
+  propsi (handleri za prevlačenje, tabIndex) idu na grupu.
+*/
+export function NabojTacka({
+  x,
+  y,
+  Q,
+  r = 18,
+  natpis,
+  ...ostalo
+}: { x: number; y: number; Q: number; r?: number; natpis?: string } & Omit<SVGProps<SVGGElement>, 'x' | 'y'>) {
+  const z = r * 0.5;
+  return (
+    <g transform={`translate(${x} ${y})`} className={`${Q >= 0 ? s.plus : s.minus} ${s.rucka}`} {...ostalo}>
+      <circle r={r} className={s.nabojKrug} />
+      <line x1={-z} y1={0} x2={z} y2={0} className={s.nabojZnak} />
+      {Q >= 0 && <line x1={0} y1={-z} x2={0} y2={z} className={s.nabojZnak} />}
+      {natpis && (
+        <text y={r + 30} textAnchor="middle" className={s.natpisNaboja}>
+          {natpis}
+        </text>
+      )}
     </g>
   );
 }

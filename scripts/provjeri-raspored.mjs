@@ -65,6 +65,7 @@ const RUTE = [
     'kontinuitet-q-noter-zunaj',
     'predznaci-5-koraka',
     'kirchhoff-cvor',
+    'coulomb-sila',
   ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */
@@ -145,6 +146,8 @@ const mjera = (skrol) => `(() => {
     transformacija roditelja, pa se okvir mora prevesti u koordinate korijena.
   */
   for (const svg of document.querySelectorAll('svg[viewBox]')) {
+    /* KaTeX crta korijen i razlomačke crte namjerno šire od viewBox-a (preserveAspectRatio slice). */
+    if (svg.closest('.katex')) continue;
     const [vx, vy, vs, vv] = svg.getAttribute('viewBox').trim().split(/[ ,]+/).map(Number);
     /* Da se provjera ne bi tiho preskočila ako viewBox ikad bude neočitljiv. */
     if (![vx, vy, vs, vv].every(Number.isFinite)) {

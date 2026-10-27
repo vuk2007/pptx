@@ -22,6 +22,7 @@ const prevod = await prevedi(
     'src/lib/fizika/nosioci.ts',
     'src/lib/fizika/predznaci.ts',
     'src/lib/fizika/gustine.ts',
+    'src/lib/fizika/elektrostatika.ts',
   ],
   'fizika-',
 );
@@ -34,6 +35,7 @@ const R = await prevod.uvezi('src/lib/fizika/racun.ts');
 const N3 = await prevod.uvezi('src/lib/fizika/nosioci.ts');
 const Z = await prevod.uvezi('src/lib/fizika/predznaci.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
+const EL = await prevod.uvezi('src/lib/fizika/elektrostatika.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -359,6 +361,54 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(Z.nabojUnutra(4, 10, primjer) === 18, 'Q_not(4 s) = 10 C + 2 A · 4 s');
 }
 
+/* ------------------------------------------------------------ §7 Coulomb */
+
+{
+  const r = slucajno(51);
+  provjeri(Math.abs(EL.duzina(EL.poljeOd({ Q: 1e-9, x: 0, y: 0 }, { x: 0.1, y: 0 })) - EL.K * 1e-9 / 0.01) < 1e-9, '1 nC na 10 cm');
+  for (let k = 0; k < 2000; k++) {
+    const a = { Q: (r() - 0.5) * 2e-8, x: r() - 0.5, y: r() - 0.5 };
+    const b = { Q: (r() - 0.5) * 2e-8, x: r() - 0.5, y: r() - 0.5 };
+    const Fab = EL.sila(a, b);
+    const Fba = EL.sila(b, a);
+    /* Treći Newtonov zakon: F₁ + F₂ = 0. */
+    provjeri(Math.abs(Fab.x + Fba.x) <= 1e-12 * EL.duzina(Fab) + 1e-30 && Math.abs(Fab.y + Fba.y) <= 1e-12 * EL.duzina(Fab) + 1e-30, 'F₁ + F₂ ≠ 0');
+    const R = Math.hypot(b.x - a.x, b.y - a.y);
+    provjeri(blizu(EL.duzina(Fab), (EL.K * Math.abs(a.Q * b.Q)) / (R * R), 1e-9), 'iznos sile nije K|Q₁Q₂|/R²');
+    /* Isti predznaci se odbijaju: sila na b gleda od a. */
+    const odA = (Fab.x * (b.x - a.x) + Fab.y * (b.y - a.y)) * Math.sign(a.Q * b.Q);
+    provjeri(odA >= 0, 'isti predznaci se ne odbijaju');
+  }
+  const d = 0.1;
+  const Q = 5e-9;
+  const dipol = [{ Q, x: -d, y: 0 }, { Q: -Q, x: d, y: 0 }];
+  const usred = EL.polje(dipol, { x: 0, y: 0 });
+  provjeri(blizu(usred.x, (2 * EL.K * Q) / (d * d), 1e-9) && Math.abs(usred.y) < 1e-9, '+Q i −Q: polje u sredini nije 2KQ/d² prema −Q');
+  const isti = EL.polje([{ Q, x: -d, y: 0 }, { Q, x: d, y: 0 }], { x: 0, y: 0 });
+  provjeri(EL.duzina(isti) < 1e-6, '+Q i +Q: polje u sredini nije nula');
+
+  /* Linije polja dipola: idu niz polje i završavaju na −Q ili van crteža. */
+  const granice = { x0: -0.5, y0: -0.3, x1: 0.5, y1: 0.3 };
+  const linije = EL.linijePolja(dipol, { poJedinici: 12, jedinica: Q, poluprecnik: 0.01, korak: 0.004, granice });
+  provjeri(linije.length === 12, `dipol: ${linije.length} linija umjesto 12`);
+  let naMinus = 0;
+  for (const l of linije) {
+    const kraj = l[l.length - 1];
+    if (Math.hypot(kraj.x - d, kraj.y) < 0.012) naMinus++;
+    for (let j = 1; j < l.length; j++) {
+      const E = EL.polje(dipol, l[j - 1]);
+      const pomak = { x: l[j].x - l[j - 1].x, y: l[j].y - l[j - 1].y };
+      if (E.x * pomak.x + E.y * pomak.y < 0) {
+        provjeri(false, 'linija polja ide protiv polja');
+        break;
+      }
+    }
+  }
+  provjeri(naMinus >= 8, `dipol: samo ${naMinus} od 12 linija stiže do −Q`);
+  const samoMinus = EL.linijePolja([{ Q: -Q, x: 0, y: 0 }], { poJedinici: 8, jedinica: Q, poluprecnik: 0.01, korak: 0.01, granice });
+  provjeri(samoMinus.length === 8, 'samo negativan naboj: linije ne kreću od njega');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -367,6 +417,7 @@ console.log('  OK   §2 gustine: σ, q i Q ostaju dok ρ raste kao 1/s, 1/s², 1
 console.log('  OK   §3 izvod i integral: sječica → tangenta, ∫ i dt = ΔQ, konstanta ne mijenja struju');
 console.log('  OK   §3 nosioci: elektroni ulijevo i ioni udesno daju istu struju, N·w/L prelaza u sekundi');
 console.log('  OK   §5 predznaci: normala mijenja samo predznak, uloga i promjena ne');
+console.log('  OK   §7 Coulomb: F₁ + F₂ = 0, K|Q₁Q₂|/R², dipol i linije polja');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

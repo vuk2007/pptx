@@ -547,6 +547,91 @@
   stroke-width: 3;
 }
 
+/* --- polje i naboji, grupa C --- */
+
+.uputa {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* Doprinos jednog izvora: tanko, isprekidano, neutralno; zbir je pun i zelen. */
+.doprinos {
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  stroke-linecap: round;
+}
+
+.doprinosIstaknut {
+  stroke: var(--text);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.komponenta {
+  stroke: var(--polje);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+}
+
+.kotaIsprekidana {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-dasharray: 7 6;
+}
+
+.tackaT {
+  fill: var(--panel);
+  fill-opacity: 0.7;
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+:focus-visible > .tackaT {
+  stroke: var(--odluci);
+  stroke-width: 4;
+}
+
+.provodnik {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+
+.vodic {
+  fill: var(--panel-2);
+  stroke: none;
+}
+
+/* Položaj naboja bez probnog naboja: prazan kružić, za poređenje. */
+.duh {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.duz {
+  stroke: var(--naboj-plus);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.plocaPlus,
+.plocaMinus {
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.plocaPlus {
+  stroke: var(--naboj-plus);
+}
+
+.plocaMinus {
+  stroke: var(--naboj-minus);
+}
+
 .bocno {
   display: grid;
   gap: 16px;

@@ -51,6 +51,7 @@ export function Ose({
   yNatpis,
   xCilj = 6,
   yCilj = 4,
+  naNuli = true,
   children,
 }: {
   okvir: Okvir;
@@ -60,6 +61,8 @@ export function Ose({
   yNatpis: ReactNode;
   xCilj?: number;
   yCilj?: number;
+  /** Uspravna osa na x = 0; false je stavlja uz lijevu ivicu (za logaritamsku x-osu). */
+  naNuli?: boolean;
   children?: ReactNode;
 }) {
   const sk = skala(okvir, xr, yr);
@@ -68,7 +71,7 @@ export function Ose({
   const xDec = decimaleZaKorak(xKorak);
   const yDec = decimaleZaKorak(yKorak);
   const xOsaY = sk.y(yr[0] <= 0 && yr[1] >= 0 ? 0 : yr[0]);
-  const yOsaX = sk.x(xr[0] <= 0 && xr[1] >= 0 ? 0 : xr[0]);
+  const yOsaX = sk.x(naNuli && xr[0] <= 0 && xr[1] >= 0 ? 0 : xr[0]);
   const desno = okvir.x + okvir.w;
   const dno = okvir.y + okvir.h;
 
@@ -95,7 +98,7 @@ export function Ose({
       <text x={desno} y={dno + 56} textAnchor="end" className={s.tih}>
         {xNatpis}
       </text>
-      <text x={okvir.x - 10} y={okvir.y - 14} textAnchor="end" className={s.tih}>
+      <text x={okvir.x - 6} y={okvir.y - 14} className={s.tih}>
         {yNatpis}
       </text>
       {children}
