@@ -31,6 +31,7 @@ const prevod = await prevedi(
     'src/lib/fizika/fluks.ts',
     'src/lib/fizika/gaussPovrsina.ts',
     'src/lib/fizika/sferno.ts',
+    'src/lib/fizika/izborPovrsine.ts',
   ],
   'fizika-',
 );
@@ -52,6 +53,7 @@ const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 const FL = await prevod.uvezi('src/lib/fizika/fluks.ts');
 const GP = await prevod.uvezi('src/lib/fizika/gaussPovrsina.ts');
 const SF = await prevod.uvezi('src/lib/fizika/sferno.ts');
+const IP = await prevod.uvezi('src/lib/fizika/izborPovrsine.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -723,6 +725,22 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   }
 }
 
+/* ------------------------------------------------------------ §9 izbor površine */
+
+{
+  const q = 5e-9;
+  const L = 0.2;
+  const v = IP.valjak(q, 0.07, L);
+  provjeri(blizu(v.ukupno, (q * L) / EL.EPS0, 1e-9) && v.osnovice === 0, 'valjak: fluks ≠ qL/ε₀');
+  for (const rho of [0.01, 0.1, 0.5]) provjeri(blizu(IP.valjak(q, rho, L).ukupno, IP.valjak(q, 0.07, L).ukupno, 1e-9), 'valjak: fluks zavisi od poluprečnika');
+  const k = IP.kocka(q, 0.05, L);
+  provjeri(Math.abs(k.ukupno - (q * L) / EL.EPS0) < 1e-5 * ((q * L) / EL.EPS0), 'kocka oko prave: fluks ≠ qL/ε₀');
+  provjeri(Math.abs(k.odnos - 2) < 3e-3, `kocka: E·n na strani ne varira 2 puta (${k.odnos})`);
+  const kt = IP.kutija(10e-9, 0.01);
+  provjeri(blizu(kt.ukupno, (10e-9 * 0.01) / EL.EPS0, 1e-12) && kt.bocno === 0, 'kutija: fluks ≠ σA/ε₀');
+  provjeri(blizu(IP.poljePrave(q, 0.1) * 2 * Math.PI * 0.1 * L, (q * L) / EL.EPS0, 1e-12), 'iz Gaussa: E·2πρL = qL/ε₀');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -740,6 +758,7 @@ console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §9 fluks: ∫E·da = K·Q·Ω, isti Ω daje isti fluks, kocka oko naboja Q/ε₀');
 console.log('  OK   §9 zatvorena površina: unutra Q/ε₀, vani nula, na obodu oba predznaka');
 console.log('  OK   §9 sferno: E·4πr² = Q_not/ε₀, ljuska i oblak od tačaka slažu se sa Gaussom');
+console.log('  OK   §9 izbor površine: valjak i kocka qL/ε₀, E·n na kocki varira 2 puta, kutija σA/ε₀');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

@@ -99,7 +99,7 @@ export const EKSPERIMENTI: Eksperiment[] = [
   { slug: 'fluks-i-prostorni-ugao', predmet: 'oe1', poglavlje: '§9', naslov: 'Fluks i prostorni ugao', opis: 'Fluks kroz komadić površine zavisi od prostornog ugla, ne od udaljenosti.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/fluks-i-prostorni-ugao/sadrzaj') },
   { slug: 'gauss-zatvorena-povrsina', predmet: 'oe1', poglavlje: '§9', naslov: 'Gaussova površina', opis: 'Fluks je Q_not/ε₀, a naboj vani daje nulu.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/gauss-zatvorena-povrsina/sadrzaj') },
   { slug: 'sferna-ljuska-i-oblak', predmet: 'oe1', poglavlje: '§9', naslov: 'Ljuska, oblak i sferni kondenzator', opis: 'E(r) iz obuhvaćenog naboja, dok širiš Gaussovu sferu.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/sferna-ljuska-i-oblak/sadrzaj') },
-  { slug: 'izbor-gaussove-povrsine', predmet: 'oe1', poglavlje: '§9', naslov: 'Izbor Gaussove površine', opis: 'Valjak za pravu, kutija za ravan, i gdje je fluks nula.', status: 'u izradi' },
+  { slug: 'izbor-gaussove-povrsine', predmet: 'oe1', poglavlje: '§9', naslov: 'Izbor Gaussove površine', opis: 'Valjak za pravu, kutija za ravan, i gdje je fluks nula.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/izbor-gaussove-povrsine/sadrzaj') },
 
   /* --- kasnije --- */
   { slug: 'napon-nezavisnost-od-puta', predmet: 'oe1', poglavlje: '§10', naslov: 'Napon ne zavisi od puta', opis: 'Dva puta između istih tačaka daju isti napon.', status: 'u izradi' },
