@@ -19,6 +19,7 @@ const prevod = await prevedi(
     'src/lib/fizika/kontinuitet.ts',
     'src/lib/fizika/kirchhoff.ts',
     'src/lib/fizika/racun.ts',
+    'src/lib/fizika/nosioci.ts',
     'src/lib/fizika/gustine.ts',
   ],
   'fizika-',
@@ -29,6 +30,7 @@ const K = await prevod.uvezi('src/lib/fizika/kontinuitet.ts');
 const H = await prevod.uvezi('src/lib/fizika/kirchhoff.ts');
 const O = await prevod.uvezi('src/lib/osa.ts');
 const R = await prevod.uvezi('src/lib/fizika/racun.ts');
+const N3 = await prevod.uvezi('src/lib/fizika/nosioci.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 prevod.pocisti();
 
@@ -276,12 +278,70 @@ provjeri(blizu(R.sjecica((t) => t * t, 1.5, 0.4), 2 * 1.5 + 0.4), 'sječica za t
 provjeri(blizu(R.dtZaPolozaj(0), R.DT_MAX) && blizu(R.dtZaPolozaj(1), R.DT_MIN), 'krajevi klizača δt');
 for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(p - 0.05), 'klizač δt nije monoton');
 
+/* ------------------------------------------------------------ §3 nosioci */
+
+{
+  const L = 900;
+  const PRESJEK = 450;
+  const BROJ = 120;
+  const w = 40;
+  const dt = 1 / 60;
+  const KORAKA = 600;
+  const rezultat = {};
+  for (const vrsta of ['elektroni', 'ioni', 'oba']) {
+    for (const smjer of [1, -1]) {
+      const nosioci = N3.napraviNosioce(vrsta, BROJ, L, 60, slucajno(17));
+      /*
+        Tačno očekivanje, nezavisno od koraka simulacije: iz početnog
+        položaja i brzine svakog nosioca, koliko puta pređe presjek na
+        prstenu dužine L za ukupno vrijeme.
+      */
+      const T = KORAKA * dt;
+      const ocekivaniKraj = nosioci.map((n) => ((((n.x + N3.brzina(n.q, smjer, w) * T) % L) + L) % L));
+      let tacno = 0;
+      for (const n of nosioci) {
+        const v = N3.brzina(n.q, smjer, w);
+        const put = Math.abs(v) * T;
+        const doPresjeka = v > 0 ? (PRESJEK - n.x + L) % L : (n.x - PRESJEK + L) % L;
+        const prelaza = doPresjeka <= put ? 1 + Math.floor((put - doPresjeka) / L) : 0;
+        tacno += n.q * Math.sign(v) * prelaza;
+      }
+      let ukupno = N3.NULA;
+      for (let k = 0; k < KORAKA; k++) ukupno = N3.saberi(ukupno, N3.korak(nosioci, smjer, w, dt, PRESJEK, L));
+      const udesno = N3.prenesenoUdesno(ukupno);
+      rezultat[`${vrsta}${smjer}`] = udesno;
+      /* Očekivano: BROJ·w/L prelaza u sekundi, svaki nosi struju u smjeru polja. */
+      const ocekivano = (smjer * BROJ * w * KORAKA * dt) / L;
+      provjeri(Math.abs(udesno - tacno) <= 1, `${vrsta}, polje ${smjer}: prešlo ${udesno}, a po putanjama ${tacno}`);
+      provjeri(Math.abs(udesno - ocekivano) <= 4 * Math.sqrt(Math.abs(ocekivano)) + 2, `${vrsta}, polje ${smjer}: prešlo ${udesno}, očekivano oko ${ocekivano.toFixed(1)}`);
+      provjeri(Math.sign(udesno) === smjer, `${vrsta}, polje ${smjer}: struja nije u smjeru polja`);
+      const b = N3.bilans(ukupno);
+      provjeri(b.lijevo === -b.desno && b.desno === udesno, `${vrsta}: bilans lijevo i desno nije suprotan`);
+      if (vrsta === 'elektroni') provjeri(ukupno.plusDesno + ukupno.plusLijevo === 0, 'elektroni: pojavio se pozitivan nosilac');
+      if (vrsta === 'ioni') provjeri(ukupno.minusDesno + ukupno.minusLijevo === 0, 'ioni: pojavio se negativan nosilac');
+      if (vrsta === 'elektroni') {
+        /* Elektroni idu protiv polja: kroz presjek prelaze samo u jednom smjeru. */
+        provjeri(smjer === 1 ? ukupno.minusDesno === 0 : ukupno.minusLijevo === 0, 'elektroni idu niz polje');
+      }
+      nosioci.forEach((n, j) => {
+        provjeri(n.x >= 0 && n.x < L, 'nosilac izašao iz žice');
+        /* Povratak kroz izvor ne smije ni da doda ni da oduzme put. */
+        const razlika = Math.abs(n.x - ocekivaniKraj[j]);
+        provjeri(Math.min(razlika, L - razlika) < 1e-6, `${vrsta}: nosilac nije gdje treba poslije ${T} s`);
+      });
+    }
+  }
+  provjeri(Math.sign(rezultat.elektroni1) === Math.sign(rezultat.ioni1), 'elektroni i ioni daju struju suprotnog smjera');
+  provjeri(N3.brzina(-1, 1, 5) === -5 && N3.brzina(1, 1, 5) === 5, 'smjer brzine nosilaca');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
 console.log('  OK   osa: podioci 1, 2, 5 · 10ⁿ, ravnomjerni, sa nulom');
 console.log('  OK   §2 gustine: σ, q i Q ostaju dok ρ raste kao 1/s, 1/s², 1/s³');
 console.log('  OK   §3 izvod i integral: sječica → tangenta, ∫ i dt = ΔQ, konstanta ne mijenja struju');
+console.log('  OK   §3 nosioci: elektroni ulijevo i ioni udesno daju istu struju, N·w/L prelaza u sekundi');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

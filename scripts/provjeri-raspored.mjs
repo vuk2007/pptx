@@ -60,6 +60,7 @@ const RUTE = [
   ...[
     'gustine-naboja',
     'q-i-izvod-integral',
+    'smjer-struje-elektroni',
     'prizma-gustina-struje',
     'kontinuitet-q-noter-zunaj',
     'kirchhoff-cvor',
