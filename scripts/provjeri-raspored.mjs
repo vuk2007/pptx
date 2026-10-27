@@ -59,6 +59,7 @@ const RUTE = [
   { ruta: '/faks/oe1/', skrol: true },
   ...[
     'gustine-naboja',
+    'q-i-izvod-integral',
     'prizma-gustina-struje',
     'kontinuitet-q-noter-zunaj',
     'kirchhoff-cvor',

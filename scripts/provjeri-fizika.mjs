@@ -18,6 +18,7 @@ const prevod = await prevedi(
     'src/lib/fizika/prizma.ts',
     'src/lib/fizika/kontinuitet.ts',
     'src/lib/fizika/kirchhoff.ts',
+    'src/lib/fizika/racun.ts',
     'src/lib/fizika/gustine.ts',
   ],
   'fizika-',
@@ -27,6 +28,7 @@ const P = await prevod.uvezi('src/lib/fizika/prizma.ts');
 const K = await prevod.uvezi('src/lib/fizika/kontinuitet.ts');
 const H = await prevod.uvezi('src/lib/fizika/kirchhoff.ts');
 const O = await prevod.uvezi('src/lib/osa.ts');
+const R = await prevod.uvezi('src/lib/fizika/racun.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 prevod.pocisti();
 
@@ -249,11 +251,37 @@ provjeri(H.stvarniSmjer(g(0, 'u')) === 0, 'bez struje nema smjera');
   }
 }
 
+/* ------------------------------------------------------------ §3 izvod i integral */
+
+for (const f of R.FUNKCIJE) {
+  for (let t0 = 0; t0 <= f.tMax - R.DT_MAX + 1e-9; t0 += 0.25) {
+    /* Sječica se za mali δt primiče tangenti, a tangenta je tačan izvod. */
+    provjeri(Math.abs(R.sjecica(f.Q, t0, 1e-6) - f.i(t0)) < 1e-4 * Math.max(1, Math.abs(f.i(t0))), `${f.id}: izvod u t=${t0}`);
+    const veliki = Math.abs(R.sjecica(f.Q, t0, R.DT_MAX) - f.i(t0));
+    const mali = Math.abs(R.sjecica(f.Q, t0, R.DT_MIN) - f.i(t0));
+    provjeri(mali <= veliki + 1e-9, `${f.id}: za manji δt sječica nije bliža tangenti (t=${t0})`);
+    provjeri(mali < 0.05, `${f.id}: pri δt = ${R.DT_MIN} s sječica odstupa ${mali} A`);
+    /* Konstanta pomjera graf, a ne mijenja nagib. */
+    for (const C of [-5, 3, 5]) {
+      provjeri(blizu(R.sjecica((t) => f.Q(t) + C, t0, 0.5), R.sjecica(f.Q, t0, 0.5), 1e-9), `${f.id}: konstanta ${C} mijenja struju`);
+    }
+  }
+  for (let t1 = 0; t1 < f.tMax; t1 += 0.5) {
+    for (let t2 = t1; t2 <= f.tMax; t2 += 0.5) {
+      provjeri(Math.abs(R.integral(f.i, t1, t2) - (f.Q(t2) - f.Q(t1))) < 1e-6, `${f.id}: ∫i dt ≠ ΔQ na [${t1}, ${t2}]`);
+    }
+  }
+}
+provjeri(blizu(R.sjecica((t) => t * t, 1.5, 0.4), 2 * 1.5 + 0.4), 'sječica za t² je 2t₀ + δt');
+provjeri(blizu(R.dtZaPolozaj(0), R.DT_MAX) && blizu(R.dtZaPolozaj(1), R.DT_MIN), 'krajevi klizača δt');
+for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(p - 0.05), 'klizač δt nije monoton');
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
 console.log('  OK   osa: podioci 1, 2, 5 · 10ⁿ, ravnomjerni, sa nulom');
 console.log('  OK   §2 gustine: σ, q i Q ostaju dok ρ raste kao 1/s, 1/s², 1/s³');
+console.log('  OK   §3 izvod i integral: sječica → tangenta, ∫ i dt = ΔQ, konstanta ne mijenja struju');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
