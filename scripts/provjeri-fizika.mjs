@@ -25,6 +25,7 @@ const prevod = await prevedi(
     'src/lib/fizika/elektrostatika.ts',
     'src/lib/fizika/prsten.ts',
     'src/lib/fizika/duz.ts',
+    'src/lib/fizika/ravan.ts',
     'src/lib/fizika/probni.ts',
   ],
   'fizika-',
@@ -41,6 +42,7 @@ const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 const EL = await prevod.uvezi('src/lib/fizika/elektrostatika.ts');
 const PR = await prevod.uvezi('src/lib/fizika/prsten.ts');
 const DZ = await prevod.uvezi('src/lib/fizika/duz.ts');
+const RV = await prevod.uvezi('src/lib/fizika/ravan.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 prevod.pocisti();
 
@@ -483,6 +485,36 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(blizu(DZ.pravaPolje(1e-9, 0.1), 2 * EL.K * 1e-9 / 0.1, 1e-12), 'q/(2πε₀ρ) = 2Kq/ρ');
 }
 
+/* ------------------------------------------------------------ §8 ravan */
+
+{
+  const sigma = 5e-9;
+  const r = slucajno(71);
+  for (let k = 0; k < 200; k++) {
+    const w = 0.05 + r() * 0.3;
+    const T = { x: (r() < 0.5 ? -1 : 1) * (0.05 * w + r() * 0.4), y: (r() - 0.5) * 0.8 };
+    const tacno = RV.trakaPolje(sigma, w, 0, T);
+    const zbirno = RV.trakaKaoPrave(sigma, w, 0, T, 20000);
+    const mjera = Math.hypot(tacno.x, tacno.y);
+    provjeri(Math.abs(zbirno.x - tacno.x) < 3e-3 * mjera && Math.abs(zbirno.y - tacno.y) < 3e-3 * mjera, `traka: zbir pravih ≠ formula (w=${w.toFixed(3)})`);
+  }
+  for (const dx of [0.01, -0.03, 0.2]) {
+    const e = RV.trakaPolje(sigma, 1e6, 0, { x: dx, y: 0 });
+    provjeri(blizu(e.x, Math.sign(dx) * RV.ravanPolje(sigma), 1e-5) && Math.abs(e.y) < 1e-9, `beskonačna ravan na ${dx}: nije σ/(2ε₀) od ravni`);
+  }
+  provjeri(blizu(RV.trakaPolje(sigma, 1e6, 0, { x: 0.5, y: 0 }).x, RV.trakaPolje(sigma, 1e6, 0, { x: 0.01, y: 0 }).x, 1e-5), 'polje ravni zavisi od udaljenosti');
+  const d = 0.02;
+  const unutra = RV.kondenzatorPolje(sigma, 1e5 * d, d, { x: 0, y: 0 });
+  provjeri(blizu(unutra.x, sigma / EL.EPS0, 1e-4), 'kondenzator: između ploča nije σ/ε₀');
+  for (const x of [-0.05, 0.05, 0.3]) {
+    const vani = RV.kondenzatorPolje(sigma, 1e5 * d, d, { x, y: 0 });
+    provjeri(Math.abs(vani.x) < 1e-4 * sigma / EL.EPS0, `kondenzator: vani (x=${x}) polje nije nula`);
+  }
+  /* Konačne ploče: na rubu polje viri van i nije više σ/ε₀. */
+  const rub = RV.kondenzatorPolje(sigma, 0.05, d, { x: 0, y: 0.05 });
+  provjeri(rub.x < 0.7 * sigma / EL.EPS0, 'na rubu konačnih ploča polje je i dalje puno');
+}
+
 /* ------------------------------------------------------------ §8 probni naboj */
 
 {
@@ -515,6 +547,7 @@ console.log('  OK   §5 predznaci: normala mijenja samo predznak, uloga i promje
 console.log('  OK   §7 Coulomb: F₁ + F₂ = 0, K|Q₁Q₂|/R², dipol i linije polja');
 console.log('  OK   §8 prsten: E_z za svaki broj komada, poprečno se poništava, nula u centru, maksimum u a/√2');
 console.log('  OK   §8 duž: zbir komada = formula, za l → ∞ prava q/(2πε₀ρ)');
+console.log('  OK   §8 ravan: traka kao niz pravih, σ/(2ε₀), kondenzator σ/ε₀ između i nula vani');
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
