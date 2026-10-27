@@ -12,11 +12,12 @@ import { prevedi } from './prevedi.mjs';
 */
 
 const prevod = await prevedi(
-  ['src/lib/fizika/slucajno.ts', 'src/lib/fizika/prizma.ts'],
+  ['src/lib/fizika/slucajno.ts', 'src/lib/fizika/prizma.ts', 'src/lib/fizika/kontinuitet.ts'],
   'fizika-',
 );
 const { slucajno } = await prevod.uvezi('src/lib/fizika/slucajno.ts');
 const P = await prevod.uvezi('src/lib/fizika/prizma.ts');
+const K = await prevod.uvezi('src/lib/fizika/kontinuitet.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -96,10 +97,71 @@ for (const rhoCm of [0.5, 1, 2, 3]) {
   }
 }
 
+/* ------------------------------------------------------------ §5 kontinuitet */
+
+const POLJE = { sirina: 680, visina: 330, cx: 340, cy: 165, r: 95 };
+const N = 150;
+
+function vozi(oblik, rezim, sjeme, koraci, dt = 1 / 60) {
+  const r = slucajno(sjeme);
+  const s = K.napraviStanje(oblik, rezim, POLJE, N, r);
+  let prije = K.brojUnutra(s);
+  let ukupnoVan = 0;
+  let prelaza = 0;
+  let tacno = true;
+  for (let i = 0; i < koraci; i++) {
+    const pr = K.korak(s, dt, r);
+    const sad = K.brojUnutra(s);
+    /* Brojanje prelaza i promjena naboja unutra moraju se slagati u svakom kadru. */
+    if (sad - prije !== pr.uslo - pr.izaslo) tacno = false;
+    if (!blizu(K.strujaVan(pr, dt, 1) * dt, -(sad - prije), 1e-9)) tacno = false;
+    if (!blizu(K.strujaVan(pr, dt, -1), -K.strujaVan(pr, dt, 1), 1e-12)) tacno = false;
+    ukupnoVan += pr.izaslo - pr.uslo;
+    prelaza += pr.izaslo + pr.uslo;
+    prije = sad;
+  }
+  return { s, ukupnoVan, prelaza, tacno, unutra: K.brojUnutra(s) };
+}
+
+for (const oblik of ['zatvorena', 'ravan']) {
+  for (const rezim of ['izlazi', 'ulazi', 'prolazi']) {
+    for (const sjeme of [1, 2, 3, 4, 5]) {
+      const v = vozi(oblik, rezim, sjeme, 600);
+      /*
+        Samo zatvorena površina ima „unutra". Kod ravni se naboj koji izađe
+        desno vrati lijevo bez prelaza, pa lijeva strana nije zatvorena i
+        jednačina kontinuiteta za nju ne važi — što i jeste poenta ravni.
+      */
+      if (oblik === 'zatvorena') provjeri(v.tacno, `${oblik}/${rezim}/${sjeme}: struja van ≠ −dQ_not/dt u nekom kadru`);
+      provjeri(v.s.naboji.length === N, `${oblik}/${rezim}: broj naboja se promijenio`);
+      for (const n of v.s.naboji) {
+        provjeri(n.x >= 0 && n.x <= POLJE.sirina && n.y >= 0 && n.y <= POLJE.visina, `${oblik}/${rezim}: naboj izašao iz crteža`);
+      }
+      if (oblik === 'zatvorena' && rezim === 'izlazi') provjeri(v.ukupnoVan > 30, `izlazi/${sjeme}: struja van nije pozitivna (${v.ukupnoVan})`);
+      if (oblik === 'zatvorena' && rezim === 'ulazi') provjeri(v.ukupnoVan < -30, `ulazi/${sjeme}: struja van nije negativna (${v.ukupnoVan})`);
+      if (oblik === 'zatvorena' && rezim === 'prolazi') {
+        provjeri(Math.abs(v.ukupnoVan) < 0.1 * v.prelaza, `prolazi/${sjeme}: neto struja ${v.ukupnoVan} od ${v.prelaza} prelaza`);
+      }
+      if (oblik === 'ravan') provjeri(v.ukupnoVan > 30, `ravan/${sjeme}: naboj ne teče udesno (${v.ukupnoVan})`);
+    }
+  }
+}
+
+{
+  const a = vozi('zatvorena', 'izlazi', 9, 300);
+  const b = vozi('zatvorena', 'izlazi', 9, 300);
+  provjeri(a.ukupnoVan === b.ukupnoVan && a.unutra === b.unutra, 'isto sjeme ne daje isto kretanje');
+}
+provjeri(K.unutra(POLJE.cx, POLJE.cy, 'zatvorena', POLJE), 'središte nije unutra');
+provjeri(!K.unutra(POLJE.cx + POLJE.r + 1, POLJE.cy, 'zatvorena', POLJE), 'tačka iza kruga je unutra');
+provjeri(K.unutra(POLJE.cx - 1, 0, 'ravan', POLJE) && !K.unutra(POLJE.cx + 1, 0, 'ravan', POLJE), 'ravan: lijevo je „unutra"');
+provjeri(K.napraviStanje('ravan', 'izlazi', POLJE, 10, slucajno(1)).rezim === 'prolazi', 'kroz ravan naboj samo prolazi');
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
+console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('');
 console.log(`  Fizika: ${provjera} provjera, ${greske.length} grešaka`);
 console.log('');
