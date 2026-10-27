@@ -12,12 +12,13 @@ import { prevedi } from './prevedi.mjs';
 */
 
 const prevod = await prevedi(
-  ['src/lib/fizika/slucajno.ts', 'src/lib/fizika/prizma.ts', 'src/lib/fizika/kontinuitet.ts'],
+  ['src/lib/fizika/slucajno.ts', 'src/lib/fizika/prizma.ts', 'src/lib/fizika/kontinuitet.ts', 'src/lib/fizika/kirchhoff.ts'],
   'fizika-',
 );
 const { slucajno } = await prevod.uvezi('src/lib/fizika/slucajno.ts');
 const P = await prevod.uvezi('src/lib/fizika/prizma.ts');
 const K = await prevod.uvezi('src/lib/fizika/kontinuitet.ts');
+const H = await prevod.uvezi('src/lib/fizika/kirchhoff.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -157,11 +158,37 @@ provjeri(!K.unutra(POLJE.cx + POLJE.r + 1, POLJE.cy, 'zatvorena', POLJE), 'tačk
 provjeri(K.unutra(POLJE.cx - 1, 0, 'ravan', POLJE) && !K.unutra(POLJE.cx + 1, 0, 'ravan', POLJE), 'ravan: lijevo je „unutra"');
 provjeri(K.napraviStanje('ravan', 'izlazi', POLJE, 10, slucajno(1)).rezim === 'prolazi', 'kroz ravan naboj samo prolazi');
 
+/* ------------------------------------------------------------ §6 Kirchhoff */
+
+const g = (i, orijentacija) => ({ i, orijentacija });
+provjeri(H.zbir([g(2, 'u'), g(5, 'u'), g(7, 'iz')]) === 0, 'ulazi 2 A i 5 A, izlazi 7 A: zbir nije nula');
+provjeri(H.promjenaNaboja([g(2, 'u'), g(5, 'u'), g(7, 'iz')]) === 0, '2 + 5 = 7: naboj se mijenja');
+provjeri(H.zbir([g(4, 'u'), g(1, 'u'), g(3, 'iz')]) === -2, 'zbir −i₁ − i₂ + i₃');
+provjeri(H.promjenaNaboja([g(4, 'u'), g(1, 'u'), g(3, 'iz')]) === 2, 'ulazi više: naboj raste');
+provjeri(H.promjenaNaboja([g(1, 'u'), g(6, 'iz')]) === -5, 'izlazi više: naboj opada');
+provjeri(H.zbir([g(-3, 'iz')]) === H.zbir([g(3, 'u')]), '−3 A iz čvora = 3 A u čvor');
+provjeri(H.stvarniSmjer(g(-3, 'iz')) === -1 && H.stvarniSmjer(g(3, 'u')) === -1, 'stvarni smjer: u čvor');
+provjeri(H.stvarniSmjer(g(2, 'iz')) === 1 && H.stvarniSmjer(g(-2, 'u')) === 1, 'stvarni smjer: iz čvora');
+provjeri(H.stvarniSmjer(g(0, 'u')) === 0, 'bez struje nema smjera');
+
+{
+  const r = slucajno(5);
+  for (let k = 0; k < 2000; k++) {
+    const grane = Array.from({ length: 2 + Math.floor(r() * 4) }, () =>
+      g(Math.round((r() * 12 - 6) * 2) / 2, r() < 0.5 ? 'u' : 'iz'),
+    );
+    const indeks = Math.floor(r() * grane.length);
+    const nove = grane.map((x, j) => (j === indeks ? { ...x, i: H.izjednaci(grane, indeks) } : x));
+    provjeri(Math.abs(H.zbir(nove)) < 1e-12, `izjednači ne daje nulu: ${JSON.stringify(grane)} → ${indeks}`);
+  }
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
+console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
 console.log('');
 console.log(`  Fizika: ${provjera} provjera, ${greske.length} grešaka`);
 console.log('');
