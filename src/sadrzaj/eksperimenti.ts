@@ -88,7 +88,7 @@ export const EKSPERIMENTI: Eksperiment[] = [
 
   /* --- grupa C --- */
   { slug: 'coulomb-sila', predmet: 'oe1', poglavlje: '§7', naslov: 'Coulombova sila', opis: 'Dva naboja koja prevlačiš, sile jednake po iznosu i suprotne po smjeru.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/coulomb-sila/sadrzaj') },
-  { slug: 'polje-tackastih-naboja', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje tačkastih naboja', opis: 'Do četiri naboja, linije polja i doprinos svakog naboja posebno.', status: 'u izradi' },
+  { slug: 'polje-tackastih-naboja', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje tačkastih naboja', opis: 'Do četiri naboja, linije polja i doprinos svakog naboja posebno.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/polje-tackastih-naboja/sadrzaj') },
   { slug: 'probni-naboj-mali', predmet: 'oe1', poglavlje: '§8', naslov: 'Zašto probni naboj mora biti mali', opis: 'Veliki probni naboj pomjera naboje koje mjeri.', status: 'u izradi' },
   { slug: 'prsten-polje-na-osi', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje prstena na osi', opis: 'Poprečne komponente se poništavaju u parovima, ostaje samo komponenta duž ose.', status: 'u izradi' },
   { slug: 'duz-u-pravu', predmet: 'oe1', poglavlje: '§8', naslov: 'Od duži do prave', opis: 'Kad duž postane beskonačna, polje prelazi u q/(2πε₀ρ).', status: 'u izradi' },
