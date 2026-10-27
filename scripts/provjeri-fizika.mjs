@@ -12,13 +12,22 @@ import { prevedi } from './prevedi.mjs';
 */
 
 const prevod = await prevedi(
-  ['src/lib/fizika/slucajno.ts', 'src/lib/fizika/prizma.ts', 'src/lib/fizika/kontinuitet.ts', 'src/lib/fizika/kirchhoff.ts'],
+  [
+    'src/lib/osa.ts',
+    'src/lib/fizika/slucajno.ts',
+    'src/lib/fizika/prizma.ts',
+    'src/lib/fizika/kontinuitet.ts',
+    'src/lib/fizika/kirchhoff.ts',
+    'src/lib/fizika/gustine.ts',
+  ],
   'fizika-',
 );
 const { slucajno } = await prevod.uvezi('src/lib/fizika/slucajno.ts');
 const P = await prevod.uvezi('src/lib/fizika/prizma.ts');
 const K = await prevod.uvezi('src/lib/fizika/kontinuitet.ts');
 const H = await prevod.uvezi('src/lib/fizika/kirchhoff.ts');
+const O = await prevod.uvezi('src/lib/osa.ts');
+const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -183,9 +192,68 @@ provjeri(H.stvarniSmjer(g(0, 'u')) === 0, 'bez struje nema smjera');
   }
 }
 
+/* ------------------------------------------------------------ osa grafa */
+
+{
+  const r = slucajno(31);
+  for (let k = 0; k < 3000; k++) {
+    const a = (r() - 0.5) * 10 ** (r() * 6 - 2);
+    const b = a + 10 ** (r() * 6 - 3);
+    const cilj = 3 + Math.floor(r() * 6);
+    const p = O.podioci(a, b, cilj);
+    const korak = O.korakOse(a, b, cilj);
+    const mantisa = korak / 10 ** Math.floor(Math.log10(korak) + 1e-12);
+    provjeri([1, 2, 5, 10].some((m) => Math.abs(mantisa - m) < 1e-9), `korak ${korak} nije 1, 2 ili 5 puta 10ⁿ`);
+    provjeri(p.length >= 2 && p.length <= cilj * 3 + 1, `${p.length} podioka za cilj ${cilj} na [${a}, ${b}]`);
+    provjeri(p.every((v) => v >= a - korak * 1e-9 && v <= b + korak * 1e-9), `podiok van raspona [${a}, ${b}]`);
+    provjeri(p.every((v, j) => j === 0 || Math.abs(v - p[j - 1] - korak) < korak * 1e-6), `podioci nisu ravnomjerni na [${a}, ${b}]`);
+    provjeri(p.every((v) => String(v).length < 16), `šum u zapisu podioka: ${p.find((v) => String(v).length >= 16)}`);
+    if (a < 0 && b > 0) provjeri(p.includes(0), `nula fali u [${a}, ${b}]`);
+  }
+}
+
+/* ------------------------------------------------------------ §2 gustine */
+
+{
+  const Q = 6;
+  const polazno = G.gustine(Q, G.dimenzije('zapremina', 1));
+  for (const s of [1, 0.5, 0.1, 0.01]) {
+    const ploca = G.gustine(Q, G.dimenzije('ploca', s));
+    const dP = G.dimenzije('ploca', s);
+    provjeri(blizu(ploca.sigma, Q / (G.KVADAR.a * G.KVADAR.b)), `ploča s=${s}: σ se mijenja`);
+    provjeri(blizu(ploca.rho * dP.c, ploca.sigma), `ploča s=${s}: σ ≠ ρ·c`);
+    provjeri(blizu(ploca.rho, polazno.rho / s), `ploča s=${s}: ρ ne raste kao 1/s`);
+
+    const zica = G.gustine(Q, G.dimenzije('zica', s));
+    const dZ = G.dimenzije('zica', s);
+    provjeri(blizu(zica.q, Q / G.KVADAR.a), `žica s=${s}: q se mijenja`);
+    provjeri(blizu(zica.rho * dZ.b * dZ.c, zica.q), `žica s=${s}: q ≠ ρ·b·c`);
+    provjeri(blizu(zica.rho, polazno.rho / (s * s)), `žica s=${s}: ρ ne raste kao 1/s²`);
+
+    const tacka = G.gustine(Q, G.dimenzije('tacka', s));
+    provjeri(blizu(tacka.rho * tacka.V, Q), `tačka s=${s}: ρ·V ≠ Q`);
+    provjeri(blizu(tacka.rho, polazno.rho / s ** 3), `tačka s=${s}: ρ ne raste kao 1/s³`);
+  }
+
+  /* Od atoma do kontinuuma: veliki kvadrat daje prosjek, mali broji cijele naboje. */
+  const L = 100;
+  const tacke = G.razbaci(4000, L, slucajno(41));
+  const prosjek = 4000 / (L * L);
+  const r = slucajno(43);
+  for (let k = 0; k < 200; k++) {
+    const c = { x: 30 + r() * 40, y: 30 + r() * 40 };
+    provjeri(Math.abs(G.procjena(tacke, c, 50) - prosjek) < 0.12 * prosjek, 'veliki kvadrat ne daje prosječnu gustinu');
+    const l = 0.3;
+    const n = G.procjena(tacke, c, l) * l * l;
+    provjeri(Math.abs(n - Math.round(n)) < 1e-9, 'mali kvadrat ne broji cijele naboje');
+  }
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
+console.log('  OK   osa: podioci 1, 2, 5 · 10ⁿ, ravnomjerni, sa nulom');
+console.log('  OK   §2 gustine: σ, q i Q ostaju dok ρ raste kao 1/s, 1/s², 1/s³');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

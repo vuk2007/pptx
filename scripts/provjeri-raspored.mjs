@@ -57,7 +57,12 @@ const RUTE = [
   */
   { ruta: '/faks/', skrol: true },
   { ruta: '/faks/oe1/', skrol: true },
-  ...['prizma-gustina-struje', 'kontinuitet-q-noter-zunaj', 'kirchhoff-cvor'].flatMap((slug) => [
+  ...[
+    'gustine-naboja',
+    'prizma-gustina-struje',
+    'kontinuitet-q-noter-zunaj',
+    'kirchhoff-cvor',
+  ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */
     {

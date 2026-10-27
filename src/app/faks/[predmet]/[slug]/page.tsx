@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { EKSPERIMENTI, gotoviPredmeta, poglavlje, predmet as nadjiPredmet } from '@/sadrzaj/eksperimenti';
+import { EKSPERIMENTI, POGLAVLJA, gotoviPredmeta, poglavlje, predmet as nadjiPredmet } from '@/sadrzaj/eksperimenti';
 import { Eksperiment } from '@/components/faks/Eksperiment';
 
 type Parametri = { params: Promise<{ predmet: string; slug: string }> };
@@ -30,8 +30,9 @@ export default async function Strana({ params }: Parametri) {
   if (!zapis || zapis.status !== 'gotovo' || !p) notFound();
 
   const { default: sadrzaj } = await zapis.ucitaj();
-  /* Susjedi su gotovi eksperimenti istog predmeta, redom iz registra. */
-  const gotovi = gotoviPredmeta(p.id);
+  /* Susjedi su gotovi eksperimenti istog predmeta, po poglavljima, pa redom iz registra. */
+  const redPoglavlja = POGLAVLJA[p.id].map((x) => x.oznaka);
+  const gotovi = gotoviPredmeta(p.id).sort((a, b) => redPoglavlja.indexOf(a.poglavlje) - redPoglavlja.indexOf(b.poglavlje));
   const i = gotovi.findIndex((e) => e.slug === slug);
 
   return (
