@@ -817,6 +817,30 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(blizu(VK.ugao(VK.v3(1, 0), VK.v3(0, 1)), Math.PI / 2, 1e-12), 'ugao između x i y nije 90°');
 }
 
+/* ------------------------------------------------------------ alati: vektorski proizvod */
+
+{
+  const r = slucajno(103);
+  const x = VK.v3(1, 0, 0);
+  const y = VK.v3(0, 1, 0);
+  const z = VK.vektorski(x, y);
+  provjeri(z.x === 0 && z.y === 0 && z.z === 1, 'x × y nije z (desna ruka)');
+  const yx = VK.vektorski(y, x);
+  provjeri(yx.z === -1, 'y × x nije −z');
+  for (let k = 0; k < 2000; k++) {
+    const a = VK.v3((r() - 0.5) * 10, (r() - 0.5) * 10, (r() - 0.5) * 10);
+    const b = VK.v3((r() - 0.5) * 10, (r() - 0.5) * 10, (r() - 0.5) * 10);
+    const c = VK.vektorski(a, b);
+    const d = VK.vektorski(b, a);
+    provjeri(blizu(c.x, -d.x, 1e-12) && blizu(c.y, -d.y, 1e-12) && blizu(c.z, -d.z, 1e-12), 'a × b ≠ −(b × a)');
+    const m = VK.iznos(a) * VK.iznos(b);
+    provjeri(Math.abs(VK.skalarni(c, a)) < 1e-9 * m * VK.iznos(a) && Math.abs(VK.skalarni(c, b)) < 1e-9 * m * VK.iznos(b), 'a × b nije okomit na a i b');
+    provjeri(Math.abs(VK.iznos(c) - m * Math.sin(VK.ugao(a, b))) < 1e-9 * m, '|a × b| ≠ ab sin α');
+  }
+  const p = VK.vektorski(VK.v3(2, 0), VK.v3(2, 0));
+  provjeri(VK.iznos(p) === 0, 'paralelni vektori: a × b nije nula');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -838,6 +862,7 @@ console.log('  OK   §9 izbor površine: valjak i kocka qL/ε₀, E·n na kocki 
 console.log('  OK   alati δ i d: δQ/δt − i = δt za t², komadić pod lupom postaje prava');
 console.log('  OK   alati Riemann: lijevo pravilo 1/m, sredinsko 1/m², tačno za pravu');
 console.log('  OK   alati skalarni proizvod: ab cos α, nula na 90°, negativan preko');
+console.log('  OK   alati vektorski proizvod: x × y = z, a × b = −(b × a), okomit, ab sin α');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

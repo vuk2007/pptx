@@ -112,7 +112,7 @@ export const EKSPERIMENTI: Eksperiment[] = [
   { slug: 'delta-i-d', predmet: 'oe1', poglavlje: 'alati', naslov: 'Od δ do d', opis: 'Konačan komadić δt se smanjuje, a δQ/δt teži limesu.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/delta-i-d/sadrzaj') },
   { slug: 'riemann-u-integral', predmet: 'oe1', poglavlje: 'alati', naslov: 'Od sume do integrala', opis: 'Suma m pravougaonika prelazi u integral kad m raste.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/riemann-u-integral/sadrzaj') },
   { slug: 'skalarni-proizvod', predmet: 'oe1', poglavlje: 'alati', naslov: 'Skalarni proizvod', opis: 'Projekcija i a·b = ab cos α: nula pri 90°, negativno preko 90°.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/skalarni-proizvod/sadrzaj') },
-  { slug: 'vektorski-proizvod', predmet: 'oe1', poglavlje: 'alati', naslov: 'Vektorski proizvod', opis: 'w × B i B × w imaju suprotne smjerove.', status: 'u izradi' },
+  { slug: 'vektorski-proizvod', predmet: 'oe1', poglavlje: 'alati', naslov: 'Vektorski proizvod', opis: 'w × B i B × w imaju suprotne smjerove.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/vektorski-proizvod/sadrzaj') },
 ];
 
 export function predmet(id: string): Predmet | undefined {
