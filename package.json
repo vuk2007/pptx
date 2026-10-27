@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "node scripts/pripremi-katex.mjs && next dev",
-    "build": "node scripts/provjeri-vercel.mjs && node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-pwm.mjs && node scripts/provjeri-radio.mjs && node scripts/provjeri-suspenzija.mjs && node scripts/provjeri-servo.mjs && node scripts/provjeri-ravnoteza.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/pripremi-katex.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
+    "build": "node scripts/provjeri-vercel.mjs && node scripts/generate-icons.mjs && node scripts/provjeri-qr.mjs && node scripts/provjeri-h-most.mjs && node scripts/provjeri-pwm.mjs && node scripts/provjeri-radio.mjs && node scripts/provjeri-suspenzija.mjs && node scripts/provjeri-servo.mjs && node scripts/provjeri-ravnoteza.mjs && node scripts/provjeri-paket.mjs && node scripts/provjeri-xgo.mjs && node scripts/provjeri-pipeline.mjs && node scripts/provjeri-talasi.mjs && node scripts/provjeri-glas.mjs && node scripts/provjeri-fizika.mjs && node scripts/pripremi-katex.mjs && node scripts/generate-qr.mjs && eslint . --max-warnings 0 && next build && node scripts/generate-sw.mjs",
     "start": "node scripts/serve.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -21,6 +21,7 @@
     "provjeri-pipeline": "node scripts/provjeri-pipeline.mjs",
     "provjeri-talasi": "node scripts/provjeri-talasi.mjs",
     "provjeri-glas": "node scripts/provjeri-glas.mjs",
+    "provjeri-fizika": "node scripts/provjeri-fizika.mjs",
     "provjeri-raspored": "node scripts/provjeri-raspored.mjs",
     "provjeri-vercel": "node scripts/provjeri-vercel.mjs",
     "provjeri-analitiku": "node scripts/provjeri-analitiku.mjs",

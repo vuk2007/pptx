@@ -76,7 +76,7 @@ export type Eksperiment = {
 
 export const EKSPERIMENTI: Eksperiment[] = [
   /* --- grupa A --- */
-  { slug: 'prizma-gustina-struje', predmet: 'oe1', poglavlje: '§4', naslov: 'Prizma i gustina struje', opis: 'Prebroj naboje u kosoj prizmi iza prozorčića i uporedi sa ρ·δa·w·δt·cos α.', status: 'u izradi' },
+  { slug: 'prizma-gustina-struje', predmet: 'oe1', poglavlje: '§4', naslov: 'Prizma i gustina struje', opis: 'Prebroj naboje u kosoj prizmi iza prozorčića i uporedi sa ρ·δa·w·δt·cos α.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/prizma-gustina-struje/sadrzaj') },
   { slug: 'kontinuitet-q-noter-zunaj', predmet: 'oe1', poglavlje: '§5', naslov: 'Naboj unutra i vani', opis: 'Naboji prelaze zatvorenu površinu: struja van je tačno brzina kojom naboj unutra opada.', status: 'u izradi' },
   { slug: 'kirchhoff-cvor', predmet: 'oe1', poglavlje: '§6', naslov: 'Čvor sa tri žice', opis: 'Kad ulaz nije jednak izlazu, naboj u čvoru raste ili opada bez kraja.', status: 'u izradi' },
 

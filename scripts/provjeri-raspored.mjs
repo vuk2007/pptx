@@ -56,7 +56,8 @@ const RUTE = [
     lijevo ili desno, a ispod donje ivice ekrana sadržaj sme da se nastavi.
   */
   { ruta: '/faks/', skrol: true },
-  ...[].flatMap((slug) => [
+  { ruta: '/faks/oe1/', skrol: true },
+  ...['prizma-gustina-struje'].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */
     {
