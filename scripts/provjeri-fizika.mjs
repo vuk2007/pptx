@@ -32,6 +32,7 @@ const prevod = await prevedi(
     'src/lib/fizika/gaussPovrsina.ts',
     'src/lib/fizika/sferno.ts',
     'src/lib/fizika/izborPovrsine.ts',
+    'src/lib/fizika/delta.ts',
   ],
   'fizika-',
 );
@@ -54,6 +55,7 @@ const FL = await prevod.uvezi('src/lib/fizika/fluks.ts');
 const GP = await prevod.uvezi('src/lib/fizika/gaussPovrsina.ts');
 const SF = await prevod.uvezi('src/lib/fizika/sferno.ts');
 const IP = await prevod.uvezi('src/lib/fizika/izborPovrsine.ts');
+const DT = await prevod.uvezi('src/lib/fizika/delta.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -741,6 +743,34 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(blizu(IP.poljePrave(q, 0.1) * 2 * Math.PI * 0.1 * L, (q * L) / EL.EPS0, 1e-12), 'iz Gaussa: E·2πρL = qL/ε₀');
 }
 
+/* ------------------------------------------------------------ alati: od δ do d */
+
+{
+  const t2 = (t) => t * t;
+  for (const t0 of [0, 0.5, 1, 2.5]) {
+    const redovi = DT.tabela(t2, 2 * t0, t0);
+    provjeri(redovi.length === DT.KORACI_TABELE.length, 'tabela nema sve redove');
+    for (const r of redovi) {
+      /* Za t² je δQ/δt − 2t₀ tačno δt. */
+      provjeri(Math.abs(r.razlika - r.dt) < 1e-9, `t²: razlika ${r.razlika} ≠ δt ${r.dt}`);
+      provjeri(blizu(r.dQ, (t0 + r.dt) ** 2 - t0 * t0, 1e-12), 'δQ nije Q(t₀ + δt) − Q(t₀)');
+    }
+    for (let k = 1; k < redovi.length; k++) provjeri(Math.abs(redovi[k].razlika) < Math.abs(redovi[k - 1].razlika), 'manji δt nije bliži izvodu');
+  }
+  const kv = (t) => 3 * t * t + 4;
+  for (const r of DT.tabela(kv, 6, 1)) provjeri(Math.abs(r.razlika - 3 * r.dt) < 1e-8, '3t² + 4: razlika nije 3δt');
+  const lin = (t) => 5 * t + 2;
+  for (const r of DT.tabela(lin, 5, 1)) provjeri(Math.abs(r.razlika) < 1e-9, 'prava: δQ/δt nije tačno nagib');
+  provjeri(DT.zakrivljenost(lin, 1, 2) < 1e-12, 'prava je zakrivljena');
+  let prethodna = Infinity;
+  for (const dt of [2, 1, 0.3, 0.1, 0.01]) {
+    const z = DT.zakrivljenost(t2, 1, dt);
+    provjeri(z < prethodna, `zakrivljenost ne opada sa δt (${dt})`);
+    prethodna = z;
+  }
+  provjeri(DT.zakrivljenost(t2, 1, 0.01) < 0.01, 'pod lupom komadić nije skoro prava');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -759,6 +789,7 @@ console.log('  OK   §9 fluks: ∫E·da = K·Q·Ω, isti Ω daje isti fluks, koc
 console.log('  OK   §9 zatvorena površina: unutra Q/ε₀, vani nula, na obodu oba predznaka');
 console.log('  OK   §9 sferno: E·4πr² = Q_not/ε₀, ljuska i oblak od tačaka slažu se sa Gaussom');
 console.log('  OK   §9 izbor površine: valjak i kocka qL/ε₀, E·n na kocki varira 2 puta, kutija σA/ε₀');
+console.log('  OK   alati δ i d: δQ/δt − i = δt za t², komadić pod lupom postaje prava');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

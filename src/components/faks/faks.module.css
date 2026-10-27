@@ -713,6 +713,88 @@
   stroke-width: 2;
 }
 
+/* --- matematički alati, grupa E --- */
+
+.lupaOkvir {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.lupaPozadina {
+  fill: var(--panel-2);
+  stroke: none;
+}
+
+.redIstaknut th,
+.redIstaknut td {
+  background: var(--panel-2);
+  font-weight: 650;
+}
+
+/* Pravougaonik Riemannove sume: naboj koji je protekao, boja struje. */
+.pravougaonik {
+  fill: var(--current);
+  fill-opacity: 0.2;
+  stroke: var(--current);
+  stroke-width: 1;
+  stroke-opacity: 0.6;
+}
+
+.pravougaonikMinus {
+  fill: var(--current);
+  fill-opacity: 0.08;
+  stroke: var(--current);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.pravac {
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+.projekcija {
+  stroke: var(--text);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-opacity: 0.55;
+}
+
+.projekcijaMinus {
+  stroke: var(--text);
+  stroke-width: 7;
+  stroke-dasharray: 10 7;
+  stroke-opacity: 0.55;
+}
+
+.rucicaVrha {
+  fill: transparent;
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+}
+
+:focus-visible > .rucicaVrha {
+  stroke: var(--odluci);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.ravanXY {
+  fill: var(--panel-2);
+  stroke: var(--line-soft);
+  stroke-width: 1.5;
+}
+
+.paralelogram {
+  fill: var(--text);
+  fill-opacity: 0.08;
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
 .bocno {
   display: grid;
   gap: 16px;
