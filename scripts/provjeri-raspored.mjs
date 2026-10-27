@@ -74,6 +74,7 @@ const RUTE = [
     'cijev-koaks',
     'fluks-i-prostorni-ugao',
     'gauss-zatvorena-povrsina',
+    'sferna-ljuska-i-oblak',
   ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */

@@ -30,6 +30,7 @@ const prevod = await prevedi(
     'src/lib/fizika/probni.ts',
     'src/lib/fizika/fluks.ts',
     'src/lib/fizika/gaussPovrsina.ts',
+    'src/lib/fizika/sferno.ts',
   ],
   'fizika-',
 );
@@ -50,6 +51,7 @@ const CJ = await prevod.uvezi('src/lib/fizika/cijev.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 const FL = await prevod.uvezi('src/lib/fizika/fluks.ts');
 const GP = await prevod.uvezi('src/lib/fizika/gaussPovrsina.ts');
+const SF = await prevod.uvezi('src/lib/fizika/sferno.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -659,6 +661,68 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(centar.every((t) => t.En > 0), 'pozitivan naboj u centru: polje negdje ulazi');
 }
 
+/* ------------------------------------------------------------ §9 sferno */
+
+{
+  const Q = 4e-9;
+  const R = 0.05;
+  for (const model of ['ljuska', 'oblak', 'kondenzator']) {
+    const rs = { model, Q, R, b: 0.1 };
+    for (let rG = 0.002; rG < 0.2; rG += 0.0037) {
+      const E = SF.poljeSferno(rs, rG);
+      provjeri(blizu(E * 4 * Math.PI * rG * rG, SF.obuhvaceno(rs, rG) / EL.EPS0, 1e-12), `${model}: E·4πr² ≠ Q_not/ε₀ za r=${rG.toFixed(3)}`);
+    }
+  }
+  const oblak = { model: 'oblak', Q, R, b: 0 };
+  const nagib = SF.poljeSferno(oblak, 0.01) / 0.01;
+  for (const rG of [0.015, 0.03, 0.049]) provjeri(blizu(SF.poljeSferno(oblak, rG) / rG, nagib, 1e-9), 'oblak: unutra polje nije linearno');
+  provjeri(Math.abs(SF.poljeSferno(oblak, R * (1 - 1e-9)) - SF.poljeSferno(oblak, R * (1 + 1e-9))) < 1e-6 * SF.poljeSferno(oblak, R), 'oblak: polje skače na rubu');
+  const ljuska = { model: 'ljuska', Q, R, b: 0 };
+  provjeri(SF.poljeSferno(ljuska, 0.9 * R) === 0 && SF.poljeSferno(ljuska, 1.1 * R) > 0, 'ljuska: unutra nije nula ili vani jeste');
+  const kond = { model: 'kondenzator', Q, R, b: 0.1 };
+  provjeri(SF.poljeSferno(kond, 0.12) === 0 && SF.poljeSferno(kond, 0.04) === 0 && SF.poljeSferno(kond, 0.07) > 0, 'kondenzator: polje van prostora između');
+
+  /* Brojčano: ljuska od 3000 tačaka i oblak od 40 ljuski, kao zbir tačkastih naboja. */
+  const tackeLjuske = SF.tackeNaSferi(3000, R);
+  const Epolje = (izvori, x) => {
+    let s = 0;
+    for (const t of izvori) {
+      const dx = x - t.x;
+      const R2 = dx * dx + t.y * t.y + t.z * t.z;
+      s += (EL.K * t.q * dx) / (R2 * Math.sqrt(R2));
+    }
+    return s;
+  };
+  const lj = tackeLjuske.map((t) => ({ ...t, q: Q / 3000 }));
+  provjeri(Math.abs(Epolje(lj, 0.5 * R)) < 0.01 * SF.poljeSferno(ljuska, R * 1.0001), 'ljuska od tačaka: unutra polje nije nula');
+  provjeri(Math.abs(Epolje(lj, 2 * R) / SF.poljeSferno(ljuska, 2 * R) - 1) < 0.01, 'ljuska od tačaka: vani nije KQ/r²');
+  /*
+    Oblak kao zapreminski integral: tačka na osi z, pa integral po φ daje
+    2π, a ostaje dvostruki integral po r' i θ'. Singularitet u samoj
+    tački je integrabilan; sredinsko pravilo ga zaobiđe.
+  */
+  const rhoV = Q / ((4 / 3) * Math.PI * R ** 3);
+  const zapreminski = (z0) => {
+    const NR = 240;
+    const NT = 240;
+    let s = 0;
+    for (let i = 0; i < NR; i++) {
+      const rp = ((i + 0.5) / NR) * R;
+      for (let j = 0; j < NT; j++) {
+        const tp = ((j + 0.5) / NT) * Math.PI;
+        const zp = rp * Math.cos(tp);
+        const sp = rp * Math.sin(tp);
+        const R2 = sp * sp + (z0 - zp) ** 2;
+        s += (EL.K * rhoV * (z0 - zp) * rp * rp * Math.sin(tp) * 2 * Math.PI * (R / NR) * (Math.PI / NT)) / (R2 * Math.sqrt(R2));
+      }
+    }
+    return s;
+  };
+  for (const rG of [0.3 * R, 0.6 * R, 1.5 * R]) {
+    provjeri(Math.abs(zapreminski(rG) / SF.poljeSferno(oblak, rG) - 1) < 0.02, `oblak kao ∫ρ dv: E(${(rG / R).toFixed(1)}R) ne odgovara Gaussu`);
+  }
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -675,6 +739,7 @@ console.log('  OK   §8 cijev: unutra nula, vani kao prava, koaks samo između p
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §9 fluks: ∫E·da = K·Q·Ω, isti Ω daje isti fluks, kocka oko naboja Q/ε₀');
 console.log('  OK   §9 zatvorena površina: unutra Q/ε₀, vani nula, na obodu oba predznaka');
+console.log('  OK   §9 sferno: E·4πr² = Q_not/ε₀, ljuska i oblak od tačaka slažu se sa Gaussom');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
