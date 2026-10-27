@@ -67,6 +67,7 @@ const RUTE = [
     'kirchhoff-cvor',
     'coulomb-sila',
     'polje-tackastih-naboja',
+    'probni-naboj-mali',
   ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */

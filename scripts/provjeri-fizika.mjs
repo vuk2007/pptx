@@ -23,6 +23,7 @@ const prevod = await prevedi(
     'src/lib/fizika/predznaci.ts',
     'src/lib/fizika/gustine.ts',
     'src/lib/fizika/elektrostatika.ts',
+    'src/lib/fizika/probni.ts',
   ],
   'fizika-',
 );
@@ -36,6 +37,7 @@ const N3 = await prevod.uvezi('src/lib/fizika/nosioci.ts');
 const Z = await prevod.uvezi('src/lib/fizika/predznaci.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 const EL = await prevod.uvezi('src/lib/fizika/elektrostatika.ts');
+const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -409,6 +411,27 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(samoMinus.length === 8, 'samo negativan naboj: linije ne kreću od njega');
 }
 
+/* ------------------------------------------------------------ §8 probni naboj */
+
+{
+  const p = { cx: 0, cy: 0, R0: 0.05, Q: 20e-9, N: 24 };
+  const T = { x: 0.1, y: 0 };
+  const pravo = PB.poljeProvodnika(p, PB.jednoliko(p), T);
+  const bez = PB.opusti(p, PB.jednoliko(p), null, 50);
+  provjeri(bez.every((u, k) => Math.abs(u - PB.jednoliko(p)[k]) < 1e-9), 'bez probnog naboja jednolik raspored nije u ravnoteži');
+  let prethodno = 0;
+  for (const dQ of [2e-12, 2e-11, 2e-10, 2e-9, 2e-8]) {
+    const { E, uglovi } = PB.izmjeri(p, T, dQ);
+    const odstupanje = 1 - E.x / pravo.x;
+    provjeri(odstupanje >= prethodno - 1e-6, `veći probni naboj (${dQ}) daje manje odstupanje`);
+    provjeri(odstupanje >= -1e-9, 'pozitivan probni naboj ne potiskuje naboje provodnika');
+    provjeri(uglovi.length === p.N, 'broj naboja na provodniku se promijenio');
+    if (dQ <= 2e-11) provjeri(odstupanje < 0.01, `mali probni naboj (${dQ}) odstupa ${(odstupanje * 100).toFixed(2)} %`);
+    if (dQ >= 2e-8) provjeri(odstupanje > 0.05, `veliki probni naboj (${dQ}) odstupa samo ${(odstupanje * 100).toFixed(2)} %`);
+    prethodno = odstupanje;
+  }
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -418,6 +441,7 @@ console.log('  OK   §3 izvod i integral: sječica → tangenta, ∫ i dt = ΔQ,
 console.log('  OK   §3 nosioci: elektroni ulijevo i ioni udesno daju istu struju, N·w/L prelaza u sekundi');
 console.log('  OK   §5 predznaci: normala mijenja samo predznak, uloga i promjena ne');
 console.log('  OK   §7 Coulomb: F₁ + F₂ = 0, K|Q₁Q₂|/R², dipol i linije polja');
+console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
