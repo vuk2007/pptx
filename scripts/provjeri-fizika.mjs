@@ -26,6 +26,7 @@ const prevod = await prevedi(
     'src/lib/fizika/prsten.ts',
     'src/lib/fizika/duz.ts',
     'src/lib/fizika/ravan.ts',
+    'src/lib/fizika/cijev.ts',
     'src/lib/fizika/probni.ts',
   ],
   'fizika-',
@@ -43,6 +44,7 @@ const EL = await prevod.uvezi('src/lib/fizika/elektrostatika.ts');
 const PR = await prevod.uvezi('src/lib/fizika/prsten.ts');
 const DZ = await prevod.uvezi('src/lib/fizika/duz.ts');
 const RV = await prevod.uvezi('src/lib/fizika/ravan.ts');
+const CJ = await prevod.uvezi('src/lib/fizika/cijev.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 prevod.pocisti();
 
@@ -515,6 +517,36 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(rub.x < 0.7 * sigma / EL.EPS0, 'na rubu konačnih ploča polje je i dalje puno');
 }
 
+/* ------------------------------------------------------------ §8 cijev */
+
+{
+  const q = 3e-9;
+  const a = 0.05;
+  const b = 0.12;
+  const r = slucajno(81);
+  for (let k = 0; k < 300; k++) {
+    const fi = r() * 2 * Math.PI;
+    const ru = r() * 0.8 * a;
+    const unutra = CJ.obodKaoPrave(q, a, 400, { x: ru * Math.cos(fi), y: ru * Math.sin(fi) });
+    provjeri(Math.hypot(unutra.x, unutra.y) < 1e-6 * CJ.cijevPolje(q, a, a), `cijev: unutra (ρ=${(ru / a).toFixed(2)}a) polje nije nula`);
+    const rv = a * (1.2 + r() * 4);
+    const T = { x: rv * Math.cos(fi), y: rv * Math.sin(fi) };
+    const vani = CJ.obodKaoPrave(q, a, 400, T);
+    provjeri(Math.abs(Math.hypot(vani.x, vani.y) - CJ.cijevPolje(q, a, rv)) < 1e-6 * CJ.cijevPolje(q, a, rv), 'cijev: vani nije kao prava u osi');
+    provjeri((vani.x * T.x + vani.y * T.y) / (Math.hypot(vani.x, vani.y) * rv) > 1 - 1e-9, 'cijev: polje vani nije radijalno');
+
+    /* Koaks: +q na a, −q na b. */
+    const rk = a * 0.05 + r() * b * 1.8;
+    if (Math.abs(rk - a) < 0.15 * a || Math.abs(rk - b) < 0.15 * b) continue;
+    const Tk = { x: rk * Math.cos(fi), y: rk * Math.sin(fi) };
+    const u = CJ.obodKaoPrave(q, a, 400, Tk);
+    const s = CJ.obodKaoPrave(-q, b, 400, Tk);
+    const E = Math.hypot(u.x + s.x, u.y + s.y);
+    provjeri(Math.abs(E - CJ.koaksPolje(q, a, b, rk)) < 1e-6 * CJ.cijevPolje(q, a, a), `koaks: ρ=${(rk / a).toFixed(2)}a, zbir ${E} ≠ ${CJ.koaksPolje(q, a, b, rk)}`);
+  }
+  provjeri(CJ.cijevPolje(q, a, 0.5 * a) === 0 && CJ.koaksPolje(q, a, b, 2 * b) === 0 && CJ.koaksPolje(q, a, b, 0.5 * a) === 0, 'nula unutra i vani');
+}
+
 /* ------------------------------------------------------------ §8 probni naboj */
 
 {
@@ -548,6 +580,7 @@ console.log('  OK   §7 Coulomb: F₁ + F₂ = 0, K|Q₁Q₂|/R², dipol i linij
 console.log('  OK   §8 prsten: E_z za svaki broj komada, poprečno se poništava, nula u centru, maksimum u a/√2');
 console.log('  OK   §8 duž: zbir komada = formula, za l → ∞ prava q/(2πε₀ρ)');
 console.log('  OK   §8 ravan: traka kao niz pravih, σ/(2ε₀), kondenzator σ/ε₀ između i nula vani');
+console.log('  OK   §8 cijev: unutra nula, vani kao prava, koaks samo između plašteva');
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');

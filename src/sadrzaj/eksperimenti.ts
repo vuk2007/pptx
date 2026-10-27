@@ -93,7 +93,7 @@ export const EKSPERIMENTI: Eksperiment[] = [
   { slug: 'prsten-polje-na-osi', predmet: 'oe1', poglavlje: '§8', naslov: 'Polje prstena na osi', opis: 'Poprečne komponente se poništavaju u parovima, ostaje samo komponenta duž ose.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/prsten-polje-na-osi/sadrzaj') },
   { slug: 'duz-u-pravu', predmet: 'oe1', poglavlje: '§8', naslov: 'Od duži do prave', opis: 'Kad duž postane beskonačna, polje prelazi u q/(2πε₀ρ).', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/duz-u-pravu/sadrzaj') },
   { slug: 'ravan-i-kondenzator', predmet: 'oe1', poglavlje: '§8', naslov: 'Ravan i kondenzator', opis: 'Ravan daje σ/(2ε₀), dvije suprotne ravni σ/ε₀ između i nulu van.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/ravan-i-kondenzator/sadrzaj') },
-  { slug: 'cijev-koaks', predmet: 'oe1', poglavlje: '§8', naslov: 'Cijev i koaksijalni kabel', opis: 'Unutra nula, vani kao prava u osi.', status: 'u izradi' },
+  { slug: 'cijev-koaks', predmet: 'oe1', poglavlje: '§8', naslov: 'Cijev i koaksijalni kabel', opis: 'Unutra nula, vani kao prava u osi.', status: 'gotovo', ucitaj: () => import('@/eksperimenti/oe1/cijev-koaks/sadrzaj') },
 
   /* --- grupa D --- */
   { slug: 'fluks-i-prostorni-ugao', predmet: 'oe1', poglavlje: '§9', naslov: 'Fluks i prostorni ugao', opis: 'Fluks kroz komadić površine zavisi od prostornog ugla, ne od udaljenosti.', status: 'u izradi' },
