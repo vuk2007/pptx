@@ -34,6 +34,7 @@ const prevod = await prevedi(
     'src/lib/fizika/izborPovrsine.ts',
     'src/lib/fizika/delta.ts',
     'src/lib/fizika/riemann.ts',
+    'src/lib/fizika/vektori.ts',
   ],
   'fizika-',
 );
@@ -58,6 +59,7 @@ const SF = await prevod.uvezi('src/lib/fizika/sferno.ts');
 const IP = await prevod.uvezi('src/lib/fizika/izborPovrsine.ts');
 const DT = await prevod.uvezi('src/lib/fizika/delta.ts');
 const RM = await prevod.uvezi('src/lib/fizika/riemann.ts');
+const VK = await prevod.uvezi('src/lib/fizika/vektori.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -797,6 +799,24 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(blizu(p.reduce((s, x) => s + x.visina * x.dt, 0), RM.riemannSuma((t) => t, 0, 2, 4, 'desno'), 1e-12), 'pravougaonici ≠ suma');
 }
 
+/* ------------------------------------------------------------ alati: skalarni proizvod */
+
+{
+  const r = slucajno(101);
+  for (let k = 0; k < 2000; k++) {
+    const a = VK.v3((r() - 0.5) * 10, (r() - 0.5) * 10, (r() - 0.5) * 10);
+    const b = VK.v3((r() - 0.5) * 10, (r() - 0.5) * 10, (r() - 0.5) * 10);
+    const ab = VK.skalarni(a, b);
+    provjeri(blizu(ab, VK.skalarni(b, a), 1e-12), 'a·b ≠ b·a');
+    provjeri(Math.abs(ab - VK.iznos(a) * VK.iznos(b) * Math.cos(VK.ugao(a, b))) < 1e-9 * (1 + Math.abs(ab)), 'a·b ≠ ab cos α');
+    provjeri(Math.sign(ab) === Math.sign(Math.cos(VK.ugao(a, b))) || Math.abs(ab) < 1e-12, 'predznak a·b ne prati ugao');
+    provjeri(blizu(VK.projekcija(a, b) * VK.iznos(b), ab, 1e-9), 'projekcija puta b ≠ a·b');
+  }
+  provjeri(VK.skalarni(VK.v3(3, 0), VK.v3(0, 4)) === 0, 'okomiti vektori: a·b nije nula');
+  provjeri(VK.skalarni(VK.v3(1, 0), VK.v3(-1, 0.2)) < 0, 'preko 90°: a·b nije negativno');
+  provjeri(blizu(VK.ugao(VK.v3(1, 0), VK.v3(0, 1)), Math.PI / 2, 1e-12), 'ugao između x i y nije 90°');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -817,6 +837,7 @@ console.log('  OK   §9 sferno: E·4πr² = Q_not/ε₀, ljuska i oblak od tača
 console.log('  OK   §9 izbor površine: valjak i kocka qL/ε₀, E·n na kocki varira 2 puta, kutija σA/ε₀');
 console.log('  OK   alati δ i d: δQ/δt − i = δt za t², komadić pod lupom postaje prava');
 console.log('  OK   alati Riemann: lijevo pravilo 1/m, sredinsko 1/m², tačno za pravu');
+console.log('  OK   alati skalarni proizvod: ab cos α, nula na 90°, negativan preko');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');

@@ -75,3 +75,15 @@ export function NabojTacka({
     </g>
   );
 }
+
+/** Gdje zrak iz tačke p u smjeru u izlazi iz pravougaonika 0..sirina × 0..visina, uz marginu. */
+export function doIvice(p: { x: number; y: number }, u: { x: number; y: number }, sirina: number, visina: number, m = 6) {
+  const kand: number[] = [];
+  if (u.x > 0) kand.push((sirina - m - p.x) / u.x);
+  if (u.x < 0) kand.push((m - p.x) / u.x);
+  if (u.y > 0) kand.push((visina - m - p.y) / u.y);
+  if (u.y < 0) kand.push((m - p.y) / u.y);
+  const pozitivni = kand.filter((x) => x > 0);
+  const t = pozitivni.length ? Math.min(...pozitivni) : 0;
+  return { x: p.x + u.x * t, y: p.y + u.y * t };
+}

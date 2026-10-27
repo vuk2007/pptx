@@ -78,6 +78,7 @@ const RUTE = [
     'izbor-gaussove-povrsine',
     'delta-i-d',
     'riemann-u-integral',
+    'skalarni-proizvod',
   ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */
