@@ -13,7 +13,7 @@ import { pokreniChrome, otvoriKarticu, uStranici, cekaj } from './cdp.mjs';
 
 const PORT_SERVERA = 4173;
 const OSNOVA = `http://localhost:${PORT_SERVERA}`;
-const RUTE = ['/', '/sajam/', '/sajam/robotika/', '/sajam/simulator/', '/sajam/izlog/', '/sajam/perjanik/', '/sajam/perjanik/h-most/', '/sajam/xgo/ravnoteza/', '/sajam/jarvis/glas/', '/sajam/pocni/', '/faks/', '/faks/oe1/', '/faks/oe1/prizma-gustina-struje/', '/faks/oe1/kirchhoff-cvor/', '/faks/oe1/q-i-izvod-integral/', '/faks/oe1/gustine-naboja/', '/faks/oe1/polje-tackastih-naboja/'];
+const RUTE = ['/', '/sajam/', '/sajam/robotika/', '/sajam/simulator/', '/sajam/izlog/', '/sajam/perjanik/', '/sajam/perjanik/h-most/', '/sajam/xgo/ravnoteza/', '/sajam/jarvis/glas/', '/sajam/pocni/', '/faks/', '/faks/oe1/', '/faks/oe1/prizma-gustina-struje/', '/faks/oe1/kirchhoff-cvor/', '/faks/oe1/q-i-izvod-integral/', '/faks/oe1/gustine-naboja/', '/faks/oe1/polje-tackastih-naboja/', '/faks/oe1/prsten-polje-na-osi/'];
 const SNIMCI = 'C:/Users/Vuk/AppData/Local/Temp/claude/c--Users-Vuk-Desktop-pptx/snimci';
 
 const greske = [];

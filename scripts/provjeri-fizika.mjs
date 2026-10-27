@@ -23,6 +23,7 @@ const prevod = await prevedi(
     'src/lib/fizika/predznaci.ts',
     'src/lib/fizika/gustine.ts',
     'src/lib/fizika/elektrostatika.ts',
+    'src/lib/fizika/prsten.ts',
     'src/lib/fizika/probni.ts',
   ],
   'fizika-',
@@ -37,6 +38,7 @@ const N3 = await prevod.uvezi('src/lib/fizika/nosioci.ts');
 const Z = await prevod.uvezi('src/lib/fizika/predznaci.ts');
 const G = await prevod.uvezi('src/lib/fizika/gustine.ts');
 const EL = await prevod.uvezi('src/lib/fizika/elektrostatika.ts');
+const PR = await prevod.uvezi('src/lib/fizika/prsten.ts');
 const PB = await prevod.uvezi('src/lib/fizika/probni.ts');
 prevod.pocisti();
 
@@ -411,6 +413,49 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(samoMinus.length === 8, 'samo negativan naboj: linije ne kreću od njega');
 }
 
+/* ------------------------------------------------------------ §8 prsten */
+
+{
+  const Q = 10e-9;
+  const a = 0.1;
+  for (const n of [1, 2, 3, 4, 7, 12, 24]) {
+    for (const z of [-0.3, -0.07, 0, 0.02, 0.0707, 0.15, 0.6]) {
+      const { ukupno, komadi } = PR.komadiPrstena(Q, a, z, n);
+      const tacno = PR.prstenNaOsi(Q, a, z);
+      provjeri(Math.abs(ukupno.z - tacno) <= 1e-9 * Math.abs(tacno) + 1e-9, `prsten n=${n} z=${z}: E_z ≠ Qz/(4πε₀(a²+z²)^3/2)`);
+      provjeri(komadi.length === n, 'broj komada');
+      /* Svaki dE gleda od svog komada T' ka tački T: paralelan sa R = T − T'. */
+      for (const kd of komadi) {
+        const R = { x: -kd.polozaj.x, y: -kd.polozaj.y, z: z - kd.polozaj.z };
+        const ukrst = Math.hypot(kd.dE.y * R.z - kd.dE.z * R.y, kd.dE.z * R.x - kd.dE.x * R.z, kd.dE.x * R.y - kd.dE.y * R.x);
+        const skalar = kd.dE.x * R.x + kd.dE.y * R.y + kd.dE.z * R.z;
+        const mjera = Math.hypot(kd.dE.x, kd.dE.y, kd.dE.z) * Math.hypot(R.x, R.y, R.z);
+        provjeri(ukrst <= 1e-9 * mjera && skalar > 0, `prsten: dE komada nije u smjeru R = T − T'`);
+      }
+      const poprecno = Math.hypot(ukupno.x, ukupno.y);
+      const jedan = Math.hypot(komadi[0].dE.x, komadi[0].dE.y);
+      if (n >= 2) provjeri(poprecno <= 1e-9 * jedan + 1e-9, `prsten n=${n}: poprečne komponente se ne poništavaju`);
+      else provjeri(poprecno > 0.5 * jedan, 'jedan komad: poprečna komponenta mora ostati');
+    }
+  }
+  provjeri(PR.prstenNaOsi(Q, a, 0) === 0, 'polje u centru prstena nije nula');
+  for (const z of [10 * a, 30 * a, 100 * a]) {
+    const odnos = PR.prstenNaOsi(Q, a, z) / PR.tackaNaOsi(Q, z);
+    provjeri(Math.abs(odnos - 1) < 1.6 * (a / z) ** 2, `daleko od prstena (z=${z / a}a) nije kao tačka: ${odnos}`);
+  }
+  provjeri(blizu(PR.prstenNaOsi(Q, a, -0.05), -PR.prstenNaOsi(Q, a, 0.05)), 'E_z(−z) ≠ −E_z(z)');
+  let najz = 0;
+  let naj = 0;
+  for (let z = 0; z <= 0.5; z += 0.0001) {
+    const e = PR.prstenNaOsi(Q, a, z);
+    if (e > naj) {
+      naj = e;
+      najz = z;
+    }
+  }
+  provjeri(Math.abs(najz - PR.maksimumNaOsi(a)) < 2e-4, `maksimum na osi u ${najz}, a ne u a/√2`);
+}
+
 /* ------------------------------------------------------------ §8 probni naboj */
 
 {
@@ -441,6 +486,7 @@ console.log('  OK   §3 izvod i integral: sječica → tangenta, ∫ i dt = ΔQ,
 console.log('  OK   §3 nosioci: elektroni ulijevo i ioni udesno daju istu struju, N·w/L prelaza u sekundi');
 console.log('  OK   §5 predznaci: normala mijenja samo predznak, uloga i promjena ne');
 console.log('  OK   §7 Coulomb: F₁ + F₂ = 0, K|Q₁Q₂|/R², dipol i linije polja');
+console.log('  OK   §8 prsten: E_z za svaki broj komada, poprečno se poništava, nula u centru, maksimum u a/√2');
 console.log('  OK   §8 probni naboj: F/δQ teži pravom polju kad δQ → 0');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
