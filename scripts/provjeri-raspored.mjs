@@ -77,6 +77,7 @@ const RUTE = [
     'sferna-ljuska-i-oblak',
     'izbor-gaussove-povrsine',
     'delta-i-d',
+    'riemann-u-integral',
   ].flatMap((slug) => [
     { ruta: `/faks/oe1/${slug}/`, skrol: true },
     /* Otključano i sa otkrivenim odgovorom: tada je strana najduža i najšira. */

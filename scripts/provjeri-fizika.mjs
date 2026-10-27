@@ -33,6 +33,7 @@ const prevod = await prevedi(
     'src/lib/fizika/sferno.ts',
     'src/lib/fizika/izborPovrsine.ts',
     'src/lib/fizika/delta.ts',
+    'src/lib/fizika/riemann.ts',
   ],
   'fizika-',
 );
@@ -56,6 +57,7 @@ const GP = await prevod.uvezi('src/lib/fizika/gaussPovrsina.ts');
 const SF = await prevod.uvezi('src/lib/fizika/sferno.ts');
 const IP = await prevod.uvezi('src/lib/fizika/izborPovrsine.ts');
 const DT = await prevod.uvezi('src/lib/fizika/delta.ts');
+const RM = await prevod.uvezi('src/lib/fizika/riemann.ts');
 prevod.pocisti();
 
 const greske = [];
@@ -771,6 +773,30 @@ for (let p = 0.05; p <= 1; p += 0.05) provjeri(R.dtZaPolozaj(p) < R.dtZaPolozaj(
   provjeri(DT.zakrivljenost(t2, 1, 0.01) < 0.01, 'pod lupom komadić nije skoro prava');
 }
 
+/* ------------------------------------------------------------ alati: Riemann */
+
+{
+  const f = (t) => 6 * t;
+  const tacno = 3 * 9 - 3 * 1;
+  provjeri(blizu(RM.riemannSuma(f, 1, 3, 1, 'sredina'), tacno, 1e-12), 'linearna funkcija: sredinsko pravilo nije tačno');
+  for (const [g, a, b, I] of [[(t) => t * t, 0, 3, 9], [(t) => Math.cos(t), 0, 2, Math.sin(2)], [(t) => 6 * t, 0.5, 4, 3 * 16 - 0.75]]) {
+    let prL = Infinity;
+    let prS = Infinity;
+    for (const m of [4, 8, 16, 32, 64, 128]) {
+      const eL = Math.abs(RM.riemannSuma(g, a, b, m, 'lijevo') - I);
+      const eS = Math.abs(RM.riemannSuma(g, a, b, m, 'sredina') - I);
+      provjeri(eL < prL + 1e-12 && eS < prS + 1e-12, `Riemann: greška ne opada sa m=${m}`);
+      if (prL !== Infinity && prL > 1e-9) provjeri(Math.abs(prL / eL - 2) < 0.15, `lijevo pravilo: greška ne pada kao 1/m (${(prL / eL).toFixed(3)})`);
+      if (prS !== Infinity && prS > 1e-9) provjeri(Math.abs(prS / eS - 4) < 0.3, `sredinsko pravilo: greška ne pada kao 1/m² (${(prS / eS).toFixed(3)})`);
+      prL = eL;
+      prS = eS;
+    }
+  }
+  const p = RM.pravougaonici((t) => t, 0, 2, 4, 'desno');
+  provjeri(p.length === 4 && blizu(p[0].visina, 0.5, 1e-12) && blizu(p[3].t + p[3].dt, 2, 1e-12), 'pravougaonici ne pokrivaju [a, b]');
+  provjeri(blizu(p.reduce((s, x) => s + x.visina * x.dt, 0), RM.riemannSuma((t) => t, 0, 2, 4, 'desno'), 1e-12), 'pravougaonici ≠ suma');
+}
+
 /* ------------------------------------------------------------ izvještaj */
 
 console.log('');
@@ -790,6 +816,7 @@ console.log('  OK   §9 zatvorena površina: unutra Q/ε₀, vani nula, na obodu
 console.log('  OK   §9 sferno: E·4πr² = Q_not/ε₀, ljuska i oblak od tačaka slažu se sa Gaussom');
 console.log('  OK   §9 izbor površine: valjak i kocka qL/ε₀, E·n na kocki varira 2 puta, kutija σA/ε₀');
 console.log('  OK   alati δ i d: δQ/δt − i = δt za t², komadić pod lupom postaje prava');
+console.log('  OK   alati Riemann: lijevo pravilo 1/m, sredinsko 1/m², tačno za pravu');
 console.log('  OK   §4 prizma: površina, put naboja kroz prozorčić i prosjek naspram ρ·δa·w·δt·cos α');
 console.log('  OK   §5 kontinuitet: struja van = −dQ_not/dt u svakom kadru, izvor, ponor i prolaz');
 console.log('  OK   §6 Kirchhoff: 2 A + 5 A = 7 A, predznaci po orijentaciji, izjednačavanje');
